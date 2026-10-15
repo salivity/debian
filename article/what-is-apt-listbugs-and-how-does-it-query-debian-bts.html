@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Is apt-listbugs and How Does It Query Debian BTS? - debian</title>
+    <meta name="description" content="apt-listbugs is a safety utility for Debian-based systems that intercepts package management tasks to protect the operating system from known critical software regressions. By integrating directly into the Advanced Package Tool (APT) workflow, it scans th">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/what-is-apt-listbugs-and-how-does-it-query-debian-bts">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Is apt-listbugs and How Does It Query Debian BTS? - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/what-is-apt-listbugs-and-how-does-it-query-debian-bts" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="apt-listbugs is a safety utility for Debian-based systems that intercepts package management tasks to protect the operating system from known critical software regressions. By integrating directly into the Advanced Package Tool (APT) workflow, it scans th" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="what-is-apt-listbugs-and-how-does-it-query-debian-bts">What Is
+apt-listbugs and How Does It Query Debian BTS?</h1>
+<p><code>apt-listbugs</code> is a safety utility for Debian-based
+systems that intercepts package management tasks to protect the
+operating system from known critical software regressions. By
+integrating directly into the Advanced Package Tool (APT) workflow, it
+scans the official Debian Bug Tracking System (BTS) for release-critical
+bugs affecting the specific package versions marked for installation or
+upgrade. This article explains what <code>apt-listbugs</code> is, how it
+hooks into the APT ecosystem, and the technical mechanism it uses to
+query the BTS before changes are applied to the system.</p>
+<h3 id="what-is-apt-listbugs">What Is apt-listbugs?</h3>
+<p><code>apt-listbugs</code> is a tool written in Ruby designed to
+minimize the risk of package upgrades, especially on dynamic branches
+such as Debian Testing and Debian Unstable (Sid). When a user runs an
+installation or upgrade command (such as <code>apt install</code> or
+<code>apt full-upgrade</code>), <code>apt-listbugs</code> reviews the
+planned package list and identifies open bugs classified by
+severity—primarily <code>critical</code>, <code>grave</code>, and
+<code>serious</code> (collectively known as Release-Critical or RC
+bugs). If bugs are found, the tool halts the installation, displays the
+bug titles and IDs, and gives the administrator the choice to abort, pin
+the package to prevent upgrading, ignore the warning, or inspect the bug
+report in detail.</p>
+<h3 id="how-apt-listbugs-hooks-into-apt">How apt-listbugs Hooks into
+APT</h3>
+<p><code>apt-listbugs</code> does not operate as a standalone daemon;
+instead, it relies on APT’s configuration hook architecture. During its
+own installation, it creates a configuration file in
+<code>/etc/apt/apt.conf.d/</code> (typically named
+<code>10apt-listbugs</code>).</p>
+<p>This configuration file defines an entry using the
+<code>DPkg::Pre-Install-Pkgs</code> hook:</p>
+<pre class="text"><code>DPkg::Pre-Install-Pkgs {&quot;/usr/sbin/apt-listbugs apt&quot;;};</code></pre>
+<p>When an administrator invokes an APT command that modifies system
+state:</p>
+<ol type="1">
+<li>APT calculates the dependency graph and determines which packages
+must be installed, upgraded, or removed.</li>
+<li>Before invoking <code>dpkg</code> to unpack and configure these
+packages, APT triggers any binaries registered under
+<code>DPkg::Pre-Install-Pkgs</code>.</li>
+<li>APT pipes the list of target packages, including their current and
+proposed version numbers, directly into standard input
+(<code>stdin</code>) of <code>apt-listbugs</code>.</li>
+</ol>
+<h3 id="how-it-queries-the-debian-bts">How It Queries the Debian
+BTS</h3>
+<p>Once <code>apt-listbugs</code> receives the package manifest from
+APT, it determines whether any of the incoming versions are broken using
+the following mechanism:</p>
+<ol type="1">
+<li><strong>Manifest Parsing</strong>: The utility reads the package
+names, architectures, and target version numbers supplied by APT.</li>
+<li><strong>Network Querying via the BTS Interface</strong>:
+<code>apt-listbugs</code> connects to the Debian Bug Tracking System at
+<code>bugs.debian.org</code>. It primarily communicates with the BTS
+over HTTPS using the Debbugs SOAP (Simple Object Access Protocol)
+interface.</li>
+<li><strong>Retrieving Bug Vectors</strong>: The tool submits batch
+requests containing the package names. The Debbugs SOAP server returns
+metadata for all associated bug reports, which includes bug numbers,
+report statuses, tags, severities, and the exact version histories (both
+"found" versions and "fixed" versions).</li>
+<li><strong>Version Tracking and Relevance Evaluation</strong>:
+<code>apt-listbugs</code> uses Debian's version-comparison logic to
+match the incoming package version against the bug's history. A bug is
+only presented to the user if the target package version is marked as
+affected ("found") and does not contain a subsequent "fixed" tag.</li>
+<li><strong>Caching</strong>: To optimize network usage, recent queries
+are cached locally so repeated commands do not re-fetch identical
+datasets over the network.</li>
+</ol>
+<h3 id="user-prompt-and-execution-control">User Prompt and Execution
+Control</h3>
+<p>If the BTS returns matching release-critical bugs,
+<code>apt-listbugs</code> interrupts the execution pipeline and presents
+a formatted list directly in the terminal. The output lists:</p>
+<ul>
+<li>The bug severity (e.g., <code>grave</code>,
+<code>critical</code>).</li>
+<li>The unique Debian bug number.</li>
+<li>A summary description of the issue.</li>
+</ul>
+<p>The program then prompts the administrator with options:</p>
+<ul>
+<li><strong>Continue (<code>y</code>)</strong>: Proceed with the
+installation despite the known bugs.</li>
+<li><strong>Abort (<code>n</code>)</strong>: Exit immediately, returning
+a non-zero exit code to APT. This instructs APT to terminate the
+operation before <code>dpkg</code> unpacks any files.</li>
+<li><strong>Pin (<code>p</code>)</strong>: Hold the affected packages at
+their current versions via APT pinning, allowing unaffected packages in
+the queue to continue upgrading safely.</li>
+</ul>
+<p>Through this query and interception process,
+<code>apt-listbugs</code> acts as an automated barrier against
+regressions, preventing broken packages from damaging a Debian
+system.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

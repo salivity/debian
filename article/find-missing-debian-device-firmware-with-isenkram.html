@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Missing Debian Device Firmware with Isenkram - debian</title>
+    <meta name="description" content="The isenkram package is a dedicated hardware-support tool in the Debian operating system designed to suggest and install packages based on the system&#39;s actual hardware components. This article explains how isenkram operates, how it detects missing device">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/find-missing-debian-device-firmware-with-isenkram">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Find Missing Debian Device Firmware with Isenkram - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/find-missing-debian-device-firmware-with-isenkram" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The isenkram package is a dedicated hardware-support tool in the Debian operating system designed to suggest and install packages based on the system&#39;s actual hardware components. This article explains how isenkram operates, how it detects missing device" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="find-missing-debian-device-firmware-with-isenkram">Find Missing
+Debian Device Firmware with Isenkram</h1>
+<p>The <code>isenkram</code> package is a dedicated hardware-support
+tool in the Debian operating system designed to suggest and install
+packages based on the system's actual hardware components. This article
+explains how <code>isenkram</code> operates, how it detects missing
+device firmware—such as non-free microcode and drivers for Wi-Fi, sound,
+or GPU hardware—and how administrators can use it to resolve hardware
+compatibility issues efficiently.</p>
+<p>Debian maintains a strict separation between free software and
+non-free, proprietary binary blobs. Consequently, fresh Debian
+installations on modern hardware often leave components like Wi-Fi
+cards, Bluetooth adapters, and graphics chipsets partially or completely
+non-functional due to absent firmware. Identifying exactly which
+<code>firmware-*</code> package corresponds to an obscure piece of
+hardware can be a tedious process for administrators. The
+<code>isenkram</code> package solves this problem by automating the
+detection and lookup process.</p>
+<h3 id="how-isenkram-identifies-missing-firmware">How Isenkram
+Identifies Missing Firmware</h3>
+<p><code>isenkram</code> works by bridging the gap between the Linux
+kernel's hardware detection mechanisms and Debian's package management
+database. It identifies missing firmware through two primary
+mechanisms:</p>
+<ol type="1">
+<li><strong>Kernel Log Analysis:</strong> When the Linux kernel
+initializes device drivers, any driver requiring external firmware
+queries the filesystem. If the file is not found, the driver outputs an
+error to the kernel log (accessible via <code>dmesg</code>), specifying
+the exact name of the missing file (e.g.,
+<code>iwlwifi-ty-a0-gf-a0-59.ucode</code>). <code>isenkram</code>
+inspects these kernel log entries to extract the specific filenames the
+kernel attempted and failed to load.</li>
+<li><strong>Modalias Matching:</strong> <code>isenkram</code> reads
+hardware modaliases from <code>/sys</code> for all connected PCI, USB,
+and other hardware interfaces. It cross-references these device
+identification strings against Debian package metadata to determine
+which packages declare support for that hardware.</li>
+</ol>
+<p>Once <code>isenkram</code> has gathered the requested firmware
+filenames or hardware identifiers, it references a locally generated or
+cached database of package contents. This database maps specific
+firmware filenames to their parent Debian packages (often found in the
+<code>non-free-firmware</code> repository component).</p>
+<h3 id="using-isenkram-to-install-firmware">Using Isenkram to Install
+Firmware</h3>
+<p>The package provides a command-line utility,
+<code>isenkram-cli</code>, which can be run manually by an administrator
+to locate and install missing packages.</p>
+<p>To check the kernel logs and immediately install the packages
+providing any missing firmware requested by running drivers, run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> isenkram-cli install-firmware</span></code></pre></div>
+<p>This command parses the current kernel messages, queries
+<code>apt</code> for packages containing the missing firmware files, and
+prompts the administrator to install them automatically.</p>
+<p>To perform a general hardware scan and display a list of all Debian
+packages (including non-firmware packages like userspace tools or
+drivers) that support the system's connected devices, run:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">isenkram-cli</span> pkg-install-list</span></code></pre></div>
+<h3 id="background-operation">Background Operation</h3>
+<p>In addition to the manual CLI utility, <code>isenkram</code> includes
+systemd service units and udev integration
+(<code>isenkram-autoinstall</code>). When enabled, the system can
+monitor hardware events dynamically. If a user plugs in a new
+device—such as a USB Wi-Fi dongle or a TV tuner—<code>isenkram</code>
+can detect the event, look up the required firmware or package, and
+prompt the desktop environment or automatically invoke package
+management to ensure the hardware functions immediately.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

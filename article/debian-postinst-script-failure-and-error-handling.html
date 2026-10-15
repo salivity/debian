@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian postinst Script Failure and Error Handling - debian</title>
+    <meta name="description" content="When a postinst (post-installation) script returns a non-zero exit code during package management on Debian, the dpkg package manager immediately halts the configuration process, transitions the package into a failure state, and attempts specific script-b">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-postinst-script-failure-and-error-handling">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian postinst Script Failure and Error Handling - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-postinst-script-failure-and-error-handling" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="When a postinst (post-installation) script returns a non-zero exit code during package management on Debian, the dpkg package manager immediately halts the configuration process, transitions the package into a failure state, and attempts specific script-b" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-postinst-script-failure-and-error-handling">Debian
+postinst Script Failure and Error Handling</h1>
+<p>When a <code>postinst</code> (post-installation) script returns a
+non-zero exit code during package management on Debian, the
+<code>dpkg</code> package manager immediately halts the configuration
+process, transitions the package into a failure state, and attempts
+specific script-based error recovery routines. This article outlines the
+precise sequence of state transitions, error unwind procedures, and
+dependency constraints enforced by Debian's packaging system when a
+<code>postinst</code> script encounters an error.</p>
+<h2 id="package-state-transition-to-half-configured">Package State
+Transition to Half-Configured</h2>
+<p>When a <code>postinst</code> script fails during normal configuration
+(<code>postinst configure</code>), <code>dpkg</code> halts execution and
+updates the package state in the system status database
+(<code>/var/lib/dpkg/status</code>).</p>
+<ul>
+<li>The package status is set to <code>half-configured</code>.</li>
+<li>The package files remain unpacked in their destinations on the
+filesystem.</li>
+<li>The package is recorded as unpacked and partially set up, but not
+ready for functional use.</li>
+</ul>
+<p>If the failure occurs during an initial installation rather than an
+upgrade, the package cannot satisfy dependencies for other packages, and
+<code>dpkg</code> prevents any packages that depend on it from being
+configured.</p>
+<h2 id="rollback-and-unwind-invocations">Rollback and Unwind
+Invocations</h2>
+<p>Debian maintainer script failure handling depends on whether the
+operation is a fresh installation or an upgrade. When a failure occurs,
+<code>dpkg</code> attempts to run error unwind calls to restore the
+system to a clean state.</p>
+<h3 id="1-failure-during-an-upgrade">1. Failure During an Upgrade</h3>
+<p>If a new version of a package fails during
+<code>new-postinst configure</code>:</p>
+<ol type="1">
+<li><p><code>dpkg</code> executes the old version's post-installation
+script with recovery parameters:</p>
+<pre class="text"><code>&lt;old-postinst&gt; abort-upgrade &lt;new-version&gt;</code></pre></li>
+<li><p>If the old script succeeds, the package remains in a
+<code>half-configured</code> state, reflecting that the upgrade failed
+but previous states were cleaned up where possible.</p></li>
+<li><p>If <code>&lt;old-postinst&gt; abort-upgrade</code> also fails,
+<code>dpkg</code> marks the package as <code>half-installed</code> or
+broken, signaling severe state corruption that requires manual
+administrative intervention.</p></li>
+</ol>
+<h3 id="2-failure-during-initial-installation">2. Failure During Initial
+Installation</h3>
+<p>Because no previous version exists on the system, <code>dpkg</code>
+does not have an older <code>postinst</code> script to execute for an
+unwind.</p>
+<ol type="1">
+<li>The execution halts immediately after the non-zero exit code is
+detected.</li>
+<li>No further maintainer scripts are called for that package during the
+execution chain.</li>
+<li>The package remains marked as <code>half-configured</code>.</li>
+</ol>
+<h2 id="cascading-effects-on-the-dependency-tree">Cascading Effects on
+the Dependency Tree</h2>
+<p>A <code>postinst</code> script failure directly alters the execution
+of the broader transaction:</p>
+<ul>
+<li><strong>Skipped Configurations:</strong> Any pending packages in the
+installation queue that declare a <code>Depends</code> or
+<code>Pre-Depends</code> relationship on the failing package are
+skipped. Their files may remain unpacked, but their
+<code>postinst</code> scripts will not be invoked.</li>
+<li><strong>Transaction Abort:</strong> APT or <code>dpkg</code>
+terminates the current configuration queue with a diagnostic error
+detailing the failed script path and the returned exit code.</li>
+<li><strong>Broken System Flags:</strong> Subsequent invocations of APT
+detect broken dependencies, blocking new software installations until
+the broken package is either successfully configured, reinstalled, or
+purged.</li>
+</ul>
+<h2 id="post-failure-system-remediation">Post-Failure System
+Remediation</h2>
+<p>Once the failure routines have executed and the error status is
+recorded, the operating system relies on administrative recovery
+commands:</p>
+<ul>
+<li>Running <code>dpkg --configure -a</code> re-attempts the execution
+of <code>postinst configure</code> for all packages currently left in
+the <code>half-configured</code> state.</li>
+<li>Running <code>apt-get install -f</code> (or
+<code>apt --fix-broken install</code>) inspects broken dependencies and
+attempts to repair, reinstall, or safely remove packages with failed
+configurations.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

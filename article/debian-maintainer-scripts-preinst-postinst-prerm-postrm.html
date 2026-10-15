@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Maintainer Scripts: preinst, postinst, prerm, postrm - debian</title>
+    <meta name="description" content="Debian packages rely on maintainer scripts to perform dynamic actions that simple file extraction cannot handle. These executable shell scripts—specifically preinst, postinst, prerm, and postrm—run at distinct phases of a package&#39;s lifecycle, including in">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-maintainer-scripts-preinst-postinst-prerm-postrm">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Maintainer Scripts: preinst, postinst, prerm, postrm - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-maintainer-scripts-preinst-postinst-prerm-postrm" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian packages rely on maintainer scripts to perform dynamic actions that simple file extraction cannot handle. These executable shell scripts—specifically preinst, postinst, prerm, and postrm—run at distinct phases of a package&#39;s lifecycle, including in" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-maintainer-scripts-preinst-postinst-prerm-postrm">Debian
+Maintainer Scripts: preinst, postinst, prerm, postrm</h1>
+<p>Debian packages rely on maintainer scripts to perform dynamic actions
+that simple file extraction cannot handle. These executable shell
+scripts—specifically <code>preinst</code>, <code>postinst</code>,
+<code>prerm</code>, and <code>postrm</code>—run at distinct phases of a
+package's lifecycle, including installation, upgrade, removal, and
+purging. This guide explains the purpose, execution timing, and common
+use cases for each of these four critical control scripts used by
+Debian's package manager (<code>dpkg</code>).</p>
+<h2 id="what-are-maintainer-scripts">What Are Maintainer Scripts?</h2>
+<p>Maintainer scripts are executable scripts packaged inside the control
+archive (<code>control.tar.xz</code> or <code>control.tar.gz</code>) of
+a <code>.deb</code> package. They are typically written as
+POSIX-compliant shell scripts (<code>/bin/sh</code>), though they can
+technically be written in any scripting language installed on the target
+system.</p>
+<p>When you install or remove software using tools like <code>apt</code>
+or <code>dpkg</code>, the package manager invokes these scripts with
+specific arguments to prepare the system, configure software, stop or
+start services, and clean up residual files.</p>
+<hr />
+<h2 id="1-preinst-pre-installation-script">1. preinst (Pre-Installation
+Script)</h2>
+<p>The <code>preinst</code> script is executed <strong>before</strong>
+the package's files are unpacked from the archive onto the
+filesystem.</p>
+<h3 id="primary-purpose">Primary Purpose</h3>
+<p>To prepare the system for the upcoming installation or upgrade,
+ensuring that the new files can be placed cleanly without conflicts or
+corruption.</p>
+<h3 id="common-use-cases">Common Use Cases:</h3>
+<ul>
+<li>Stopping an existing version of a service before replacing its
+binary files.</li>
+<li>Checking system dependencies or hardware compatibility that cannot
+be expressed in standard package metadata.</li>
+<li>Backing up or migrating older configuration files before new ones
+are written.</li>
+</ul>
+<hr />
+<h2 id="2-postinst-post-installation-script">2. postinst
+(Post-Installation Script)</h2>
+<p>The <code>postinst</code> script is executed <strong>after</strong>
+the package files have been unpacked onto the filesystem.</p>
+<h3 id="primary-purpose-1">Primary Purpose</h3>
+<p>To configure the package, initialize data, register system
+components, and start services so the software becomes fully
+functional.</p>
+<h3 id="common-use-cases-1">Common Use Cases:</h3>
+<ul>
+<li>Running configuration dialogs using <code>debconf</code> to ask the
+user for setup choices.</li>
+<li>Creating required system users and groups (<code>adduser</code>,
+<code>addgroup</code>).</li>
+<li>Registering icons, desktop files, or man pages with system databases
+(<code>update-desktop-database</code>, <code>mandb</code>).</li>
+<li>Initializing databases or setting strict file permissions.</li>
+<li>Starting or enabling systemd services
+(<code>systemctl enable --now</code>).</li>
+</ul>
+<hr />
+<h2 id="3-prerm-pre-removal-script">3. prerm (Pre-Removal Script)</h2>
+<p>The <code>prerm</code> script is executed <strong>before</strong> any
+of the package's files are deleted from the system during an
+uninstallation or upgrade.</p>
+<h3 id="primary-purpose-2">Primary Purpose</h3>
+<p>To gracefully shut down active components and deactivate features
+before the underlying executables and libraries are removed.</p>
+<h3 id="common-use-cases-2">Common Use Cases:</h3>
+<ul>
+<li>Stopping running daemons and services associated with the
+package.</li>
+<li>Unregistering system alternatives
+(<code>update-alternatives --remove</code>).</li>
+<li>De-registering system integrations, such as menu entries or browser
+plugins.</li>
+</ul>
+<hr />
+<h2 id="4-postrm-post-removal-script">4. postrm (Post-Removal
+Script)</h2>
+<p>The <code>postrm</code> script is executed <strong>after</strong> the
+package files have been deleted from the filesystem. It also runs during
+the final purge phase.</p>
+<h3 id="primary-purpose-3">Primary Purpose</h3>
+<p>To clean up residual state data, modify system integrations, or
+completely erase configuration files when a package is purged.</p>
+<h3 id="common-use-cases-3">Common Use Cases:</h3>
+<ul>
+<li>Updating system caches after binary removal (e.g.,
+<code>ldconfig</code>, <code>update-mime-database</code>).</li>
+<li>Removing dynamically generated cache files or logs that were not
+part of the original <code>.deb</code> payload.</li>
+<li>Deleting configuration files and databases when invoked with the
+<code>purge</code> argument.</li>
+<li>Removing system users or groups that were dedicated solely to that
+package (when purged).</li>
+</ul>
+<hr />
+<h2 id="summary-of-execution-flow">Summary of Execution Flow</h2>
+<ul>
+<li><strong>Installation:</strong> <code>preinst</code> (install) <span
+class="math inline">\(\rightarrow\)</span> <em>Unpack files</em> <span
+class="math inline">\(\rightarrow\)</span> <code>postinst</code>
+(configure)</li>
+<li><strong>Upgrade:</strong> Old <code>prerm</code> (upgrade) <span
+class="math inline">\(\rightarrow\)</span> New <code>preinst</code>
+(upgrade) <span class="math inline">\(\rightarrow\)</span> <em>Unpack
+files</em> <span class="math inline">\(\rightarrow\)</span> Old
+<code>postrm</code> (upgrade) <span
+class="math inline">\(\rightarrow\)</span> New <code>postinst</code>
+(configure)</li>
+<li><strong>Removal (<code>remove</code>):</strong> <code>prerm</code>
+(remove) <span class="math inline">\(\rightarrow\)</span> <em>Delete
+package files</em> <span class="math inline">\(\rightarrow\)</span>
+<code>postrm</code> (remove)</li>
+<li><strong>Purge (<code>purge</code>):</strong> Runs
+<code>postrm</code> (purge) to delete lingering configurations and
+data.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Prevents Upstream Proprietary Lock-In - debian</title>
+    <meta name="description" content="The Debian operating system prevents upstream proprietary lock-in through a strict framework governed by the Debian Social Contract and the Debian Free Software Guidelines (DFSG). By enforcing comprehensive licensing criteria, requiring full access to sou">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-prevents-upstream-proprietary-lock-in">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Prevents Upstream Proprietary Lock-In - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-prevents-upstream-proprietary-lock-in" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian operating system prevents upstream proprietary lock-in through a strict framework governed by the Debian Social Contract and the Debian Free Software Guidelines (DFSG). By enforcing comprehensive licensing criteria, requiring full access to sou" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-prevents-upstream-proprietary-lock-in">How Debian
+Prevents Upstream Proprietary Lock-In</h1>
+<p>The Debian operating system prevents upstream proprietary lock-in
+through a strict framework governed by the Debian Social Contract and
+the Debian Free Software Guidelines (DFSG). By enforcing comprehensive
+licensing criteria, requiring full access to source code, maintaining
+strict archive separation, and performing meticulous copyright audits on
+all packaged software, Debian guarantees that neither individual
+developers nor upstream vendors can impose restrictive, discriminatory,
+or proprietary conditions on its users and downstreams.</p>
+<h3 id="the-debian-free-software-guidelines-dfsg">The Debian Free
+Software Guidelines (DFSG)</h3>
+<p>The core mechanism preventing lock-in is the DFSG, which sets the
+legal baseline for any software distributed in the primary Debian
+operating system. Under the DFSG, software must satisfy specific legal
+criteria:</p>
+<ul>
+<li><strong>Unrestricted Redistribution:</strong> The license cannot
+restrict any party from selling or giving away the software as a
+component of an aggregate software distribution. Upstream vendors cannot
+demand royalties or licensing fees for continued distribution.</li>
+<li><strong>Source Code Inclusion:</strong> Complete, un-obfuscated
+source code must be distributed alongside the binary packages, ensuring
+that the community can maintain the software independently if upstream
+abandons it or closes the license.</li>
+<li><strong>Permission for Modifications and Derived Works:</strong> The
+license must explicitly allow modifications and derivative works, and
+must allow them to be distributed under the same terms as the original
+software. This prevents an upstream project from forbidding forks or
+feature additions.</li>
+<li><strong>No Discrimination Against Persons, Groups, or Fields of
+Endeavor:</strong> Licenses that ban commercial use, military use, or
+specific industries (often found in "ethical" source-available licenses)
+fail this test. Upstream maintainers cannot selectively revoke or
+restrict usage rights.</li>
+<li><strong>License Must Not Be Specific to Debian:</strong> Rights
+attached to the software must not depend on the program being part of a
+Debian system. This ensures that any recipient has the same rights as
+Debian itself, eliminating platform-level lock-in.</li>
+</ul>
+<h3 id="machine-readable-copyright-tracking-dep-5">Machine-Readable
+Copyright Tracking (DEP-5)</h3>
+<p>Debian enforces upstream transparency through standardized licensing
+metadata, formalized as the Machine-Readable
+<code>debian/copyright</code> specification (DEP-5).</p>
+<p>Every package maintainer must document every license and copyright
+holder present in the upstream source tree, file-by-file. This process
+catches "poison pill" clauses—such as isolated source files with
+non-free or patent-encumbered terms hidden inside otherwise permissive
+repositories. If upstream introduces incompatible or proprietary terms
+into minor components, Debian packaging teams detect and isolate these
+changes before binaries are built and distributed.</p>
+<h3 id="archive-component-segregation">Archive Component
+Segregation</h3>
+<p>Debian structurally segregates software repositories into three
+primary areas: <code>main</code>, <code>contrib</code>, and
+<code>non-free</code> (along with <code>non-free-firmware</code>):</p>
+<ul>
+<li><strong>Main:</strong> Comprises the official Debian operating
+system. Every package inside <code>main</code> must comply 100% with the
+DFSG and must not rely on any software outside of <code>main</code> to
+build or run.</li>
+<li><strong>Contrib and Non-Free:</strong> Stored on separate servers
+and omitted from default installations. Software in <code>contrib</code>
+complies with DFSG but depends on non-free software, while
+<code>non-free</code> contains packages that fail one or more DFSG
+criteria.</li>
+</ul>
+<p>By mandating that nothing in <code>main</code> can depend on
+proprietary code, Debian protects its core distribution from
+supply-chain dependency traps where an essential system component
+suddenly relies on closed upstream infrastructure.</p>
+<h3 id="mitigation-of-upstream-relicensing">Mitigation of Upstream
+Relicensing</h3>
+<p>When upstream projects transition from open-source licenses to
+proprietary, restrictive, or source-available licenses (such as the
+Business Source License or Server Side Public License), Debian’s
+policies trigger an immediate defensive response:</p>
+<ol type="1">
+<li><strong>Rejection from the Archive:</strong> Software shifting to
+non-DFSG terms cannot enter the testing or stable branches of Debian
+<code>main</code>.</li>
+<li><strong>Community Fork Adoption:</strong> Debian package maintainers
+transition packages to fully open community forks (for example,
+packaging MariaDB when MySQL’s stewardship raised licensing concerns, or
+adopting Valkey in response to Redis licensing shifts).</li>
+<li><strong>Archive Removal:</strong> If no viable open-source fork
+exists, Debian removes the software entirely from its core distribution
+rather than compromising its non-lock-in guarantees.</li>
+</ol>
+<h3 id="patent-and-non-compete-protections">Patent and Non-Compete
+Protections</h3>
+<p>Upstream vendors frequently use patents or restrictive covenants to
+create lock-in. Debian’s guidelines treat discriminatory patent
+restrictions as a violation of free redistribution rights. If an
+upstream author requires patent licenses or royalties that contradict
+DFSG provisions, the software is deemed non-distributable and kept out
+of Debian's core repositories. This ensures that users deploy Debian
+software without hidden legal liabilities or vendor claims.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

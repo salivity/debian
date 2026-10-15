@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian APT Package Download Cache Configuration - debian</title>
+    <meta name="description" content="Debian&#39;s Advanced Package Tool (APT) stores downloaded .deb packages in a local cache before installing them. By modifying or creating configuration snippets in /etc/apt/apt.conf.d/, administrators can control whether packages are retained after installat">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-apt-package-download-cache-configuration">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian APT Package Download Cache Configuration - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-apt-package-download-cache-configuration" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian&#39;s Advanced Package Tool (APT) stores downloaded .deb packages in a local cache before installing them. By modifying or creating configuration snippets in /etc/apt/apt.conf.d/, administrators can control whether packages are retained after installat" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-apt-package-download-cache-configuration">Debian APT
+Package Download Cache Configuration</h1>
+<p>Debian's Advanced Package Tool (APT) stores downloaded
+<code>.deb</code> packages in a local cache before installing them. By
+modifying or creating configuration snippets in
+<code>/etc/apt/apt.conf.d/</code>, administrators can control whether
+packages are retained after installation, adjust the cache directory
+location, or enforce size and age limits on stored archives.</p>
+<h3 id="the-primary-retention-setting-aptkeep-downloaded-packages">The
+Primary Retention Setting:
+<code>APT::Keep-Downloaded-Packages</code></h3>
+<p>The primary directive controlling whether downloaded
+<code>.deb</code> files remain on the system after installation is
+<code>APT::Keep-Downloaded-Packages</code>.</p>
+<ul>
+<li><p><strong>To retain packages in the cache:</strong></p>
+<pre class="apt"><code>APT::Keep-Downloaded-Packages &quot;true&quot;;</code></pre></li>
+<li><p><strong>To automatically delete packages after
+installation:</strong></p>
+<pre class="apt"><code>APT::Keep-Downloaded-Packages &quot;false&quot;;</code></pre></li>
+</ul>
+<p>In modern Debian releases, the command-line utility <code>apt</code>
+defaults to deleting packages (<code>false</code>), whereas
+<code>apt-get</code> historically defaults to keeping them
+(<code>true</code>). To enforce a uniform policy across all package
+management tools, create a dedicated file such as
+<code>/etc/apt/apt.conf.d/01cache</code> containing your preferred
+directive.</p>
+<h3 id="changing-the-download-directory-dircachearchives">Changing the
+Download Directory: <code>Dir::Cache::Archives</code></h3>
+<p>By default, APT stores packages in
+<code>/var/cache/apt/archives/</code> and incomplete downloads in
+<code>/var/cache/apt/archives/partial/</code>. You can redirect this
+storage path to an alternative filesystem or mount point using the
+following configuration:</p>
+<pre class="apt"><code>Dir::Cache::Archives &quot;/path/to/custom/cache/&quot;;</code></pre>
+<p>Ensure the destination directory exists and has appropriate read and
+write permissions for the <code>_apt</code> and <code>root</code>
+users.</p>
+<h3 id="controlling-automatic-cache-cleanup">Controlling Automatic Cache
+Cleanup</h3>
+<p>For systems using background maintenance scripts (such as
+<code>apt-daily.service</code> or unattended upgrades), APT supports
+parameters that limit cache expansion based on time and disk
+consumption:</p>
+<ul>
+<li><p><strong><code>APT::Archives::MaxAge</code></strong>: Sets the
+maximum number of days a package file can stay in the cache. Files older
+than this value are removed during automated cleanup runs.</p>
+<pre class="apt"><code>APT::Archives::MaxAge &quot;30&quot;;</code></pre></li>
+<li><p><strong><code>APT::Archives::MinAge</code></strong>: Prevents the
+deletion of packages that were downloaded more recently than the
+specified number of days, regardless of cache size limits.</p>
+<pre class="apt"><code>APT::Archives::MinAge &quot;2&quot;;</code></pre></li>
+<li><p><strong><code>APT::Archives::MaxSize</code></strong>: Sets a
+target maximum size (in megabytes) for the cache. If the directory
+exceeds this limit, older packages are purged until the size falls back
+beneath it.</p>
+<pre class="apt"><code>APT::Archives::MaxSize &quot;500&quot;;</code></pre></li>
+</ul>
+<h3 id="completely-disabling-disk-caching">Completely Disabling Disk
+Caching</h3>
+<p>In containerized environments (like Docker) or environments with
+extreme storage constraints, you can prevent APT from using disk storage
+for archives entirely by directing the archive storage to an empty
+string:</p>
+<pre class="apt"><code>Dir::Cache::Archives &quot;&quot;;
+APT::Keep-Downloaded-Packages &quot;false&quot;;</code></pre>
+<p>This prevents APT from committing <code>.deb</code> files to
+permanent storage, saving disk space at the expense of needing to
+redownload files if a package reinstallation is required.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

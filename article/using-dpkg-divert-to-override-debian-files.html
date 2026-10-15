@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using dpkg-divert to Override Debian Files - debian</title>
+    <meta name="description" content="The dpkg-divert utility is the standard Debian mechanism for safely overriding files provided by other packages without causing package manager conflicts or having custom changes overwritten during system upgrades. By instructing dpkg to write a file to a">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/using-dpkg-divert-to-override-debian-files">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using dpkg-divert to Override Debian Files - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/using-dpkg-divert-to-override-debian-files" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The dpkg-divert utility is the standard Debian mechanism for safely overriding files provided by other packages without causing package manager conflicts or having custom changes overwritten during system upgrades. By instructing dpkg to write a file to a" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-dpkg-divert-to-override-debian-files">Using dpkg-divert to
+Override Debian Files</h1>
+<p>The <code>dpkg-divert</code> utility is the standard Debian mechanism
+for safely overriding files provided by other packages without causing
+package manager conflicts or having custom changes overwritten during
+system upgrades. By instructing <code>dpkg</code> to write a file to an
+alternate location instead of its default path, system administrators
+and software packagers can substitute custom versions of binaries,
+scripts, or configuration files while maintaining clean package
+integrity.</p>
+<p>In Debian-based systems, <code>dpkg</code> strictly manages file
+ownership. When a package is upgraded, any file it owns is replaced with
+the new version from the archive. If an administrator replaces a
+package-provided binary directly, subsequent updates will overwrite that
+modification. Similarly, if a second package attempts to overwrite a
+file owned by an existing package, <code>dpkg</code> halts installation
+due to a file conflict. <code>dpkg-divert</code> solves both problems by
+intercepting <code>dpkg</code> operations at the database level.</p>
+<p>When a diversion is registered, <code>dpkg</code> modifies its
+internal catalog of file paths. Whenever an installation or update
+attempts to unpack the targeted file, <code>dpkg</code> automatically
+redirects the incoming file to a specified diversion path (for example,
+<code>/usr/bin/original.distrib</code>). This ensures the
+vendor-supplied file remains safely stored on disk and receives official
+updates without interfering with the custom replacement positioned at
+the primary path.</p>
+<p>Diversions generally fall into two categories:</p>
+<ul>
+<li><strong>Local diversions:</strong> Created by system administrators
+to apply site-specific customizations. By default, adding a diversion
+sets it as local, which overrides the target file regardless of which
+package provides it.</li>
+<li><strong>Package diversions:</strong> Created by custom or
+third-party Debian packages using pre-installation scripts
+(<code>preinst</code>). These specify
+<code>--package &lt;package-name&gt;</code>, ensuring the diversion only
+applies when that specific package is installed.</li>
+</ul>
+<p>To divert a file, the <code>--add</code> and <code>--rename</code>
+options are typically used together. The <code>--rename</code> flag
+tells <code>dpkg</code> to actively move the existing file on the
+filesystem to its new diverted location immediately, rather than waiting
+for a future package installation to trigger the shift:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">dpkg-divert</span> <span class="at">--divert</span> /usr/bin/target.distrib <span class="at">--rename</span> /usr/bin/target</span></code></pre></div>
+<p>Once diverted, administrators can place their custom script or binary
+at <code>/usr/bin/target</code>. When the package owning
+<code>/usr/bin/target</code> is updated, the new version will write to
+<code>/usr/bin/target.distrib</code>, leaving the custom file
+untouched.</p>
+<p>Removing a diversion restores standard <code>dpkg</code> behavior.
+The custom file must be deleted first, followed by running
+<code>dpkg-divert</code> with the <code>--remove</code> and
+<code>--rename</code> flags to return the diverted file to its original
+location:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> /usr/bin/target</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">dpkg-divert</span> <span class="at">--rename</span> <span class="at">--remove</span> /usr/bin/target</span></code></pre></div>
+<p>By decoupling local modifications from package-managed updates,
+<code>dpkg-divert</code> serves as an essential tool for maintaining
+non-standard environments, testing software patches, and creating
+wrapper scripts while preserving system stability.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packaging Rust for Debian with cargo-deb - debian</title>
+    <meta name="description" content="This article examines how cargo-deb acts as a specialized bridge between the Rust development ecosystem and the Debian packaging system. It details how the tool extracts metadata, resolves runtime dependencies, bundles compiled binaries and assets, and au">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/packaging-rust-for-debian-with-cargo-deb">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Packaging Rust for Debian with cargo-deb - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/packaging-rust-for-debian-with-cargo-deb" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article examines how cargo-deb acts as a specialized bridge between the Rust development ecosystem and the Debian packaging system. It details how the tool extracts metadata, resolves runtime dependencies, bundles compiled binaries and assets, and au" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="packaging-rust-for-debian-with-cargo-deb">Packaging Rust for
+Debian with cargo-deb</h1>
+<p>This article examines how <code>cargo-deb</code> acts as a
+specialized bridge between the Rust development ecosystem and the Debian
+packaging system. It details how the tool extracts metadata, resolves
+runtime dependencies, bundles compiled binaries and assets, and
+automates the creation of standard <code>.deb</code> packages directly
+from a Rust workspace. By streamlining this workflow,
+<code>cargo-deb</code> enables Rust developers to distribute
+production-ready Debian archives without manually configuring complex
+native packaging toolchains.</p>
+<h3 id="the-bridge-between-cargo-and-debian-packaging">The Bridge
+Between Cargo and Debian Packaging</h3>
+<p>Building Debian packages natively typically requires familiarization
+with tools such as <code>dpkg-buildpackage</code>, <code>debuild</code>,
+and the Debian-specific directory layout containing
+<code>control</code>, <code>rules</code>, and <code>changelog</code>
+files. For Rust developers, this traditional workflow introduces
+friction because Cargo already manages project builds, dependencies, and
+metadata.</p>
+<p><code>cargo-deb</code> is a Cargo subcommand designed to eliminate
+this friction. It integrates natively with Cargo to generate binary
+<code>.deb</code> packages directly from the compiled output of
+<code>cargo build --release</code>. Rather than replacing Debian
+standards, it generates fully compliant Debian control archives, data
+archives, and package checksums using Rust-native tooling.</p>
+<h3
+id="translating-cargo-metadata-into-debian-control-fields">Translating
+Cargo Metadata into Debian Control Fields</h3>
+<p>Debian packages rely on a <code>control</code> file to declare
+critical metadata, including package name, version, architecture,
+maintainer information, and descriptions. <code>cargo-deb</code>
+automatically inspects <code>Cargo.toml</code> to extract these fields,
+translating Rust conventions into Debian equivalents:</p>
+<ul>
+<li><strong>Package Name &amp; Version:</strong> Converts crate names
+into valid Debian package formats and maps SemVer versions
+directly.</li>
+<li><strong>Architecture:</strong> Automatically detects target target
+architectures (e.g., <code>x86_64-unknown-linux-gnu</code> maps to
+<code>amd64</code>).</li>
+<li><strong>Debian-Specific Metadata:</strong> Allows developers to
+define Debian-specific fields via an optional
+<code>[package.metadata.deb]</code> table in <code>Cargo.toml</code>.
+This table configures parameters such as maintainer scripts
+(<code>postinst</code>, <code>prerm</code>), package priority, section,
+and licensing terms.</li>
+</ul>
+<h3 id="automated-shared-library-dependency-discovery">Automated Shared
+Library Dependency Discovery</h3>
+<p>A critical requirement for any native Linux package is the
+declaration of runtime dynamic dependencies, such as <code>libc6</code>,
+<code>libssl</code>, or system libraries linked via <code>-sys</code>
+crates.</p>
+<p><code>cargo-deb</code> resolves this automatically by inspecting the
+compiled ELF binaries. It invokes system utilities like
+<code>dpkg-shlibdeps</code> or parses ELF headers directly to identify
+dynamic library linkages. It then translates these linkages into exact
+Debian package dependency strings, ensuring that target systems
+automatically install the required shared libraries upon package
+deployment.</p>
+<h3 id="system-asset-and-configuration-placement">System Asset and
+Configuration Placement</h3>
+<p>Beyond the primary binary, enterprise applications typically require
+configuration files, documentation, manual pages, and system services.
+<code>cargo-deb</code> handles asset mapping through its configuration
+table:</p>
+<ul>
+<li><strong>Binary Installation:</strong> Automatically places
+executables into <code>/usr/bin/</code> by default.</li>
+<li><strong>Systemd Integration:</strong> Detects and installs systemd
+service files into <code>/lib/systemd/system/</code>, enabling automated
+service management upon installation.</li>
+<li><strong>Configuration Files:</strong> Allows specific files to be
+marked as <code>conffiles</code>, ensuring Debian package managers (like
+<code>apt</code> and <code>dpkg</code>) preserve user modifications
+during future upgrades.</li>
+<li><strong>Static Assets:</strong> Maps documentation, licenses, and
+auxiliary assets to designated paths such as
+<code>/usr/share/doc/</code> or <code>/etc/</code>.</li>
+</ul>
+<h3 id="impact-on-cicd-and-distribution-pipelines">Impact on CI/CD and
+Distribution Pipelines</h3>
+<p>By condensing the Debian packaging process into a single executable
+command (<code>cargo deb</code>), the tool significantly lowers the
+barrier to distributing native Linux packages. Development teams can
+embed <code>.deb</code> creation directly into automated continuous
+integration and continuous deployment (CI/CD) pipelines without needing
+a full Debian build environment. The resulting packages can be served
+via standard Apt repositories, deployed across cloud instances, or
+distributed as standalone release artifacts.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

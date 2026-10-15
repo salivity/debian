@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prevent Debian Package Upgrades with apt-mark hold - debian</title>
+    <meta name="description" content="The apt-mark hold command allows Debian administrators to lock designated packages at their current version, preventing the Advanced Package Tool (APT) from automatically updating them during standard system maintenance. This guide covers how this mechani">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/prevent-debian-package-upgrades-with-apt-mark-hold">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Prevent Debian Package Upgrades with apt-mark hold - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/prevent-debian-package-upgrades-with-apt-mark-hold" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The apt-mark hold command allows Debian administrators to lock designated packages at their current version, preventing the Advanced Package Tool (APT) from automatically updating them during standard system maintenance. This guide covers how this mechani" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="prevent-debian-package-upgrades-with-apt-mark-hold">Prevent
+Debian Package Upgrades with apt-mark hold</h1>
+<p>The <code>apt-mark hold</code> command allows Debian administrators
+to lock designated packages at their current version, preventing the
+Advanced Package Tool (APT) from automatically updating them during
+standard system maintenance. This guide covers how this mechanism
+operates behind the scenes, the exact commands required to lock and
+unlock packages, and how to verify which packages are currently
+pinned.</p>
+<h2 id="how-the-hold-mechanism-works">How the Hold Mechanism Works</h2>
+<p>When you run system updates on Debian using commands such as
+<code>apt upgrade</code> or <code>apt full-upgrade</code>, APT queries
+the repositories, calculates dependencies, and prepares to replace older
+packages with their newer counterparts.</p>
+<p>Marking a package with <code>hold</code> alters its status in
+Debian’s package management database (<code>/var/lib/dpkg/status</code>
+and APT's extended states file). When APT evaluates candidate versions
+during an upgrade transaction, its dependency resolver checks these
+status flags. If a package is marked as held, APT treats the installed
+version as immutable. The resolver ignores newer versions found in
+remote repositories and will not schedule the held package for
+installation, replacement, or removal, effectively freezing it in
+place.</p>
+<h2 id="holding-a-package">Holding a Package</h2>
+<p>To place a package on hold, execute the <code>apt-mark hold</code>
+command followed by the package name using administrative
+privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-mark hold <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span></code></pre></div>
+<p>For example, to prevent the Nginx web server from being updated
+during bulk upgrades:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-mark hold nginx</span></code></pre></div>
+<p>Once executed, APT will confirm that the package has been set on
+hold. From this point forward, general update commands will display the
+package as kept back rather than upgrading it.</p>
+<h2 id="viewing-currently-held-packages">Viewing Currently Held
+Packages</h2>
+<p>To verify which packages are currently protected from automated
+upgrades on your system, use the <code>showhold</code> option:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-mark</span> showhold</span></code></pre></div>
+<p>This returns a simple list of all package names on the system that
+have active hold flags.</p>
+<h2 id="releasing-a-package-hold">Releasing a Package Hold</h2>
+<p>When you are ready to update the package—such as after testing a new
+release or applying a necessary patch—you can remove the hold
+restriction by running:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-mark unhold <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span></code></pre></div>
+<p>Once unheld, the package will once again be considered by APT for
+regular updates during the next <code>apt upgrade</code> execution.</p>
+<h2 id="direct-installation-behavior">Direct Installation Behavior</h2>
+<p>It is important to note that while <code>apt-mark hold</code>
+prevents automated updates through bulk upgrade commands, it does not
+completely prevent manual intervention. If an administrator explicitly
+targets a held package using
+<code>sudo apt install &lt;package-name&gt;</code>, APT will warn the
+user or prompt for confirmation before proceeding to upgrade the package
+and remove the hold flag.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

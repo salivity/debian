@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Watch File and Upstream Monitoring Guide - debian</title>
+    <meta name="description" content="The debian/watch file is a core configuration file used in Debian packaging to automate the tracking, downloading, and verification of new upstream software releases. This article explains the purpose of the debian/watch file, how it interacts with the us">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-watch-file-and-upstream-monitoring-guide">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Watch File and Upstream Monitoring Guide - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-watch-file-and-upstream-monitoring-guide" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The debian/watch file is a core configuration file used in Debian packaging to automate the tracking, downloading, and verification of new upstream software releases. This article explains the purpose of the debian/watch file, how it interacts with the us" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-watch-file-and-upstream-monitoring-guide">Debian Watch
+File and Upstream Monitoring Guide</h1>
+<p>The <code>debian/watch</code> file is a core configuration file used
+in Debian packaging to automate the tracking, downloading, and
+verification of new upstream software releases. This article explains
+the purpose of the <code>debian/watch</code> file, how it interacts with
+the <code>uscan</code> utility to monitor external sources such as web
+servers and Git repositories, and how to write and configure effective
+watch patterns for streamlined package maintenance.</p>
+<h2 id="what-is-the-debianwatch-file">What Is the debian/watch
+File?</h2>
+<p>In the Debian GNU/Linux operating system, software packages are
+typically built from source code provided by an "upstream" developer or
+project. The <code>debian/watch</code> file resides inside the
+<code>debian/</code> directory of a Debian source package. Its primary
+role is to specify where and how the Debian packaging tools can locate
+new versions of the upstream project.</p>
+<p>The file is parsed primarily by <code>uscan</code>, a tool provided
+by the <code>devscripts</code> package. Debian maintainers and automated
+infrastructure (such as the Debian Package Tracking System) rely on
+<code>uscan</code> to periodically check upstream distribution points
+for newer tarballs or Git tags.</p>
+<h2 id="core-syntax-and-format">Core Syntax and Format</h2>
+<p>A <code>debian/watch</code> file is a plain text file containing
+instructions and regular expressions. Modern packaging standards use
+version 4 syntax, which must be declared on the first line:</p>
+<pre class="text"><code>version=4</code></pre>
+<p>A standard watch line contains three key components:</p>
+<ol type="1">
+<li><strong>Options (optional):</strong> Directives modifying download
+behavior, signature verification, or compression formats, enclosed in
+square brackets <code>[...]</code>.</li>
+<li><strong>URL Base:</strong> The HTTP, HTTPS, or FTP directory, or Git
+repository URL to monitor.</li>
+<li><strong>Matching Pattern:</strong> A regular expression specifying
+how to identify release files or tags and extract the version
+string.</li>
+</ol>
+<h3 id="basic-httpftp-pattern">Basic HTTP/FTP Pattern</h3>
+<p>For a project hosting tarballs on an HTTP server, a typical entry
+looks like:</p>
+<pre class="text"><code>version=4
+https://example.com/downloads/ project-(.+)\.tar\.(?:gz|bz2|xz)</code></pre>
+<p>In this example:</p>
+<ul>
+<li><code>https://example.com/downloads/</code> is the base URL scanned
+for links.</li>
+<li><code>project-(.+)\.tar\.(?:gz|bz2|xz)</code> is the regex matching
+the archive files.</li>
+<li>The parenthesis <code>(.+)</code> captures the upstream version
+string, which <code>uscan</code> uses to compare against the version
+recorded in <code>debian/changelog</code>.</li>
+</ul>
+<h3 id="monitoring-code-hosting-platforms">Monitoring Code Hosting
+Platforms</h3>
+<p>Modern watch files frequently target platforms like GitHub or GitLab.
+Special redirector services or specific API patterns are commonly used
+to ensure stable matching.</p>
+<p>A standard GitHub tag monitoring entry:</p>
+<pre class="text"><code>version=4
+opts=&quot;filenamemangle=s%(?:.*?)?(?:v|version)?(\d[\d.]*)\.tar\.gz%project-$1.tar.gz%&quot; \
+https://github.com/user/project/tags .*/(?:v|version)?(\d[\d.]*)\.tar\.gz</code></pre>
+<p>Here, <code>filenamemangle</code> rewrites the downloaded file's name
+to match Debian's naming convention
+(<code>&lt;package&gt;_&lt;version&gt;.orig.tar.gz</code>).</p>
+<h2 id="cryptographic-signature-verification">Cryptographic Signature
+Verification</h2>
+<p>The <code>debian/watch</code> file also automates security
+verification by checking upstream OpenPGP/GPG signatures. By adding the
+<code>pgpsigurlmangle</code> option, <code>uscan</code> automatically
+downloads an associated <code>.asc</code> or <code>.sig</code> file and
+verifies it against the maintainer's keyring stored in
+<code>debian/upstream/signing-key.asc</code>:</p>
+<pre class="text"><code>version=4
+opts=&quot;pgpsigurlmangle=s%$%.asc%&quot; \
+https://example.com/releases/ project-(.+)\.tar\.gz</code></pre>
+<p>If the signature fails verification, <code>uscan</code> aborts the
+download process.</p>
+<h2 id="executing-and-automating-upstream-checks">Executing and
+Automating Upstream Checks</h2>
+<p>Maintainers test and run the configuration locally using the
+<code>uscan</code> command:</p>
+<ul>
+<li><code>uscan --verbose</code>: Scans upstream and reports whether a
+newer version exists without downloading it.</li>
+<li><code>uscan --download</code>: Downloads the new upstream tarball
+and places it in the parent directory.</li>
+<li><code>uscan --download --rename</code>: Downloads the archive and
+automatically renames it to Debian's
+<code>&lt;package&gt;_&lt;version&gt;.orig.tar.&lt;ext&gt;</code>
+format.</li>
+</ul>
+<p>Within the broader Debian infrastructure, automated services
+regularly run <code>uscan</code> against every package in the archive.
+When a new release is detected, it is flagged on the Debian Package
+Tracker, alerting maintainers that an update is available to be packaged
+and integrated into the distribution.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

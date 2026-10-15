@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Buildd: Compiling Incoming Source Uploads - debian</title>
+    <meta name="description" content="This article provides an overview of how the Debian operating system automatically transforms developer-submitted source packages into binary packages across multiple hardware architectures. It details the architecture of Debian’s distributed build networ">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-buildd-compiling-incoming-source-uploads">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Buildd: Compiling Incoming Source Uploads - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-buildd-compiling-incoming-source-uploads" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides an overview of how the Debian operating system automatically transforms developer-submitted source packages into binary packages across multiple hardware architectures. It details the architecture of Debian’s distributed build networ" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-buildd-compiling-incoming-source-uploads">Debian Buildd:
+Compiling Incoming Source Uploads</h1>
+<p>This article provides an overview of how the Debian operating system
+automatically transforms developer-submitted source packages into binary
+packages across multiple hardware architectures. It details the
+architecture of Debian’s distributed build network, focusing on the role
+of the <code>buildd</code> daemon, the coordination provided by the
+<code>wanna-build</code> database, the isolated compilation process
+inside <code>sbuild</code>, and how successfully compiled packages are
+signed and integrated back into the Debian archive.</p>
+<h3 id="the-source-upload-and-archive-intake">The Source Upload and
+Archive Intake</h3>
+<p>The build lifecycle begins when a Debian package maintainer uploads a
+cryptographically signed source package to Debian's central incoming
+queue (<code>ftp-master</code>). A source upload typically consists of
+the upstream source tarball, a Debian-specific diff or packaging
+archive, and a <code>.dsc</code> (Debian Source Control) file. Once the
+archive software (<code>dak</code>) verifies the signature and validates
+package integrity, the source files are accepted into the pool, making
+them available for compilation across all supported target
+architectures.</p>
+<h3 id="task-coordination-via-wanna-build">Task Coordination via
+Wanna-Build</h3>
+<p>Debian supports numerous hardware architectures, ranging from
+<code>amd64</code> and <code>arm64</code> to specialized ports like
+<code>riscv64</code> or <code>s390x</code>. Because maintainers
+generally upload source code alongside binaries for only a single
+architecture (often their local machine), Debian must compile the
+package for every other supported architecture.</p>
+<p>To manage this, the central infrastructure uses a database system
+called <strong>wanna-build</strong>. Wanna-build tracks the state of
+every package per architecture using statuses such as:</p>
+<ul>
+<li><strong>Needs-Build:</strong> The source package is available, and
+an architecture-specific binary must be compiled.</li>
+<li><strong>Building:</strong> A build daemon has claimed the job and is
+currently compiling.</li>
+<li><strong>Dep-Wait:</strong> The package cannot be built yet because
+specific build dependencies are missing or undergoing their own
+compilation.</li>
+<li><strong>Failed:</strong> The build process completed with errors,
+requiring human intervention.</li>
+<li><strong>Uploaded / Built:</strong> The binaries were successfully
+produced and submitted.</li>
+</ul>
+<h3 id="the-buildd-daemon-lifecycle">The Buildd Daemon Lifecycle</h3>
+<p>The <code>buildd</code> (Build Daemon) software runs as a background
+service on dedicated machines or virtual instances assigned to a
+specific CPU architecture. The process operates in a continuous
+loop:</p>
+<ol type="1">
+<li><strong>Polling:</strong> <code>buildd</code> queries the
+<code>wanna-build</code> database for its assigned architecture, looking
+for packages marked <code>Needs-Build</code>.</li>
+<li><strong>Job Claiming:</strong> When an eligible package with
+satisfied dependencies is found, <code>wanna-build</code> transitions
+the state to <code>Building</code> to prevent duplicate efforts by other
+builder nodes.</li>
+<li><strong>Downloading Sources:</strong> <code>buildd</code> downloads
+the <code>.dsc</code> file and associated source archives from a local
+Debian mirror.</li>
+</ol>
+<h3 id="cleanroom-compilation-with-sbuild">Cleanroom Compilation with
+Sbuild</h3>
+<p>To ensure reproducible, consistent, and clean builds,
+<code>buildd</code> does not compile software directly in the host OS
+environment. Instead, it invokes <strong>sbuild</strong>, a tool
+designed to execute builds inside isolated environments:</p>
+<ul>
+<li><strong>Chroot Isolation:</strong> <code>sbuild</code> initializes a
+clean, minimal <code>chroot</code> (or container) using LVM snapshots,
+tmpfs, or overlayfs. This guarantees that remnants of prior builds do
+not alter compiler behavior.</li>
+<li><strong>Dependency Resolution:</strong> <code>sbuild</code> parses
+the <code>Build-Depends</code> and <code>Build-Depends-Indep</code>
+fields in the package's control file. It temporarily installs only the
+specified Debian packages into the isolated environment using
+<code>apt</code>.</li>
+<li><strong>Execution:</strong> The package is compiled using standard
+toolchain wrappers (primarily <code>dpkg-buildpackage</code>). Test
+suites included by the package maintainer are executed during this
+phase.</li>
+<li><strong>Artifact Generation:</strong> If successful,
+architecture-specific binary files (<code>.deb</code>), translation
+packages, and a <code>.changes</code> file listing the generated
+artifacts are produced.</li>
+<li><strong>Tear Down:</strong> The temporary environment is discarded,
+purging all installed build dependencies and compilation debris.</li>
+</ul>
+<h3 id="signing-uploading-and-status-reporting">Signing, Uploading, and
+Status Reporting</h3>
+<p>Once the build successfully completes, <code>buildd</code>
+automatically attaches a cryptographic signature to the build log and
+the <code>.changes</code> file using an architecture-specific GPG key
+held by the daemon.</p>
+<p>The generated <code>.deb</code> packages, the build log, and the
+signed <code>.changes</code> file are then uploaded back to Debian's
+incoming queue. Once the archive validates the upload,
+<code>wanna-build</code> marks the job as <code>Installed</code> or
+<code>Uploaded</code>. If compilation fails at any stage, the process
+halts, the build log is saved and published publicly for developer
+inspection, and the package status changes to <code>Failed</code>.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

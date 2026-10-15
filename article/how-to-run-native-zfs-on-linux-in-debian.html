@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Run Native ZFS on Linux in Debian - debian</title>
+    <meta name="description" content="Running the ZFS filesystem natively on Debian requires enabling specific package repositories, installing the Linux kernel headers, compiling the OpenZFS kernel modules via Dynamic Kernel Module Support (DKMS), and ensuring adequate hardware resources. Be">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-to-run-native-zfs-on-linux-in-debian">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Run Native ZFS on Linux in Debian - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-to-run-native-zfs-on-linux-in-debian" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Running the ZFS filesystem natively on Debian requires enabling specific package repositories, installing the Linux kernel headers, compiling the OpenZFS kernel modules via Dynamic Kernel Module Support (DKMS), and ensuring adequate hardware resources. Be" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-run-native-zfs-on-linux-in-debian">How to Run Native ZFS
+on Linux in Debian</h1>
+<p>Running the ZFS filesystem natively on Debian requires enabling
+specific package repositories, installing the Linux kernel headers,
+compiling the OpenZFS kernel modules via Dynamic Kernel Module Support
+(DKMS), and ensuring adequate hardware resources. Because the CDDL
+license used by OpenZFS is legally incompatible with Debian's
+GPL-licensed Linux kernel binaries, Debian does not ship pre-compiled
+ZFS kernel modules in its main repositories. This guide outlines the
+system prerequisites, software dependencies, and fundamental setup
+needed to successfully run OpenZFS natively on Debian.</p>
+<h2 id="hardware-requirements">Hardware Requirements</h2>
+<p>To run ZFS reliably, your system should meet the following minimum
+hardware standards:</p>
+<ul>
+<li><strong>Architecture:</strong> A 64-bit CPU architecture
+(x86_64/amd64 or arm64). ZFS is not recommended on 32-bit platforms due
+to address space limitations.</li>
+<li><strong>Memory (RAM):</strong> A minimum of 2 GB of RAM for basic
+operations. For production environments, 8 GB or more is recommended.
+ZFS heavily utilizes RAM for its Adaptive Replacement Cache (ARC). If
+features like deduplication are enabled, ZFS generally requires 1 GB to
+5 GB of RAM per terabyte of stored data.</li>
+<li><strong>Storage Devices:</strong> Dedicated, unformatted block
+devices (HDDs, NVMe drives, or SSDs). Hardware RAID controllers should
+be set to IT mode (HBA) or JBOD mode, as ZFS directly manages disk
+redundancy, error detection, and parity.</li>
+</ul>
+<h2 id="software-and-repository-prerequisites">Software and Repository
+Prerequisites</h2>
+<p>Because Debian cannot distribute binary kernel modules of ZFS, you
+must compile the module locally on your system using DKMS. This requires
+access to the <code>contrib</code> and <code>non-free</code> repository
+archives.</p>
+<ol type="1">
+<li><strong>Enable Repositories:</strong> Update
+<code>/etc/apt/sources.list</code> to include the <code>contrib</code>
+and <code>non-free</code> sections alongside <code>main</code>.</li>
+<li><strong>Update Package Cache:</strong> Run <code>apt update</code>
+to fetch the updated lists of packages from the newly enabled
+sections.</li>
+</ol>
+<h2 id="required-system-packages">Required System Packages</h2>
+<p>Running native ZFS requires specific compilation tools and userspace
+management utilities:</p>
+<ul>
+<li><strong>Kernel Headers:</strong> The headers matching your currently
+running kernel version (<code>linux-headers-$(uname -r)</code>) are
+necessary to compile the DKMS module against the Debian kernel.</li>
+<li><strong>zfs-dkms:</strong> The source package for OpenZFS that DKMS
+uses to automatically build and rebuild the ZFS kernel modules whenever
+your kernel is updated.</li>
+<li><strong>zfsutils-linux:</strong> The userspace administration tools
+required to create, manage, and monitor ZFS pools (<code>zpool</code>)
+and filesystems (<code>zfs</code>).</li>
+</ul>
+<p>These packages can be installed by running:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt</span> install linux-headers-<span class="va">$(</span><span class="fu">uname</span> <span class="at">-r</span><span class="va">)</span> zfs-dkms zfsutils-linux</span></code></pre></div>
+<p>During this installation, DKMS will automatically trigger a build
+process to compile the <code>zfs.ko</code> module for your active
+kernel.</p>
+<h2 id="kernel-module-activation">Kernel Module Activation</h2>
+<p>Once compilation completes, the module must be loaded into the active
+Linux kernel:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">modprobe</span> zfs</span></code></pre></div>
+<p>To verify that the module is correctly loaded and operational,
+run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zfs</span> <span class="at">--version</span></span></code></pre></div>
+<p>If the command returns both the userspace version and the kernel
+module version, the Debian system meets all requirements and is fully
+prepared to create and manage native ZFS storage pools.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

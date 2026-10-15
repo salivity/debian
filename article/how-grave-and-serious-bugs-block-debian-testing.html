@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Grave and Serious Bugs Block Debian Testing - debian</title>
+    <meta name="description" content="In the Debian operating system, bugs classified as &quot;grave&quot; or &quot;serious&quot; are designated as Release-Critical (RC) bugs. When filed against a package version residing in the unstable distribution (Sid), these bugs directly halt the package&#39;s automated migrat">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-grave-and-serious-bugs-block-debian-testing">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Grave and Serious Bugs Block Debian Testing - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-grave-and-serious-bugs-block-debian-testing" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In the Debian operating system, bugs classified as &quot;grave&quot; or &quot;serious&quot; are designated as Release-Critical (RC) bugs. When filed against a package version residing in the unstable distribution (Sid), these bugs directly halt the package&#39;s automated migrat" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-grave-and-serious-bugs-block-debian-testing">How Grave and
+Serious Bugs Block Debian Testing</h1>
+<p>In the Debian operating system, bugs classified as "grave" or
+"serious" are designated as Release-Critical (RC) bugs. When filed
+against a package version residing in the unstable distribution
+(<em>Sid</em>), these bugs directly halt the package's automated
+migration into the testing branch (<em>Testing</em>). Because the
+testing distribution serves as the staging ground for the next stable
+Debian release, the migration automation engine strictly prevents any
+package harboring unresolved RC bugs from advancing.</p>
+<h3 id="release-critical-bug-classifications">Release-Critical Bug
+Classifications</h3>
+<p>Debian's Bug Tracking System (BTS) utilizes severity levels to
+categorize issues. The designations "grave" and "serious," alongside
+"critical," represent Release-Critical severity:</p>
+<ul>
+<li><strong>Grave:</strong> Indicates that the bug makes the package
+largely or completely unusable, causes serious data loss, or introduces
+a major security vulnerability affecting users of the package.</li>
+<li><strong>Serious:</strong> Indicates a severe violation of the Debian
+Policy Manual or makes the package entirely unbuildable on supported
+architectures.</li>
+</ul>
+<p>Any issue meeting either of these criteria signals that the software
+is unfit for release in a stable operating environment.</p>
+<h3 id="the-role-of-the-testing-migration-tool-britney">The Role of the
+Testing Migration Tool (Britney)</h3>
+<p>The transition of packages from Debian Unstable to Testing is
+governed by an automated script named Britney. Under normal conditions,
+a package enters Testing after meeting specific criteria, including an
+aging period (typically 2 to 10 days depending on upload urgency),
+passing all automated test suites (autopkgtest), and having all
+dependencies resolved.</p>
+<p>Britney checks the BTS status for RC bugs before approving any
+transition:</p>
+<ul>
+<li><strong>Zero-Tolerance for New RC Bugs:</strong> If an upload in
+Unstable contains a bug marked <code>grave</code> or
+<code>serious</code> that is not present in the current Testing version,
+Britney immediately blocks the package.</li>
+<li><strong>Comparative RC Count:</strong> A package can only transition
+if it does not introduce new RC bugs into Testing. If the version in
+Unstable fixes an existing RC bug in Testing without introducing new
+ones, migration is permitted and actively prioritized.</li>
+</ul>
+<h3 id="removal-from-testing">Removal from Testing</h3>
+<p>The impact of <code>grave</code> or <code>serious</code> bugs extends
+beyond preventing entry. If an RC bug is discovered in a package that is
+already in Testing:</p>
+<ol type="1">
+<li><strong>Autoremoval Timer:</strong> The BTS flags the package for
+automatic removal from Testing.</li>
+<li><strong>Grace Period:</strong> Maintainers are generally given a
+grace period (often 14 to 30 days, depending on whether the package is a
+key component) to upload a fix to Unstable and let it migrate.</li>
+<li><strong>Cascading Removal:</strong> If the issue is not fixed within
+the allotted window, the package—along with any reverse dependencies
+that rely on it—is removed from Testing entirely.</li>
+</ol>
+<h3 id="restoring-candidacy">Restoring Candidacy</h3>
+<p>To restore migration eligibility, the RC bug must be resolved. The
+maintainer must upload a fixed package to Unstable and close the bug via
+the Debian changelog, resolve it manually in the BTS, or legitimately
+downgrade the bug's severity if investigation proves it does not violate
+policy or break the software to an RC degree. Once the bug status
+updates in the BTS, the package automatically regains its candidacy for
+migration into Testing.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

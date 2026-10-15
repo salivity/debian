@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Adopt a Debian Package via WNPP - debian</title>
+    <meta name="description" content="Adopting a package in Debian through the Work-Needing and Prospective Packages (WNPP) system allows contributors to take over the maintenance of orphaned or unmaintained software. This guide outlines the essential procedural and technical steps involved i">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-to-adopt-a-debian-package-via-wnpp">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Adopt a Debian Package via WNPP - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-to-adopt-a-debian-package-via-wnpp" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Adopting a package in Debian through the Work-Needing and Prospective Packages (WNPP) system allows contributors to take over the maintenance of orphaned or unmaintained software. This guide outlines the essential procedural and technical steps involved i" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-adopt-a-debian-package-via-wnpp">How to Adopt a Debian
+Package via WNPP</h1>
+<p>Adopting a package in Debian through the Work-Needing and Prospective
+Packages (WNPP) system allows contributors to take over the maintenance
+of orphaned or unmaintained software. This guide outlines the essential
+procedural and technical steps involved in the adoption process,
+beginning with the initial claim of the package on Debian's bug tracking
+system and concluding with the upload of the updated package to the
+official archive.</p>
+<h3 id="1-identify-the-package-and-bug-report">1. Identify the Package
+and Bug Report</h3>
+<p>Unmaintained packages are tracked under Debian's pseudo-package
+<code>wnpp</code>. A package available for adoption is marked with one
+of two bug types:</p>
+<ul>
+<li><strong>O (Orphaned):</strong> The previous maintainer has abandoned
+the package, and it is temporarily maintained by the Debian QA
+team.</li>
+<li><strong>RFA (Request for Adoption):</strong> The current maintainer
+wishes to step down but continues to maintain the package until a
+successor steps forward.</li>
+</ul>
+<h3 id="2-declare-an-intent-to-adopt-ita">2. Declare an Intent to Adopt
+(ITA)</h3>
+<p>To signal to the community that you are taking over maintenance and
+to avoid duplicate efforts, you must retitle the existing WNPP bug:</p>
+<ul>
+<li>Send a control message to Debian's Bug Tracking System (BTS) at
+<code>control@bugs.debian.org</code>.</li>
+<li>Retitle the bug from
+<code>O: package-name -- short description</code> or
+<code>RFA: package-name -- short description</code> to
+<code>ITA: package-name -- short description</code>.</li>
+<li>Set yourself as the owner of the bug by issuing the
+<code>owner &lt;bug-number&gt; !</code> command (or specifying your
+email address).</li>
+</ul>
+<h3 id="3-retrieve-and-inspect-the-source-code">3. Retrieve and Inspect
+the Source Code</h3>
+<p>Obtain the latest packaging source code from the Debian archive or
+the team repository (such as Salsa, Debian's GitLab instance):</p>
+<ul>
+<li>Check open bugs listed in the BTS against the package to understand
+existing issues.</li>
+<li>Review the current packaging files in the <code>debian/</code>
+directory to evaluate required modernizations, such as updating the
+<code>debhelper-compat</code> level or fixing lintian warnings.</li>
+</ul>
+<h3 id="4-update-the-packaging-files">4. Update the Packaging Files</h3>
+<p>Edit the necessary files in the <code>debian/</code> directory to
+formally transfer maintenance:</p>
+<ul>
+<li><strong><code>debian/control</code>:</strong> Replace the existing
+entry in the <code>Maintainer:</code> field with your full name and
+email address. If the package was orphaned, remove it from the QA team.
+Update the <code>Vcs-*</code> fields to point to your new packaging
+repository if applicable.</li>
+<li><strong><code>debian/changelog</code>:</strong> Add a new changelog
+entry. The entry must explicitly mention the change of ownership and
+reference the WNPP bug number using the format
+<code>* New maintainer (Closes: #&lt;bug-number&gt;)</code>.</li>
+</ul>
+<h3 id="5-address-pending-issues-and-test">5. Address Pending Issues and
+Test</h3>
+<p>Before preparing the package for release:</p>
+<ul>
+<li>Fix any outstanding Release-Critical (RC) bugs or long-standing
+defects where feasible.</li>
+<li>Update <code>debian/control</code> to reflect the latest
+<code>Standards-Version</code> after verifying compliance with the
+Debian Policy Manual.</li>
+<li>Build the package cleanly in an isolated environment using tools
+like <code>sbuild</code> or <code>pbuilder</code>.</li>
+<li>Run <code>lintian</code> on the generated <code>.changes</code> file
+to check for packaging errors or warnings.</li>
+</ul>
+<h3 id="6-upload-the-package">6. Upload the Package</h3>
+<p>The final step depends on your status within the Debian project:</p>
+<ul>
+<li><strong>Debian Developers (DD) or Debian Maintainers (DM) with
+upload permissions:</strong> Upload the signed package directly to the
+Debian incoming queue using <code>dput</code> or
+<code>dupload</code>.</li>
+<li><strong>Non-DD/DM Contributors:</strong> Seek a sponsor by uploading
+the package to <code>mentors.debian.net</code> and filing a Request for
+Sponsorship (RFS) bug against the <code>sponsorship-requests</code>
+pseudo-package. Once a sponsor reviews and approves the changes, they
+will sign and upload the package to the archive on your behalf.</li>
+</ul>
+<p>Once the package is processed into the Debian archive, the BTS
+automatically closes the ITA bug, completing the adoption process.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

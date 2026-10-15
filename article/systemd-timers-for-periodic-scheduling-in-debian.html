@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Systemd Timers for Periodic Scheduling in Debian - debian</title>
+    <meta name="description" content="This article examines how the systemd init system provides robust, flexible alternatives to legacy cron daemons for periodic scheduling in Debian. It covers the dual-unit architecture of systemd timers, the distinct timing mechanisms available—including r">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/systemd-timers-for-periodic-scheduling-in-debian">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Systemd Timers for Periodic Scheduling in Debian - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/systemd-timers-for-periodic-scheduling-in-debian" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article examines how the systemd init system provides robust, flexible alternatives to legacy cron daemons for periodic scheduling in Debian. It covers the dual-unit architecture of systemd timers, the distinct timing mechanisms available—including r" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="systemd-timers-for-periodic-scheduling-in-debian">Systemd Timers
+for Periodic Scheduling in Debian</h1>
+<p>This article examines how the systemd init system provides robust,
+flexible alternatives to legacy cron daemons for periodic scheduling in
+Debian. It covers the dual-unit architecture of systemd timers, the
+distinct timing mechanisms available—including realtime calendar events
+and monotonic triggers—and the native features that make systemd-based
+automation more reliable for system administration.</p>
+<h2 id="the-systemd-timer-architecture">The Systemd Timer
+Architecture</h2>
+<p>In Debian, systemd replaces standalone schedulers like
+<code>cron</code> and <code>anacron</code> using timer units (files
+ending in <code>.timer</code>). A systemd timer does not execute
+commands directly; instead, it binds to and activates a matching service
+unit (files ending in <code>.service</code>).</p>
+<p>When a timer triggers, systemd starts the corresponding service unit,
+which executes the defined task within systemd’s managed execution
+environment. This provides access to advanced cgroup resource limits,
+structured logging through <code>journald</code>, and strict dependency
+resolution.</p>
+<h2 id="realtime-timers-calendar-events">Realtime Timers (Calendar
+Events)</h2>
+<p>The primary alternative to traditional cron expressions in systemd is
+the <strong>realtime timer</strong>, configured using the
+<code>OnCalendar=</code> directive. Realtime timers trigger based on
+wall-clock time and calendar dates.</p>
+<p>Unlike cron’s five-field format, systemd calendar events use
+human-readable syntax that supports granular specifications from years
+down to seconds:</p>
+<ul>
+<li><code>OnCalendar=*-*-* 04:00:00</code> (daily at 4:00 AM)</li>
+<li><code>OnCalendar=Mon,Fri *-*-* 18:30:00</code> (Mondays and Fridays
+at 6:30 PM)</li>
+<li><code>OnCalendar=hourly</code> or <code>daily</code> or
+<code>weekly</code> (convenient predefined shortcuts)</li>
+</ul>
+<p>To match or exceed the functionality of <code>anacron</code>, systemd
+timers support the <code>Persistent=true</code> directive. If the
+machine is powered off or suspended when a scheduled run is due, systemd
+immediately executes the service upon the next boot.</p>
+<h2 id="monotonic-timers-relative-events">Monotonic Timers (Relative
+Events)</h2>
+<p>Monotonic timers schedule jobs relative to varying system states
+rather than the wall clock. These timers do not drift when the system
+clock changes (e.g., due to daylight saving adjustments or NTP updates)
+and provide scheduling paradigms that traditional cron cannot
+replicate:</p>
+<ul>
+<li><strong><code>OnBootSec=</code></strong>: Triggers a specific
+duration after the kernel has booted.</li>
+<li><strong><code>OnStartupSec=</code></strong>: Triggers relative to
+when the systemd service manager itself initialized.</li>
+<li><strong><code>OnUnitActiveSec=</code></strong>: Schedules a task
+relative to the moment the associated service was last activated.</li>
+<li><strong><code>OnUnitInactiveSec=</code></strong>: Schedules a task
+relative to when the associated service finished its last execution,
+preventing task overlaps if a job runs longer than expected.</li>
+</ul>
+<p>Multiple timing constraints can be combined in a single
+<code>.timer</code> file, allowing jobs to run at boot and subsequently
+repeat at regular intervals:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Unit]</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Description</span><span class="ot">=</span><span class="st">Run maintenance script periodically</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">[Timer]</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="dt">OnBootSec</span><span class="ot">=</span><span class="st">15min</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="dt">OnUnitActiveSec</span><span class="ot">=</span><span class="st">1d</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="dt">Persistent</span><span class="ot">=</span><span class="kw">true</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">[Install]</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="dt">WantedBy</span><span class="ot">=</span><span class="st">timers.target</span></span></code></pre></div>
+<h2 id="transient-timers-with-systemd-run">Transient Timers with
+systemd-run</h2>
+<p>For ad-hoc tasks or command-line scripting where creating persistent
+unit files on the filesystem is unnecessary, Debian users can generate
+<strong>transient timers</strong> via the <code>systemd-run</code>
+utility.</p>
+<p>Transient timers create temporary timer and service units dynamically
+in memory:</p>
+<ul>
+<li>Relative execution:
+<code>systemd-run --on-active="2h" /usr/local/bin/backup.sh</code></li>
+<li>Calendar execution:
+<code>systemd-run --on-calendar="daily" /usr/local/bin/cleanup.sh</code></li>
+</ul>
+<h2 id="managing-and-auditing-timers">Managing and Auditing Timers</h2>
+<p>Systemd includes native tooling to inspect, track, and monitor
+scheduled jobs without parsing disparate crontab files or user
+tables.</p>
+<ul>
+<li><strong>View active timers:</strong> Run
+<code>systemctl list-timers</code> to display all active timers, their
+next scheduled run time, the time elapsed since their last execution,
+and their associated service units.</li>
+<li><strong>View execution logs:</strong> Run
+<code>journalctl -u service-name.service</code> to review dedicated
+stdout, stderr, and failure codes for the scheduled job.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

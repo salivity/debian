@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Maintainer vs Debian Developer Differences - debian</title>
+    <meta name="description" content="In the Debian ecosystem, the package workflow and governance structure rely heavily on two contributor tiers: Debian Maintainers (DMs) and Debian Developers (DDs). While both roles allow individuals to maintain and introduce software into the official Deb">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-maintainer-vs-debian-developer-differences">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Maintainer vs Debian Developer Differences - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-maintainer-vs-debian-developer-differences" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In the Debian ecosystem, the package workflow and governance structure rely heavily on two contributor tiers: Debian Maintainers (DMs) and Debian Developers (DDs). While both roles allow individuals to maintain and introduce software into the official Deb" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-maintainer-vs-debian-developer-differences">Debian
+Maintainer vs Debian Developer Differences</h1>
+<p>In the Debian ecosystem, the package workflow and governance
+structure rely heavily on two contributor tiers: Debian Maintainers
+(DMs) and Debian Developers (DDs). While both roles allow individuals to
+maintain and introduce software into the official Debian archives, they
+fundamentally differ in their package upload privileges, access to
+project infrastructure, onboarding rigor, and governance rights within
+the Debian Project.</p>
+<h3 id="package-upload-permissions">Package Upload Permissions</h3>
+<p>The primary operational difference between a Debian Maintainer and a
+Debian Developer lies in their level of autonomy when pushing packages
+to the Debian archive.</p>
+<ul>
+<li><strong>Debian Maintainer (DM):</strong> A DM has limited,
+package-specific upload permissions. They cannot upload arbitrary
+packages. Instead, a full Debian Developer must grant them explicit
+permission to upload specific packages that the DM actively maintains.
+Furthermore, DMs cannot introduce completely new source packages into
+the archive on their own; new packages must always be sponsored and
+initially uploaded by a Debian Developer.</li>
+<li><strong>Debian Developer (DD - Uploading):</strong> An uploading
+Debian Developer holds unrestricted access to the Debian archive. They
+can upload new packages directly, modify existing packages, and perform
+"Non-Maintainer Uploads" (NMUs) to fix critical bugs in other
+maintainers' packages across the distribution. Additionally, DDs have
+the authority to grant upload permissions to DMs and act as sponsors for
+new contributors.</li>
+</ul>
+<h3 id="governance-and-voting-rights">Governance and Voting Rights</h3>
+<p>Debian operates as a democratic project governed by the Debian
+Constitution, but voting privileges are strictly defined by membership
+status.</p>
+<ul>
+<li><strong>Debian Maintainer:</strong> DMs are not formal members of
+the Debian Project. Consequently, they do not possess voting rights.
+They cannot vote in General Resolutions (GRs), participate in the annual
+Debian Project Leader (DPL) elections, or stand as candidates for
+official project roles.</li>
+<li><strong>Debian Developer:</strong> DDs are recognized as official
+members of the Debian Project. Regardless of whether they are uploading
+developers or non-uploading developers (such as translators,
+documentation writers, or infrastructure administrators), all DDs have
+full voting rights on project decisions, constitutional amendments, and
+leadership elections.</li>
+</ul>
+<h3 id="infrastructure-access-and-identity">Infrastructure Access and
+Identity</h3>
+<p>Official Debian infrastructure access distinguishes maintainers from
+full project members.</p>
+<ul>
+<li><strong>Debian Maintainer:</strong> DMs do not receive an official
+<code>@debian.org</code> email alias. They also lack direct shell access
+to Debian Project machines and internal build infrastructure. Their
+cryptographic GPG keys reside in a distinct, limited-access keyring
+managed by Debian's archive software (<code>dak</code>).</li>
+<li><strong>Debian Developer:</strong> Upon acceptance, DDs are granted
+an <code>@debian.org</code> email address, access to the Debian LDAP
+database, and shell access to project servers and porter machines used
+for debugging architecture-specific issues. Their GPG keys are added to
+the authoritative Debian Developer keyring.</li>
+</ul>
+<h3 id="the-application-and-vetting-process">The Application and Vetting
+Process</h3>
+<p>Achieving DM status is designed to be a lightweight milestone,
+whereas becoming a DD requires extensive vetting.</p>
+<ul>
+<li><strong>Debian Maintainer Process:</strong> The DM process focuses
+strictly on basic technical competence and identity verification. An
+applicant must possess a valid GPG key signed by at least one Debian
+Developer and demonstrate prior maintenance work through sponsored
+uploads. Once endorsed by existing DDs, the Debian Account Managers
+(DAM) review and approve the application relatively quickly.</li>
+<li><strong>Debian Developer Process (New Member Process):</strong>
+Becoming a DD requires undergoing the comprehensive New Member (NM)
+process. Applicants work with an Application Manager (AM) to complete
+rigorous checks across multiple areas: identity verification, deep
+technical packaging competence, and an in-depth understanding of
+Debian's philosophy, including the Debian Social Contract and the Debian
+Free Software Guidelines (DFSG). Final approval must be granted by both
+the Front Desk and the Debian Account Managers.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

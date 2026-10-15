@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian DFSG Open Collaboration and Patch Distribution - debian</title>
+    <meta name="description" content="The Debian Free Software Guidelines (DFSG) define the criteria used to determine whether software qualifies as free software within the Debian operating system. Central to this framework are the principles governing derived works, author integrity, and no">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-dfsg-open-collaboration-and-patch-distribution">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian DFSG Open Collaboration and Patch Distribution - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-dfsg-open-collaboration-and-patch-distribution" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian Free Software Guidelines (DFSG) define the criteria used to determine whether software qualifies as free software within the Debian operating system. Central to this framework are the principles governing derived works, author integrity, and no" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-dfsg-open-collaboration-and-patch-distribution">Debian
+DFSG Open Collaboration and Patch Distribution</h1>
+<p>The Debian Free Software Guidelines (DFSG) define the criteria used
+to determine whether software qualifies as free software within the
+Debian operating system. Central to this framework are the principles
+governing derived works, author integrity, and non-discrimination, which
+together establish Debian’s rules for open collaboration and patch
+distribution. This article details how the DFSG balances developer
+collaboration with upstream code provenance, specifically examining
+Guideline 3 (Derived Works) and Guideline 4 (Integrity of The Author's
+Source Code).</p>
+<h3 id="the-foundation-of-collaboration-derived-works-dfsg-3">The
+Foundation of Collaboration: Derived Works (DFSG 3)</h3>
+<p>DFSG 3 establishes the baseline for open collaboration by requiring
+that licenses permit modifications and derived works. For software to be
+included in Debian, the license must allow users and downstream
+maintainers to study, modify, and redistribute the program under the
+same license terms as the original software. This ensures that any
+collaborator can fix bugs, add features, or port the application to new
+architectures without requiring special authorization from the original
+authors.</p>
+<h3 id="patch-distribution-and-author-integrity-dfsg-4">Patch
+Distribution and Author Integrity (DFSG 4)</h3>
+<p>While DFSG 3 guarantees the right to modify software, DFSG 4
+addresses how those modifications may be distributed when upstream
+authors wish to protect the integrity of their official release
+codebase.</p>
+<p>DFSG 4 allows licenses to restrict the redistribution of modified
+source code, but <em>only</em> under a strict compromise:</p>
+<ol type="1">
+<li><strong>Permission of Patch Files:</strong> The license may restrict
+source code from being distributed in directly modified form only if it
+explicitly permits the distribution of "patch files" alongside the
+pristine upstream source. These patches are designed to alter the
+program at build time.</li>
+<li><strong>Binary Distribution Rights:</strong> The license must
+explicitly allow the compilation and redistribution of binaries built
+from this patched source code. Downstream distributors cannot be barred
+from executing or distributing the resulting modified program.</li>
+<li><strong>Naming and Version Requirements:</strong> The license may
+mandate that modified or derived works carry a different name or version
+number from the original software. This protects the original author's
+reputation and prevents user confusion regarding official versus
+community-modified releases.</li>
+</ol>
+<h3 id="historical-context-and-practical-function">Historical Context
+and Practical Function</h3>
+<p>The patch distribution clause was created largely to accommodate
+established software with strict author-integrity requirements, such as
+Donald Knuth's TeX and Larry Wall's Perl. Knuth required that any
+modified version of TeX not be distributed under the name "TeX" unless
+it passed strict validation tests, ensuring standard rendering across
+platforms.</p>
+<p>By sanctioning the distribution of unmodified upstream tarballs
+combined with separate diff/patch files, the DFSG accommodates upstream
+provenance while safeguarding downstream freedom. In Debian's packaging
+workflow, this principle is visible in source packages, where the
+original source code (<code>.orig.tar.gz</code>) is maintained intact
+alongside Debian-specific modifications packaged as unified patches
+(typically via the <code>quilt</code> format).</p>
+<h3 id="inclusive-collaboration-dfsg-5-and-dfsg-6">Inclusive
+Collaboration (DFSG 5 and DFSG 6)</h3>
+<p>Open collaboration under the DFSG also relies on
+non-discrimination:</p>
+<ul>
+<li><strong>DFSG 5 (No Discrimination Against Persons or
+Groups):</strong> Licenses cannot exclude specific individuals,
+organizations, or nationalities from accessing or contributing to the
+codebase.</li>
+<li><strong>DFSG 6 (No Discrimination Against Fields of
+Endeavor):</strong> Licenses cannot restrict how the software is used,
+meaning commercial entities, academic researchers, and hobbyists all
+retain identical rights to patch, build, and redistribute the
+software.</li>
+</ul>
+<p>Together, these guidelines ensure that Debian's model of patch
+distribution remains decentralized, transparent, and universally
+accessible to all contributors.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

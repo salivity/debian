@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Coreutils Package and Standard Commands - debian</title>
+    <meta name="description" content="This article explores the GNU coreutils package within the Debian operating system, detailing its core function as the foundational userland toolkit and cataloging the essential command-line utilities it provides for system administration, file management">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-coreutils-package-and-standard-commands">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Coreutils Package and Standard Commands - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-coreutils-package-and-standard-commands" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores the GNU coreutils package within the Debian operating system, detailing its core function as the foundational userland toolkit and cataloging the essential command-line utilities it provides for system administration, file management" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-coreutils-package-and-standard-commands">Debian Coreutils
+Package and Standard Commands</h1>
+<p>This article explores the GNU <code>coreutils</code> package within
+the Debian operating system, detailing its core function as the
+foundational userland toolkit and cataloging the essential command-line
+utilities it provides for system administration, file management, and
+text processing.</p>
+<h2 id="the-function-of-the-coreutils-package-in-debian">The Function of
+the Coreutils Package in Debian</h2>
+<p>The <code>coreutils</code> (GNU Core Utilities) package contains the
+basic file, shell, and text manipulation utilities required by every
+Unix-like operating system. In Debian, <code>coreutils</code> is marked
+with the <code>Essential: yes</code> priority flag, meaning it is
+installed by default and cannot be removed without fundamentally
+breaking the operating system.</p>
+<p>The primary function of <code>coreutils</code> is to act as the
+bridge between user-space applications and the Linux kernel. It
+standardizes basic system interactions according to POSIX specifications
+while adding GNU-specific enhancements. These tools are indispensable
+for system booting, initialization scripts, package management routines,
+shell scripting, and day-to-day terminal operations.</p>
+<h2 id="standard-commands-introduced-by-coreutils">Standard Commands
+Introduced by Coreutils</h2>
+<p>The <code>coreutils</code> package supplies over one hundred standard
+command-line tools, typically categorized into three functional areas:
+file utilities, text utilities, and shell/system utilities.</p>
+<h3 id="1-file-and-directory-utilities">1. File and Directory
+Utilities</h3>
+<p>These commands allow users and automated scripts to create, inspect,
+modify, and delete files, directories, and file systems.</p>
+<ul>
+<li><strong><code>ls</code></strong>: Lists directory contents and file
+metadata.</li>
+<li><strong><code>cp</code></strong>: Copies files and directories.</li>
+<li><strong><code>mv</code></strong>: Moves or renames files and
+directories.</li>
+<li><strong><code>rm</code></strong>: Removes files or directories.</li>
+<li><strong><code>rmdir</code></strong>: Removes empty directories.</li>
+<li><strong><code>mkdir</code></strong>: Creates new directories.</li>
+<li><strong><code>touch</code></strong>: Changes file timestamps or
+creates empty files.</li>
+<li><strong><code>ln</code></strong>: Creates hard and symbolic links
+between files.</li>
+<li><strong><code>chmod</code></strong>: Changes file mode bits
+(permissions).</li>
+<li><strong><code>chown</code></strong>: Changes file owner and
+group.</li>
+<li><strong><code>chgrp</code></strong>: Changes group ownership of
+files.</li>
+<li><strong><code>dd</code></strong>: Converts and copies files at the
+block level.</li>
+<li><strong><code>df</code></strong>: Reports file system disk space
+usage.</li>
+<li><strong><code>du</code></strong>: Estimates file space usage across
+directories.</li>
+<li><strong><code>sync</code></strong>: Flushes file system buffers to
+persistent storage.</li>
+</ul>
+<h3 id="2-text-and-data-manipulation-utilities">2. Text and Data
+Manipulation Utilities</h3>
+<p>These programs are optimized for processing data streams, parsing
+logs, and transforming text directly within the terminal or shell
+pipelines.</p>
+<ul>
+<li><strong><code>cat</code></strong>: Concatenates and displays file
+contents.</li>
+<li><strong><code>head</code></strong>: Outputs the beginning section of
+files.</li>
+<li><strong><code>tail</code></strong>: Outputs the final section of
+files, including real-time monitoring.</li>
+<li><strong><code>cut</code></strong>: Removes sections from each line
+of files based on delimiters or byte positions.</li>
+<li><strong><code>paste</code></strong>: Merges lines of files
+sequentially.</li>
+<li><strong><code>sort</code></strong>: Sorts lines of text files
+alphabetically or numerically.</li>
+<li><strong><code>uniq</code></strong>: Reports or omits repeated lines
+in sorted data.</li>
+<li><strong><code>wc</code></strong>: Counts and prints newline, word,
+and byte counts.</li>
+<li><strong><code>tr</code></strong>: Translates, squeezes, or deletes
+specific characters from standard input.</li>
+<li><strong><code>split</code></strong>: Splits a file into pieces by
+line count or size.</li>
+<li><strong><code>csplit</code></strong>: Splits a file into sections
+determined by context lines.</li>
+<li><strong><code>md5sum</code></strong>,
+<strong><code>sha256sum</code></strong>: Computes and checks
+cryptographic message digests.</li>
+</ul>
+<h3 id="3-system-and-shell-utilities">3. System and Shell Utilities</h3>
+<p>These utilities provide environment inspection, process control,
+system information querying, and fundamental logic execution.</p>
+<ul>
+<li><strong><code>echo</code></strong>: Displays a line of text.</li>
+<li><strong><code>printf</code></strong>: Formats and prints data.</li>
+<li><strong><code>pwd</code></strong>: Prints the name of the current
+working directory.</li>
+<li><strong><code>whoami</code></strong>: Prints the effective user
+ID.</li>
+<li><strong><code>id</code></strong>: Prints real and effective user and
+group IDs.</li>
+<li><strong><code>uname</code></strong>: Prints operating system and
+kernel information.</li>
+<li><strong><code>date</code></strong>: Displays or sets the system date
+and time.</li>
+<li><strong><code>env</code></strong>: Runs a program in a modified
+environment or prints current environment variables.</li>
+<li><strong><code>printenv</code></strong>: Prints all or part of the
+environment.</li>
+<li><strong><code>sleep</code></strong>: Pauses execution for a
+specified amount of time.</li>
+<li><strong><code>timeout</code></strong>: Runs a command with a time
+limit.</li>
+<li><strong><code>nice</code></strong>: Runs a program with modified
+scheduling priority.</li>
+<li><strong><code>nohup</code></strong>: Runs a command immune to
+hangups, allowing processes to persist after logout.</li>
+<li><strong><code>true</code></strong> and
+<strong><code>false</code></strong>: Return exit statuses representing
+success or failure, respectively.</li>
+<li><strong><code>test</code></strong> / **`</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

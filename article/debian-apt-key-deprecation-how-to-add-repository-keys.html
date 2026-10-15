@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian apt-key Deprecation: How to Add Repository Keys - debian</title>
+    <meta name="description" content="The deprecation of apt-key fundamentally changes how the Debian operating system handles third-party package signatures, replacing a centralized, vulnerable trust store with isolated, repository-specific key management. Historically, adding a signing key">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-apt-key-deprecation-how-to-add-repository-keys">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian apt-key Deprecation: How to Add Repository Keys - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-apt-key-deprecation-how-to-add-repository-keys" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The deprecation of apt-key fundamentally changes how the Debian operating system handles third-party package signatures, replacing a centralized, vulnerable trust store with isolated, repository-specific key management. Historically, adding a signing key" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-apt-key-deprecation-how-to-add-repository-keys">Debian
+apt-key Deprecation: How to Add Repository Keys</h1>
+<p>The deprecation of <code>apt-key</code> fundamentally changes how the
+Debian operating system handles third-party package signatures,
+replacing a centralized, vulnerable trust store with isolated,
+repository-specific key management. Historically, adding a signing key
+made it trusted for <em>all</em> repositories on the system, creating
+significant security risks. With modern Debian releases (starting with
+Debian 11 Bullseye and fully enforced in Debian 12 Bookworm),
+administrators must download armored keys, store them in dedicated
+keyring directories such as <code>/etc/apt/keyrings/</code>, and
+explicitly link them to their respective repositories using the
+<code>signed-by</code> option.</p>
+<h3 id="why-apt-key-was-deprecated">Why apt-key Was Deprecated</h3>
+<p>The traditional <code>apt-key add</code> command imported
+cryptographic public keys into a single global keyring located at
+<code>/etc/apt/trusted.gpg</code> (or
+<code>/etc/apt/trusted.gpg.d/</code>). Under this architecture, APT did
+not map specific keys to specific repositories. If you imported a
+third-party repository's key to install a single application, that key
+gained the authority to validate packages from any other repository
+configured on the system, including Debian's base system repositories.
+If a third-party repository was compromised or acted maliciously, it
+could sign and distribute malicious updates for critical core utilities
+without triggering signature verification errors.</p>
+<h3 id="the-modern-key-installation-standard">The Modern Key
+Installation Standard</h3>
+<p>The modern approach isolates trust by ensuring each third-party key
+validates only packages originating from its specified source. This is
+achieved through a two-step process: storing the key file in a dedicated
+location and referencing it explicitly in the repository
+configuration.</p>
+<h4 id="1-storing-the-gpg-key">1. Storing the GPG Key</h4>
+<p>Instead of importing keys into the global APT keyring, keys are
+stored as standalone files. Recommended practices place system-managed
+keys in <code>/usr/share/keyrings/</code> and administrator-managed keys
+in <code>/etc/apt/keyrings/</code>.</p>
+<p>Keys must typically be stored in binary OpenPGP format (ending in
+<code>.gpg</code>) rather than ASCII-armored format (ending in
+<code>.asc</code>), although modern versions of APT can handle dearmored
+keys directly if configured correctly.</p>
+<p>To download, convert, and store a key in
+<code>/etc/apt/keyrings/</code>, use the following standard
+commands:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure the keyrings directory exists with secure permissions</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> install <span class="at">-m</span> 0755 <span class="at">-d</span> /etc/apt/keyrings</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Download and dearmor the key to the destination file</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://example.com/repo/KEY.gpg <span class="kw">|</span> <span class="fu">sudo</span> gpg <span class="at">--dearmor</span> <span class="at">-o</span> /etc/apt/keyrings/example-repo.gpg</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure read permissions for APT</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 0644 /etc/apt/keyrings/example-repo.gpg</span></code></pre></div>
+<h4 id="2-associating-the-key-with-the-repository">2. Associating the
+Key with the Repository</h4>
+<p>Once the key is stored, the repository configuration must point
+directly to it using the <code>signed-by</code> attribute.</p>
+<p><strong>Traditional One-Line Format (<code>.list</code>
+files):</strong></p>
+<p>In <code>/etc/apt/sources.list.d/example.list</code>, specify the
+path to the key inside square brackets:</p>
+<pre class="text"><code>deb [signed-by=/etc/apt/keyrings/example-repo.gpg] https://example.com/repo/ stable main</code></pre>
+<p><strong>Modern Deb822 Format (<code>.sources</code>
+files):</strong></p>
+<p>In <code>/etc/apt/sources.list.d/example.sources</code>, specify the
+path in the <code>Signed-By</code> field:</p>
+<pre class="text"><code>Types: deb
+URIs: https://example.com/repo/
+Suites: stable
+Components: main
+Signed-By: /etc/apt/keyrings/example-repo.gpg</code></pre>
+<h3 id="summary-of-changes">Summary of Changes</h3>
+<ul>
+<li><strong>Scope of Trust:</strong> Trust is scoped strictly to
+individual repositories rather than globally across the entire operating
+system.</li>
+<li><strong>Storage Location:</strong> Keys move from
+<code>/etc/apt/trusted.gpg</code> to individual files in
+<code>/etc/apt/keyrings/</code> or
+<code>/usr/share/keyrings/</code>.</li>
+<li><strong>Tooling:</strong> Deprecated <code>apt-key</code> wrappers
+are replaced by standard utilities like <code>curl</code>,
+<code>wget</code>, <code>gpg</code>, and <code>install</code>.</li>
+<li><strong>Configuration:</strong> Repository definitions explicitly
+dictate which GPG fingerprint or file validates their contents via the
+<code>signed-by</code> directive.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

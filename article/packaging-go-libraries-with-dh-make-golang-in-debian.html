@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packaging Go Libraries with dh-make-golang in Debian - debian</title>
+    <meta name="description" content="This article explains how the dh-make-golang tool automates the creation of Debian packaging files for Go (Golang) libraries. By inspecting upstream Go source code, parsing module definitions, and automatically resolving dependencies into Debian package e">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/packaging-go-libraries-with-dh-make-golang-in-debian">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Packaging Go Libraries with dh-make-golang in Debian - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/packaging-go-libraries-with-dh-make-golang-in-debian" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how the dh-make-golang tool automates the creation of Debian packaging files for Go (Golang) libraries. By inspecting upstream Go source code, parsing module definitions, and automatically resolving dependencies into Debian package e" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="packaging-go-libraries-with-dh-make-golang-in-debian">Packaging
+Go Libraries with dh-make-golang in Debian</h1>
+<p>This article explains how the <code>dh-make-golang</code> tool
+automates the creation of Debian packaging files for Go (Golang)
+libraries. By inspecting upstream Go source code, parsing module
+definitions, and automatically resolving dependencies into Debian
+package equivalents, the tool significantly streamlines the workflow for
+maintaining Go software within the Debian ecosystem.</p>
+<h3 id="source-code-retrieval-and-inspection">Source Code Retrieval and
+Inspection</h3>
+<p>The packaging workflow begins when a maintainer runs
+<code>dh-make-golang make &lt;canonical-go-import-path&gt;</code>. The
+tool clones the target Go repository using Git and inspects its internal
+configuration. It reads the Go module definition file
+(<code>go.mod</code>) or scans Go source code files (<code>.go</code>)
+to detect package metadata, including the project's canonical import
+path, build tags, and test requirements.</p>
+<h3 id="automated-dependency-mapping">Automated Dependency Mapping</h3>
+<p>Go projects rely on remote import paths (such as
+<code>github.com/user/repo</code>), whereas Debian manages dependencies
+through its native package archive. <code>dh-make-golang</code> bridges
+this gap through automated translation:</p>
+<ul>
+<li><strong>Name Translation:</strong> It converts canonical Go import
+paths into standardized Debian source and binary package names. By
+convention, Go libraries in Debian use the prefix
+<code>golang-&lt;vendor&gt;-&lt;project&gt;-dev</code>.</li>
+<li><strong>Archive Querying:</strong> The tool queries the Debian
+package archive and the Debian Go team's metadata repositories to check
+if upstream dependencies already exist as packaged Debian
+libraries.</li>
+<li><strong>Dependency Declaration:</strong> Identified dependencies are
+automatically mapped and inserted into the <code>Build-Depends</code>
+and <code>Depends</code> fields of the generated Debian control file. If
+a dependency is missing from Debian, the tool notifies the maintainer so
+it can be packaged beforehand.</li>
+</ul>
+<h3 id="generation-of-the-debian-directory">Generation of the
+<code>debian/</code> Directory</h3>
+<p>Creating the packaging skeleton manually is error-prone.
+<code>dh-make-golang</code> generates a complete, policy-compliant
+<code>debian/</code> directory containing all essential files:</p>
+<ol type="1">
+<li><p><strong><code>debian/control</code>:</strong> Contains package
+metadata, including standard build dependencies, runtime dependencies,
+maintainer information (typically the Debian Go Packaging Team), Vcs
+repository URLs, and extended package descriptions extracted from the
+upstream <code>README</code> or Go documentation.</p></li>
+<li><p><strong><code>debian/rules</code>:</strong> Produces a minimal
+Makefile configured to use Debian's <code>debhelper</code> engine
+alongside the Go build system plugin:</p>
+<pre class="make"><code>#!/usr/bin/make -f
+%:
+ dh $@ --buildsystem=golang --with=golang</code></pre>
+<p>This configuration instructs Debian build daemons to compile, test,
+and install the library in accordance with Debian Go team
+standards.</p></li>
+<li><p><strong><code>debian/copyright</code>:</strong> Scans license
+files, source headers, and repository roots to generate a
+machine-readable <code>DEP-5</code> compliant copyright file,
+identifying software licenses (such as Apache, MIT, or BSD) and
+copyright holders.</p></li>
+<li><p><strong><code>debian/changelog</code>:</strong> Automatically
+initializes a changelog entry targeting the <code>UNRELEASED</code>
+distribution, referencing the relevant "Intent to Package" (ITP) bug
+number filed in Debian’s Bug Tracking System.</p></li>
+</ol>
+<h3 id="integration-with-debian-git-workflows">Integration with Debian
+Git Workflows</h3>
+<p>Beyond flat file generation, <code>dh-make-golang</code> can
+automatically configure a Git repository using
+<code>git-buildpackage</code> conventions. It sets up standard branching
+structures (<code>upstream</code>,
+<code>master</code>/<code>debian/sid</code>, and
+<code>pristine-tar</code>), imports upstream tags, and commits the
+generated <code>debian/</code> directory on top of the imported source
+tree. This prepares the Go library for immediate review, building with
+tools like <code>sbuild</code> or <code>pbuilder</code>, and
+collaborative maintenance within the Debian Go packaging
+infrastructure.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

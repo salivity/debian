@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using deborphan to Remove Unused Libraries in Debian - debian</title>
+    <meta name="description" content="This article explains the role of deborphan in maintaining a Debian system by identifying and removing redundant shared libraries. Over time, package installations and removals can leave behind library files that are no longer required by any active softw">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/using-deborphan-to-remove-unused-libraries-in-debian">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using deborphan to Remove Unused Libraries in Debian - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/using-deborphan-to-remove-unused-libraries-in-debian" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the role of deborphan in maintaining a Debian system by identifying and removing redundant shared libraries. Over time, package installations and removals can leave behind library files that are no longer required by any active softw" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-deborphan-to-remove-unused-libraries-in-debian">Using
+deborphan to Remove Unused Libraries in Debian</h1>
+<p>This article explains the role of <code>deborphan</code> in
+maintaining a Debian system by identifying and removing redundant shared
+libraries. Over time, package installations and removals can leave
+behind library files that are no longer required by any active software,
+wasting disk space and complicating system maintenance. The following
+sections cover what orphaned packages are, how <code>deborphan</code>
+detects them, how to safely delete them, and how the tool complements
+native package management utilities.</p>
+<h3 id="understanding-orphaned-libraries-in-debian">Understanding
+Orphaned Libraries in Debian</h3>
+<p>When software is installed on Debian, package managers like
+<code>apt</code> install both the requested program and its required
+shared libraries. If the main application is later removed, its
+supporting libraries can sometimes remain on the storage
+drive—especially when removals are performed using low-level tools such
+as <code>dpkg</code> or when dependencies are altered across
+distribution upgrades. An "orphaned" library is a package, typically
+located in the <code>libs</code> or <code>oldlibs</code> package
+sections, that has no other installed package depending on it.</p>
+<h3 id="how-deborphan-operates">How deborphan Operates</h3>
+<p>The <code>deborphan</code> utility scans the Debian package database
+located at <code>/var/lib/dpkg/status</code>. By default, it restricts
+its search to the library sections (<code>libs</code> and
+<code>oldlibs</code>) and cross-references them against the reverse
+dependencies of all currently installed packages.</p>
+<p>If <code>deborphan</code> finds a library package that is not listed
+as a dependency, recommendation, or suggestion for any other installed
+software, it flags the package as orphaned. Because it evaluates the
+actual dependency tree rather than metadata tracking installation
+origins, it can detect unneeded files that standard package management
+logs might overlook.</p>
+<h3 id="basic-usage-and-identification">Basic Usage and
+Identification</h3>
+<p>To use the tool, it must first be installed:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install deborphan</span></code></pre></div>
+<p>Running <code>deborphan</code> without any flags outputs a list of
+orphaned library packages:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">deborphan</span></span></code></pre></div>
+<p>To see the disk space consumed by these packages, you can use the
+<code>-s</code> (show size) flag:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">deborphan</span> <span class="at">-s</span></span></code></pre></div>
+<h3 id="removing-orphaned-libraries">Removing Orphaned Libraries</h3>
+<p>Once orphaned packages are identified, they can be safely purged from
+the system. A common approach is piping the output of
+<code>deborphan</code> directly into <code>apt-get</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get purge <span class="va">$(</span><span class="ex">deborphan</span><span class="va">)</span></span></code></pre></div>
+<p>Because removing one set of libraries may cause another parent
+library to become orphaned, the process often needs to be repeated until
+<code>deborphan</code> returns no output. Alternatively, Debian provides
+<code>orphaner</code>, a menu-driven front end included with the
+<code>deborphan</code> package, which allows administrators to
+interactively select which packages to keep or delete.</p>
+<h3 id="managing-false-positives-with-keep-files">Managing False
+Positives with Keep Files</h3>
+<p>Some libraries are installed for manual compiling, dynamic runtime
+loading (such as plugins), or proprietary software not tracked by
+Debian’s package manager. Removing these can break software
+functionality.</p>
+<p><code>deborphan</code> allows users to whitelist specific packages to
+prevent them from appearing in orphan scans. To exclude a package
+permanently:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> deborphan <span class="at">-A</span> package-name</span></code></pre></div>
+<p>This updates the <code>/var/lib/deborphan/keep</code> file. To view
+the current exclusion list, run:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">deborphan</span> <span class="at">--list-keep</span></span></code></pre></div>
+<h3 id="deborphan-vs-apt-autoremove">deborphan vs. apt autoremove</h3>
+<p>Modern versions of <code>apt</code> include the
+<code>apt autoremove</code> command, which removes packages that were
+automatically installed to satisfy dependencies and are no longer
+needed. However, <code>apt autoremove</code> relies on the
+"automatically installed" flag assigned at the time of installation.</p>
+<p>If a package was installed manually, installed via
+<code>dpkg -i</code>, or had its flags altered during an upgrade,
+<code>apt autoremove</code> will ignore it. <code>deborphan</code> fills
+this gap by directly inspecting the dependency relationships in the
+package database, ensuring that unused libraries are detected regardless
+of how they entered the system.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

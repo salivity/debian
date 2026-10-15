@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autopkgtest Role in Debian Package Verification - debian</title>
+    <meta name="description" content="This article explores how autopkgtest functions as an automated testing framework within the Debian operating system to validate software packages in their installed environments. It covers the mechanism of Debian Enhancement Proposal 8 (DEP-8), how tests">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/autopkgtest-role-in-debian-package-verification">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Autopkgtest Role in Debian Package Verification - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/autopkgtest-role-in-debian-package-verification" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores how autopkgtest functions as an automated testing framework within the Debian operating system to validate software packages in their installed environments. It covers the mechanism of Debian Enhancement Proposal 8 (DEP-8), how tests" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="autopkgtest-role-in-debian-package-verification">Autopkgtest
+Role in Debian Package Verification</h1>
+<p>This article explores how <code>autopkgtest</code> functions as an
+automated testing framework within the Debian operating system to
+validate software packages in their installed environments. It covers
+the mechanism of Debian Enhancement Proposal 8 (DEP-8), how tests are
+isolated across different virtualization backends, its critical gating
+role in Debian Continuous Integration (Debian CI), and how
+reverse-dependency testing prevents system-wide regressions before
+packages migrate to the Debian Testing branch.</p>
+<h3 id="understanding-as-installed-package-testing">Understanding
+As-Installed Package Testing</h3>
+<p>Traditional package compilation often includes build-time unit tests,
+but passing build tests does not guarantee that a package functions
+correctly once unpackaged, configured, and integrated into a running
+system. Build environments frequently have access to local source trees,
+intermediate build artifacts, and development headers that are omitted
+from final binary packages.</p>
+<p><code>autopkgtest</code> addresses this gap by executing tests
+against the <em>as-installed</em> package. Instead of validating code
+inside a source tree, it installs the compiled <code>.deb</code>
+binaries into a clean, isolated environment, sets up runtime
+dependencies, and verifies that public binaries, libraries, services,
+and system integrations perform as expected under real-world
+conditions.</p>
+<h3 id="the-dep-8-specification-and-test-definitions">The DEP-8
+Specification and Test Definitions</h3>
+<p>The framework relies on the DEP-8 specification, which defines a
+standardized format for package test metadata. Package maintainers
+declare their tests within the source package under
+<code>debian/tests/control</code>.</p>
+<p>This configuration file specifies:</p>
+<ul>
+<li><strong>Test scripts:</strong> The commands or scripts to execute
+(typically stored in <code>debian/tests/</code>).</li>
+<li><strong>Test dependencies (<code>Depends</code>):</strong> Packages
+needed to run the test suite, such as test runners, mock services, or
+compilers.</li>
+<li><strong>Restrictions (<code>Restrictions</code>):</strong> Flags
+indicating special requirements, such as requiring root access
+(<code>needs-root</code>), allowing network access (<code>flaky</code>),
+or isolating the environment completely.</li>
+</ul>
+<p>By formalizing this structure, <code>autopkgtest</code> provides a
+uniform interface to run disparate test suites across thousands of
+distinct Debian packages.</p>
+<h3 id="isolation-and-virtualization-backends">Isolation and
+Virtualization Backends</h3>
+<p>To prevent tests from modifying the host system and to ensure
+consistent, reproducible results, <code>autopkgtest</code> executes test
+suites inside dedicated, disposable testbeds. It supports multiple
+virtualization and containerization backends:</p>
+<ul>
+<li><strong>QEMU:</strong> Full system virtualization providing complete
+hardware isolation, essential for tests that alter kernel states,
+configure filesystems, or modify system boot processes.</li>
+<li><strong>LXC/LXD and Incus:</strong> Container-based environments
+offering low overhead and rapid startup times for general user-space
+testing.</li>
+<li><strong>Schroot:</strong> Chroot environments used for lightweight
+testing scenarios that do not require full system virtualization or root
+isolation.</li>
+<li><strong>Null backend:</strong> Executes directly on the host,
+primarily utilized for rapid local debugging by maintainers.</li>
+</ul>
+<p>After a test run completes, the backend resets to a clean snapshot,
+ensuring that residual files or altered configurations from one test do
+not affect subsequent runs.</p>
+<h3 id="integration-with-debian-ci-and-package-migration">Integration
+with Debian CI and Package Migration</h3>
+<p><code>autopkgtest</code> is the underlying engine for the Debian
+Continuous Integration platform (debci). Whenever a package maintainer
+uploads a new version to the <code>unstable</code> (Sid) repository,
+Debian CI automatically triggers <code>autopkgtest</code> runs across
+supported CPU architectures.</p>
+<p>The test results directly influence package migration:</p>
+<ul>
+<li><strong>Migration Gating:</strong> Debian's release management tool,
+<code>Britney</code>, uses <code>autopkgtest</code> results as a quality
+gate. A package must pass its test suite before it is allowed to migrate
+from <code>unstable</code> to <code>testing</code>.</li>
+<li><strong>Regression Detection:</strong> If a package update causes
+previously passing tests to fail, migration to <code>testing</code> is
+blocked until the maintainer resolves the failure.</li>
+</ul>
+<h3 id="reverse-dependency-testing">Reverse-Dependency Testing</h3>
+<p>One of the most powerful capabilities of <code>autopkgtest</code> in
+Debian is reverse-dependency testing. When a shared library, runtime, or
+core utility is updated, <code>autopkgtest</code> can run the test
+suites of all packages that depend on that updated component.</p>
+<p>For example, if a fundamental library like <code>glibc</code> or a
+language runtime like <code>python3</code> receives an update in
+<code>unstable</code>, Debian CI triggers tests for the dependent
+applications using the new version. If an update breaks API
+compatibility or introduces behavioral changes, the failures are
+detected immediately in downstream packages. This mechanism isolates
+breakages early, preventing unstable changes from cascading into the
+Debian testing and stable releases.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

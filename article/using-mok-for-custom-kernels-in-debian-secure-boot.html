@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using MOK for Custom Kernels in Debian Secure Boot - debian</title>
+    <meta name="description" content="UEFI Secure Boot ensures that an operating system loads only cryptographically validated binaries, which natively prevents user-compiled or modified kernels from booting. In Debian, the Machine Owner Key (MOK) bridges this gap by acting as an administrato">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/using-mok-for-custom-kernels-in-debian-secure-boot">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using MOK for Custom Kernels in Debian Secure Boot - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/using-mok-for-custom-kernels-in-debian-secure-boot" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="UEFI Secure Boot ensures that an operating system loads only cryptographically validated binaries, which natively prevents user-compiled or modified kernels from booting. In Debian, the Machine Owner Key (MOK) bridges this gap by acting as an administrato" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-mok-for-custom-kernels-in-debian-secure-boot">Using MOK
+for Custom Kernels in Debian Secure Boot</h1>
+<p>UEFI Secure Boot ensures that an operating system loads only
+cryptographically validated binaries, which natively prevents
+user-compiled or modified kernels from booting. In Debian, the Machine
+Owner Key (MOK) bridges this gap by acting as an
+administrator-controlled trust anchor within the <code>shim</code>
+bootloader infrastructure. This article explains how MOK enables the
+execution of custom Linux kernels on Debian systems, the cryptographic
+mechanism behind its validation process, and how it preserves platform
+security without disabling Secure Boot.</p>
+<h3 id="the-secure-boot-challenge-with-custom-kernels">The Secure Boot
+Challenge with Custom Kernels</h3>
+<p>Under standard UEFI Secure Boot, the system firmware relies on
+authorized keys stored in non-volatile RAM (NVRAM), typically restricted
+to Microsoft and hardware OEM certificates. Debian achieves
+compatibility with Secure Boot by using a first-stage bootloader
+(<code>shimx64.efi</code>) signed by Microsoft's Third Party UEFI CA,
+which subsequently validates Debian's official bootloader (GRUB) and
+stock kernels signed by Debian's official key.</p>
+<p>When an administrator compiles a custom kernel, builds out-of-tree
+kernel modules (such as proprietary drivers or custom patches), or
+modifies an existing kernel image, Debian's official signature is
+absent. The firmware and standard boot chain reject the binary, halting
+the boot process to prevent unauthorized code execution.</p>
+<h3 id="the-role-and-architecture-of-the-machine-owner-key">The Role and
+Architecture of the Machine Owner Key</h3>
+<p>The Machine Owner Key is an X.509 certificate managed directly by the
+system owner rather than hardware vendors or Debian maintainers. It
+operates within the <code>shim</code> bootloader layer rather than the
+UEFI platform key hierarchy (PK, KEK, db), avoiding the risk of bricking
+firmware or modifying complex UEFI NVRAM databases directly.</p>
+<p>The primary functions of MOK in custom kernel validation include:</p>
+<ul>
+<li><strong>Local Trust Anchor:</strong> MOK serves as a secondary
+signature verification database specifically for <code>shim</code>. When
+<code>shim</code> checks the validity of GRUB and subsequent kernel
+images, it references both the embedded distribution keys and the keys
+enrolled in the MOK database.</li>
+<li><strong>Preserving Firmware Integrity:</strong> Because MOK
+operations are managed by <code>shim</code> and its companion utility
+<code>MokManager</code> (<code>mmx64.efi</code>), users do not need to
+replace firmware-level platform keys or disable Secure Boot
+globally.</li>
+<li><strong>Kernel and Module Validation:</strong> In addition to
+validating the custom <code>vmlinuz</code> binary during the initial
+boot phase, Debian uses the MOK database at runtime. If the kernel is
+built with module signature verification enabled
+(<code>CONFIG_MODULE_SIG</code>), the kernel imports keys from the MOK
+list into its system keyring, allowing custom or DKMS-compiled kernel
+modules to load seamlessly.</li>
+</ul>
+<h3 id="how-debian-validates-a-custom-kernel-via-mok">How Debian
+Validates a Custom Kernel via MOK</h3>
+<p>Validating a custom kernel requires establishing a trusted signing
+pipeline between the administrator and the MOK database:</p>
+<ol type="1">
+<li><strong>Key Generation:</strong> The administrator generates an
+asymmetric RSA or ECDSA key pair (a private signing key and an X.509
+public certificate) on the Debian system.</li>
+<li><strong>Signing the Kernel:</strong> The custom kernel image is
+signed using the private key and tools such as <code>sbsign</code>. This
+embeds a digital signature directly into the PE/COFF header of the
+kernel binary.</li>
+<li><strong>Enrollment Request:</strong> The public certificate is
+submitted to the MOK infrastructure using the user-space utility
+<code>mokutil --import</code>. This stages the key in a temporary,
+protected UEFI variable.</li>
+<li><strong>Physical Presence Verification:</strong> Upon reboot,
+control is handed to <code>MokManager</code>. To prevent malware from
+silently registering its own signing keys from user space,
+<code>MokManager</code> requires a physically present user to confirm
+the key enrollment and input a one-time password set during the
+<code>mokutil</code> command.</li>
+<li><strong>Boot-Time Verification:</strong> Once enrolled, the key is
+permanently stored in the MOK list (held in NVRAM). On every subsequent
+boot, <code>shim</code> evaluates the custom kernel's embedded signature
+against this enrolled certificate. If the signature matches, the kernel
+executes with the full protection of Secure Boot active.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

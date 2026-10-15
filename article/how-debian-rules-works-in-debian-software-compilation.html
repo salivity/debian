@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How debian/rules Works in Debian Software Compilation - debian</title>
+    <meta name="description" content="The debian/rules file is the central automation script responsible for driving the compilation, testing, and packaging of software within Debian and Debian-based operating systems. Serving as an executable Makefile, it dictates the exact instructions that">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-rules-works-in-debian-software-compilation">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How debian/rules Works in Debian Software Compilation - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-rules-works-in-debian-software-compilation" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The debian/rules file is the central automation script responsible for driving the compilation, testing, and packaging of software within Debian and Debian-based operating systems. Serving as an executable Makefile, it dictates the exact instructions that" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debianrules-works-in-debian-software-compilation">How
+debian/rules Works in Debian Software Compilation</h1>
+<p>The <code>debian/rules</code> file is the central automation script
+responsible for driving the compilation, testing, and packaging of
+software within Debian and Debian-based operating systems. Serving as an
+executable Makefile, it dictates the exact instructions that
+package-building tools follow to transform raw upstream source code into
+binary <code>.deb</code> packages. This article explains how the file is
+structured, how it executes standard build targets, and how modern
+package maintainers utilize helper tools to streamline the build
+process.</p>
+<h2 id="executable-makefile-architecture">Executable Makefile
+Architecture</h2>
+<p>At its core, <code>debian/rules</code> is an executable script
+written using GNU Make syntax. It begins with the standard shebang:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/make -f</span></span></code></pre></div>
+<p>Because it is marked as executable
+(<code>chmod +x debian/rules</code>), build utilities like
+<code>dpkg-buildpackage</code> can invoke it directly. The Debian Policy
+Manual requires <code>debian/rules</code> to support a set of mandatory
+standard targets:</p>
+<ul>
+<li><strong><code>clean</code></strong>: Reverses any compilation and
+configuration steps, returning the source directory to an unmodified,
+pristine state.</li>
+<li><strong><code>build</code></strong>: Compiles the source code and
+documentation. This is often split into <code>build-arch</code>
+(architecture-dependent binaries) and <code>build-indep</code>
+(architecture-independent files, such as documentation or data).</li>
+<li><strong><code>binary</code></strong>: Gathers compiled files, places
+them into package staging directories, runs post-processing commands
+(like stripping debug symbols or compressing man pages), and produces
+the final <code>.deb</code> packages. This is similarly split into
+<code>binary-arch</code> and <code>binary-indep</code>.</li>
+</ul>
+<h2 id="modern-execution-with-debhelper-dh">Modern Execution with
+Debhelper (<code>dh</code>)</h2>
+<p>In modern Debian packaging, maintainers rarely write raw Make recipes
+for standard compilation steps. Instead, they rely on Debhelper's
+<code>dh</code> sequencer. A typical modern <code>debian/rules</code>
+file often consists of just three lines:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/make -f</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dv">%:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>dh <span class="ch">$@</span></span></code></pre></div>
+<p>The wildcard rule (<code>%</code>) passes every target requested by
+the build environment to the <code>dh</code> sequencer. When
+<code>dpkg-buildpackage</code> calls <code>debian/rules build</code>,
+the sequencer detects the upstream build system (such as CMake, Meson,
+Autotools, or Python setuptools) and automatically executes the
+appropriate configure, build, and test commands in the correct
+order.</p>
+<h2 id="customization-via-overrides">Customization via Overrides</h2>
+<p>When custom compilation steps, compiler flags, or non-standard
+configurations are required, the file uses override targets. Maintainers
+override specific Debhelper phases by creating rules prefixed with
+<code>override_</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/make -f</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dv">%:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>dh <span class="ch">$@</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="dv">override_dh_auto_configure:</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>dh_auto_configure -- -DENABLE_CUSTOM_FEATURE=ON</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="dv">override_dh_auto_test:</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Skip test suite during compilation</span></span></code></pre></div>
+<p>In this workflow, <code>dh</code> will call the custom
+<code>override_dh_auto_configure</code> recipe instead of the default
+configuration command, passing the designated build flags directly to
+upstream tools like CMake.</p>
+<h2 id="role-in-the-build-lifecycle">Role in the Build Lifecycle</h2>
+<p>During an end-to-end package build, higher-level build tools interact
+with <code>debian/rules</code> in a defined sequence:</p>
+<ol type="1">
+<li><strong>Preparation</strong>: The environment sets standard build
+variables (like <code>CFLAGS</code> and <code>LDFLAGS</code> via
+<code>dpkg-buildflags</code>).</li>
+<li><strong>Cleaning</strong>: The <code>clean</code> target executes to
+ensure a consistent starting state.</li>
+<li><strong>Compilation</strong>: The <code>build</code> target runs
+upstream compilation steps inside the source directory.</li>
+<li><strong>Installation</strong>: Binaries are installed not into the
+host root directory, but into a temporary staging tree (typically
+<code>debian/tmp</code> or
+<code>debian/&lt;package-name&gt;</code>).</li>
+<li><strong>Packaging</strong>: The <code>binary</code> target computes
+runtime shared-library dependencies, generates control files, and
+invokes <code>dpkg-deb</code> to generate the final binary
+packages.</li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

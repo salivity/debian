@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using snapshot.debian.org to Restore Historical Packages - debian</title>
+    <meta name="description" content="This article explains how Debian administrators can utilize snapshot.debian.org to roll back package upgrades, reproduce historical system states, and resolve package regressions. By acting as a comprehensive, timestamp-indexed archive of the Debian opera">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/using-snapshot-debian-org-to-restore-historical-packages">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Using snapshot.debian.org to Restore Historical Packages - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/using-snapshot-debian-org-to-restore-historical-packages" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how Debian administrators can utilize snapshot.debian.org to roll back package upgrades, reproduce historical system states, and resolve package regressions. By acting as a comprehensive, timestamp-indexed archive of the Debian opera" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="using-snapshotdebianorg-to-restore-historical-packages">Using
+snapshot.debian.org to Restore Historical Packages</h1>
+<p>This article explains how Debian administrators can utilize
+snapshot.debian.org to roll back package upgrades, reproduce historical
+system states, and resolve package regressions. By acting as a
+comprehensive, timestamp-indexed archive of the Debian operating system,
+the snapshot service allows users to view and download any historical
+package or pin their Advanced Package Tool (APT) configuration to an
+exact point in time.</p>
+<h3 id="understanding-snapshotdebianorg">Understanding
+snapshot.debian.org</h3>
+<p>Debian maintains standard mirrors that only provide the current
+stable, testing, or unstable releases, pruning obsolete packages when
+newer versions arrive. In contrast, snapshot.debian.org stores all
+official packages, source files, and repository metadata dating back to
+2005.</p>
+<p>Instead of updating in place, the service catalogs repository
+snapshots using an ISO 8601-like timestamp format:
+<code>YYYYMMDDTHHMMSSZ</code>. Every daily repository state is preserved
+permanently with its matching Release files and package manifests,
+allowing systems to reproduce any past environment accurately.</p>
+<h3 id="configuring-apt-for-a-specific-point-in-time">Configuring APT
+for a Specific Point in Time</h3>
+<p>To restore a system to a prior state or access a legacy package,
+administrators must configure APT to read from the snapshot archive
+rather than current mirrors.</p>
+<ol type="1">
+<li><p><strong>Locate the Target Timestamp</strong>: Determine the exact
+date and time needed. For example, to revert to the state on April 10,
+2023, at 00:00:00 UTC, the timestamp is
+<code>20230410T000000Z</code>.</p></li>
+<li><p><strong>Update Repository Sources</strong>: Edit
+<code>/etc/apt/sources.list</code> (or create a file in
+<code>/etc/apt/sources.list.d/</code>) to point to the snapshot archive
+URL matching the distribution and timestamp:</p>
+<pre><code>deb http://snapshot.debian.org/archive/debian/20230410T000000Z/ bookworm main
+deb http://snapshot.debian.org/archive/debian-security/20230410T000000Z/ bookworm-security main</code></pre></li>
+<li><p><strong>Bypass Release Expiration Checks</strong>: APT verifies
+that repository <code>Release</code> files are not expired. Because
+snapshot archives are by definition historical, standard verification
+will reject them. To bypass this expiration check, create an APT
+configuration rule:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&#39;Acquire::Check-Valid-Until &quot;false&quot;;&#39;</span> <span class="op">&gt;</span> /etc/apt/apt.conf.d/80snapshot</span></code></pre></div></li>
+<li><p><strong>Synchronize Package Indexes</strong>: Refresh local
+package indexes against the specified historical mirror:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-get</span> update</span></code></pre></div></li>
+</ol>
+<h3 id="restoring-and-downgrading-packages">Restoring and Downgrading
+Packages</h3>
+<p>Once APT is pointed at the snapshot:</p>
+<ul>
+<li><p><strong>Install a Specific Historical Version</strong>: To
+install or downgrade an isolated package without changing the rest of
+the system:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-get</span> install package-name=version-number</span></code></pre></div></li>
+<li><p><strong>Perform a Full System Rollback</strong>: If pinning is
+configured in <code>/etc/apt/preferences</code> to prioritize the
+snapshot repository with a pin-priority above 1000, running
+<code>apt-get dist-upgrade</code> forces APT to downgrade all installed
+packages to match that historical date precisely.</p></li>
+<li><p><strong>Prevent Subsequent Upgrades</strong>: Once downgraded,
+hold the package to prevent standard upgrades from overwriting it
+later:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-mark</span> hold package-name</span></code></pre></div></li>
+</ul>
+<h3 id="key-administrative-use-cases">Key Administrative Use Cases</h3>
+<ul>
+<li><strong>Bug and Regression Testing</strong>: Isolating whether a bug
+was introduced by an upstream update by stepping through historical
+repository releases day by day.</li>
+<li><strong>Deterministic Build Environments</strong>: Ensuring
+continuous integration (CI) and container build processes always
+download identical dependency trees over time.</li>
+<li><strong>Emergency Rollbacks</strong>: Rapidly recovering operational
+capability when a mission-critical package update breaks compatibility
+or system stability.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Merged /usr Controversy Explained - debian</title>
+    <meta name="description" content="The adoption of the merged /usr filesystem layout in Debian sparked intense debate among developers, revolving around package manager safety, filesystem aliasing bugs, and project governance. While the initiative modernized Debian by consolidating system">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-merged-usr-controversy-explained">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Merged /usr Controversy Explained - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-merged-usr-controversy-explained" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The adoption of the merged /usr filesystem layout in Debian sparked intense debate among developers, revolving around package manager safety, filesystem aliasing bugs, and project governance. While the initiative modernized Debian by consolidating system" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-merged-usr-controversy-explained">Debian Merged /usr
+Controversy Explained</h1>
+<p>The adoption of the merged <code>/usr</code> filesystem layout in
+Debian sparked intense debate among developers, revolving around package
+manager safety, filesystem aliasing bugs, and project governance. While
+the initiative modernized Debian by consolidating system binaries and
+libraries into <code>/usr</code> with compatibility symlinks, critics
+argued that bypassing the package manager (<code>dpkg</code>) to achieve
+this transition introduced subtle, catastrophic file-loss risks during
+package upgrades. The dispute escalated into multi-year conflicts
+involving the Debian Technical Committee, highlighting a fundamental
+clash between modern Linux standardization and Debian's traditional
+commitment to package-level correctness.</p>
+<h3 id="historical-context-and-the-goal-of-merged-usr">Historical
+Context and the Goal of Merged /usr</h3>
+<p>Historically, Unix systems separated critical binaries and libraries
+into root directories (<code>/bin</code>, <code>/sbin</code>,
+<code>/lib</code>) and secondary directories (<code>/usr/bin</code>,
+<code>/usr/sbin</code>, <code>/usr/lib</code>). This separation
+originated as a hardware workaround for limited disk space on early
+PDP-11 systems, allowing the root filesystem to fit on a small primary
+disk while mounting <code>/usr</code> from a secondary disk.</p>
+<p>As systems evolved, this split became redundant and introduced
+operational headaches, such as determining which utilities were truly
+essential for early boot and system recovery. Upstream projects, led by
+systemd and Fedora, pushed for the "merged <code>/usr</code>" standard,
+where <code>/bin</code>, <code>/sbin</code>, and <code>/lib</code>
+become symbolic links pointing directly to their <code>/usr</code>
+counterparts. The goal was to simplify system packaging, enable atomic
+root updates, and ensure consistency across Linux distributions.</p>
+<h3 id="technical-objections-and-the-aliasing-problem">Technical
+Objections and the Aliasing Problem</h3>
+<p>The primary technical controversy centered on how the transition was
+executed. Instead of redesigning <code>dpkg</code> to recognize that
+<code>/bin/foo</code> and <code>/usr/bin/foo</code> refer to the same
+inode, the implementation relied on filesystem-level symlinks. This
+introduced "filesystem aliasing."</p>
+<p>Because <code>dpkg</code> tracks files strictly by path strings
+rather than canonical filesystem locations, it remained unaware of the
+symlinks. This mismatch created dangerous edge cases:</p>
+<ul>
+<li><strong>File Loss During Upgrades:</strong> If a package moved a
+file from <code>/bin/foo</code> to <code>/usr/bin/foo</code> in a newer
+release, <code>dpkg</code> would install the new file, then unpack
+cleanup routines. During the cleanup of the older version,
+<code>dpkg</code> could attempt to remove the obsolete
+<code>/bin/foo</code>. Because of the symlink, this action would
+inadvertently delete the newly installed <code>/usr/bin/foo</code>,
+leaving the system without essential binaries.</li>
+<li><strong>Diverted and Overwritten Files:</strong> Aliasing disrupted
+package diversions (<code>dpkg-divert</code>), leading to scenarios
+where packages could unintentionally overwrite each other's binaries
+without generating conflict warnings.</li>
+</ul>
+<p>Guillem Jover, the lead maintainer of <code>dpkg</code>, strongly
+opposed adopting the merged layout via symlinks. He maintained that
+making the package manager natively aware of path equivalencies was a
+prerequisite, warning that implementing symlink workarounds risked
+system corruption and violated Debian’s reliability guarantees.</p>
+<h3 id="tooling-disagreements-usrmerge-vs-native-handling">Tooling
+Disagreements: <code>usrmerge</code> vs. Native Handling</h3>
+<p>To transition existing installations, proponents introduced the
+<code>usrmerge</code> package, a Perl script designed to convert
+existing systems by relocating files and creating symlinks. Critics
+pointed out that relying on an external conversion script was fragile,
+as any interruption during execution could render a system
+unbootable.</p>
+<p>Furthermore, because Debian allows installations to be created via
+minimal bootstrap tools like <code>debootstrap</code>, split-brain
+issues emerged. Some installations ran under the legacy layout, while
+others ran under the merged layout, forcing maintainers to support and
+test two divergent filesystem paradigms simultaneously.</p>
+<h3 id="governance-and-technical-committee-rulings">Governance and
+Technical Committee Rulings</h3>
+<p>The deadlock between the <code>dpkg</code> maintainers and developers
+advocating for rapid adoption caused significant friction across the
+project. With consensus out of reach, developers turned to the Debian
+Technical Committee (TC) multiple times to resolve the impasse.</p>
+<ul>
+<li><strong>2019 (Bug #914560):</strong> The TC affirmed that Debian
+should support merged <code>/usr</code> by default for new installations
+in Debian 10 (Buster), but stopped short of mandating it for
+upgrades.</li>
+<li><strong>2021 (Bug #978636):</strong> After continued resistance and
+unresolved aliasing issues, the TC was asked to revisit the decision.
+The committee ruled that Debian 12 (Bookworm) would not support the
+unmerged layout, effectively making merged <code>/usr</code>
+mandatory.</li>
+<li><strong>2022 (Bug #994388):</strong> The TC ruled on the specific
+migration mechanism, choosing to rely on an explicit transition path
+supported by the core distribution rather than waiting for an overhaul
+of <code>dpkg</code>.</li>
+</ul>
+<h3 id="resolution-and-aftermath">Resolution and Aftermath</h3>
+<p>Debian 12 successfully shipped with merged <code>/usr</code> enforced
+as a requirement, and transition safeguards were implemented to prevent
+known file-loss scenarios. While the transition modernized Debian's
+filesystem to match modern systemd-based Linux standards, the process
+left lasting impressions on the community. It underscored the difficulty
+of modifying foundational Unix conventions and highlighted the
+persistent tension within Debian between rapid ecosystem standardization
+and rigorous architectural conservatism.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

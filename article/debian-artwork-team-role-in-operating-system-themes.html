@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Artwork Team Role in Operating System Themes - debian</title>
+    <meta name="description" content="The Debian Artwork Team is responsible for shaping the visual identity of each major Debian GNU/Linux release by coordinating the selection, packaging, and integration of default system themes. This article explores how the team manages the community-driv">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-artwork-team-role-in-operating-system-themes">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Artwork Team Role in Operating System Themes - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-artwork-team-role-in-operating-system-themes" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian Artwork Team is responsible for shaping the visual identity of each major Debian GNU/Linux release by coordinating the selection, packaging, and integration of default system themes. This article explores how the team manages the community-driv" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-artwork-team-role-in-operating-system-themes">Debian
+Artwork Team Role in Operating System Themes</h1>
+<p>The Debian Artwork Team is responsible for shaping the visual
+identity of each major Debian GNU/Linux release by coordinating the
+selection, packaging, and integration of default system themes. This
+article explores how the team manages the community-driven design
+lifecycle, transforms independent artistic submissions into cohesive
+interface packages, and ensures that visual assets function consistently
+across bootloaders, installers, and diverse desktop environments while
+adhering to strict open-source software guidelines.</p>
+<h3 id="defining-the-visual-identity-of-major-releases">Defining the
+Visual Identity of Major Releases</h3>
+<p>Every major Debian release is codenamed after a character from the
+<em>Toy Story</em> franchise, and each milestone receives a unique
+visual theme to distinguish it from previous iterations. The Debian
+Artwork Team oversees this visual branding, creating an out-of-the-box
+aesthetic that gives the operating system a modern, cohesive look. This
+identity spans multiple system layers, ensuring that a user encounters a
+unified visual style from the moment the installation media boots to the
+daily operation of the desktop environment.</p>
+<h3 id="managing-the-public-theme-contest">Managing the Public Theme
+Contest</h3>
+<p>Debian relies on a decentralized, community-driven workflow to
+develop its artwork. For each upcoming release cycle, the Artwork Team
+initiates a public call for proposals on the Debian Wiki. Any digital
+artist, designer, or community member can submit a thematic concept,
+provided the work meets specific technical and legal requirements:</p>
+<ul>
+<li><strong>Licensing:</strong> All submitted artwork must comply with
+the Debian Free Software Guidelines (DFSG), typically utilizing licenses
+such as Creative Commons Attribution-ShareAlike or the GNU General
+Public License.</li>
+<li><strong>Source Files:</strong> Contributors must provide editable
+vector graphics (such as SVG files) to allow for scaling, adaptation,
+and maintenance by the community.</li>
+<li><strong>Completeness:</strong> Submissions must demonstrate
+versatility, offering mockups that can translate effectively across
+diverse screen resolutions and interfaces.</li>
+</ul>
+<p>Once submissions close, the Artwork Team coordinates a public
+evaluation process. The broader Debian community participates in surveys
+and reviews to select the winning design, ensuring that the chosen theme
+reflects the preferences of users and developers alike.</p>
+<h3 id="technical-packaging-and-multi-component-integration">Technical
+Packaging and Multi-Component Integration</h3>
+<p>Selecting a visual concept is only the first step; the primary
+technical role of the Artwork Team is adapting the artwork into
+functioning software packages. A single release theme must be formatted
+and integrated into several distinct system components:</p>
+<ul>
+<li><strong>Bootloaders:</strong> Graphics must be converted to specific
+color palettes and resolutions compatible with GRUB and Syslinux.</li>
+<li><strong>Debian Installer (d-i):</strong> Themes require lightweight
+banners and backgrounds optimized for both graphical and low-resource
+installation environments.</li>
+<li><strong>Plymouth Boot Splash:</strong> The team packages graphical
+animations and transition screens displayed as the operating system
+initializes the kernel and system services.</li>
+<li><strong>Display Managers:</strong> Login screens across managers
+like GDM, LightDM, and SDDM require standardized backgrounds and
+branding elements.</li>
+<li><strong>Desktop Environments:</strong> The default wallpaper and
+accent styling must harmonize with various desktop environments
+supported by Debian, including GNOME, KDE Plasma, Xfce, LXQt, and
+MATE.</li>
+<li><strong>Promotional and Physical Media:</strong> The artwork is
+adapted for CD/DVD labels, official stickers, and release announcement
+banners.</li>
+</ul>
+<h3 id="ensuring-software-freedom-and-long-term-stability">Ensuring
+Software Freedom and Long-Term Stability</h3>
+<p>Beyond aesthetic coordination, the Debian Artwork Team enforces the
+project's rigorous standards of software freedom and technical
+stability. The team ensures that all graphical assets are compiled
+directly from source using free software tools like Inkscape and GIMP.
+By maintaining these assets in standard Debian packages (such as
+<code>desktop-base</code>), the team ensures that themes can be easily
+installed, updated, or removed using the native APT package management
+system, preserving the stability and integrity of the operating
+system.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

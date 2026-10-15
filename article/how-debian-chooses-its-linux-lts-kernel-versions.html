@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Chooses Its Linux LTS Kernel Versions - debian</title>
+    <meta name="description" content="This article examines how the Debian Kernel Team selects upstream Long Term Support (LTS) Linux kernels for inclusion in stable Debian releases. It details the alignment between Debian’s multi-year release schedules and upstream kernel releases, the techn">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-chooses-its-linux-lts-kernel-versions">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Chooses Its Linux LTS Kernel Versions - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-chooses-its-linux-lts-kernel-versions" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article examines how the Debian Kernel Team selects upstream Long Term Support (LTS) Linux kernels for inclusion in stable Debian releases. It details the alignment between Debian’s multi-year release schedules and upstream kernel releases, the techn" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-chooses-its-linux-lts-kernel-versions">How Debian
+Chooses Its Linux LTS Kernel Versions</h1>
+<p>This article examines how the Debian Kernel Team selects upstream
+Long Term Support (LTS) Linux kernels for inclusion in stable Debian
+releases. It details the alignment between Debian’s multi-year release
+schedules and upstream kernel releases, the technical criteria regarding
+hardware enablement and architecture support, and how maintainability
+drives the team's final decision.</p>
+<h3 id="alignment-with-upstream-lts-schedules">Alignment with Upstream
+LTS Schedules</h3>
+<p>The primary factor in selecting a kernel version is the upstream
+Linux kernel release cycle, overseen by kernel maintainers like Greg
+Kroah-Hartman. Upstream designates typically one kernel per calendar
+year as an LTS release, usually the final release of that year.</p>
+<p>Because Debian provides security support for a stable release for
+approximately three years—extended to five years with the Debian LTS
+project—the Debian Kernel Team strongly favors an upstream LTS release.
+Relying on an upstream LTS branch allows Debian to inherit critical bug
+fixes, driver improvements, and security patches without having to
+independently backport every fix from mainline development.</p>
+<h3 id="the-debian-freeze-window">The Debian Freeze Window</h3>
+<p>Debian releases follow a strict milestone-driven freeze process:
+Transition Freeze, Soft Freeze, Hard Freeze, and Full Freeze. The kernel
+selection must fit within this window:</p>
+<ol type="1">
+<li><strong>Testing in Unstable:</strong> The kernel team introduces
+prospective kernel versions into Debian <code>unstable</code> (Sid) to
+discover regressions and packaging issues.</li>
+<li><strong>Transition to Testing:</strong> The selected kernel must
+migrate into Debian <code>testing</code> before the Hard Freeze takes
+effect.</li>
+<li><strong>Timing Compatibility:</strong> If an upstream LTS kernel is
+released shortly before the freeze begins (typically late winter or
+early spring of a release year), the team evaluates whether there is
+enough time to package, test, and stabilize it before the final release.
+If an upstream LTS is released too late in the freeze cycle, the team
+defaults to the preceding upstream LTS release.</li>
+</ol>
+<h3 id="architecture-and-hardware-compatibility">Architecture and
+Hardware Compatibility</h3>
+<p>Debian is committed to supporting a wide range of hardware
+architectures, including <code>amd64</code>, <code>arm64</code>,
+<code>armel</code>, <code>armhf</code>, <code>i386</code>,
+<code>mips64el</code>, <code>ppc64el</code>, <code>riscv64</code>, and
+<code>s390x</code>.</p>
+<p>Before locking in an LTS candidate, the Debian Kernel Team ensures
+the version compiles and functions reliably across all official release
+architectures. Furthermore, the chosen kernel must provide sufficient
+hardware enablement for newer consumer and enterprise platforms while
+avoiding regressions on older, legacy systems supported by the
+distribution.</p>
+<h3 id="upstream-coordination-and-backporting-feasibility">Upstream
+Coordination and Backporting Feasibility</h3>
+<p>The Debian Kernel Team maintains direct communication with upstream
+kernel developers. If a Debian release schedule falls between potential
+upstream LTS designations, the team assesses:</p>
+<ul>
+<li><strong>Official Upstream Commitment:</strong> Confirmation that
+upstream will maintain the branch for at least two to three years.</li>
+<li><strong>Maintenance Overhead:</strong> The workload required to
+maintain the kernel once upstream LTS maintenance ends, particularly
+when handing the release over to the Debian LTS team.</li>
+<li><strong>Backporting Security Fixes:</strong> The ease of applying
+stable tree patches and Common Vulnerabilities and Exposures (CVE)
+remedies over the Debian release lifecycle.</li>
+</ul>
+<p>By synchronizing Debian's freeze schedule with the upstream Linux LTS
+calendar, the Debian Kernel Team ensures that each Debian stable release
+ships with a thoroughly tested, widely supported kernel that can be
+reliably maintained for years.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

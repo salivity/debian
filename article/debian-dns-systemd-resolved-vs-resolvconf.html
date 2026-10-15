@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian DNS: systemd-resolved vs resolvconf - debian</title>
+    <meta name="description" content="Debian&#39;s approach to Domain Name System (DNS) resolution has evolved from static text configurations and script-based aggregators like resolvconf to daemon-driven local caching resolvers like systemd-resolved. This article examines how Debian handles DNS">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-dns-systemd-resolved-vs-resolvconf">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian DNS: systemd-resolved vs resolvconf - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-dns-systemd-resolved-vs-resolvconf" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian&#39;s approach to Domain Name System (DNS) resolution has evolved from static text configurations and script-based aggregators like resolvconf to daemon-driven local caching resolvers like systemd-resolved. This article examines how Debian handles DNS" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-dns-systemd-resolved-vs-resolvconf">Debian DNS:
+systemd-resolved vs resolvconf</h1>
+<p>Debian's approach to Domain Name System (DNS) resolution has evolved
+from static text configurations and script-based aggregators like
+<code>resolvconf</code> to daemon-driven local caching resolvers like
+<code>systemd-resolved</code>. This article examines how Debian handles
+DNS queries under both frameworks, compares their core architectures,
+caching, and security features, and explains how to configure or switch
+between them on modern Debian installations.</p>
+<h2 id="the-traditional-approach-resolvconf-and-etcresolvconf">The
+Traditional Approach: resolvconf and /etc/resolv.conf</h2>
+<p>Traditionally, Linux networking relies directly on the
+<code>/etc/resolv.conf</code> configuration file, which the C library
+resolver (<code>glibc</code>) reads to determine which nameservers to
+query. In simple setups, this file is written statically by the system
+administrator.</p>
+<p>However, modern systems often run multiple network management
+tools—such as DHCP clients, PPP daemons, VPN clients, and
+<code>ifupdown</code>—that simultaneously attempt to overwrite
+<code>/etc/resolv.conf</code>. The <code>resolvconf</code> framework was
+designed to resolve this contention.</p>
+<ul>
+<li><strong>How it works:</strong> <code>resolvconf</code> acts as an
+intermediary. Network configuration scripts register their DNS
+requirements by running the <code>resolvconf</code> executable. The
+<code>resolvconf</code> daemon aggregates these inputs according to
+predefined priority rules and dynamically rewrites
+<code>/etc/resolv.conf</code>.</li>
+<li><strong>Stateless Forwarding:</strong> Traditional
+<code>resolvconf</code> does not cache DNS records or run a local DNS
+service. It simply populates standard upstream IP addresses into
+<code>/etc/resolv.conf</code>.</li>
+<li><strong>Limitations:</strong> Because it lacks local caching, every
+DNS query generated by an application must travel over the network
+unless an external caching daemon like <code>dnsmasq</code> or
+<code>unbound</code> is manually installed. Additionally, it lacks
+native support for advanced protocols like DNSSEC validation and
+DNS-over-TLS (DoT).</li>
+</ul>
+<h2 id="the-modern-alternative-systemd-resolved">The Modern Alternative:
+systemd-resolved</h2>
+<p>Starting with Debian 12 (Bookworm), <code>systemd-resolved</code> was
+split into a separate, optional package rather than being installed
+automatically with the core systemd package. Unlike
+<code>resolvconf</code>, <code>systemd-resolved</code> is an active
+network service that runs a local DNS stub listener.</p>
+<ul>
+<li><strong>How it works:</strong> <code>systemd-resolved</code> binds a
+local caching resolver to the loopback IP <code>127.0.0.53</code> on
+port 53. Debian's <code>/etc/resolv.conf</code> is replaced with a
+symbolic link pointing to
+<code>/run/systemd/resolve/stub-resolv.conf</code>, which points
+applications to <code>127.0.0.53</code>.</li>
+<li><strong>Integrated Caching and Features:</strong> It features a
+built-in cryptographic validation engine for DNSSEC, support for
+DNS-over-TLS (DoT), Link-Local Multicast Name Resolution (LLMNR), and
+Multicast DNS (mDNS).</li>
+<li><strong>Per-Interface Routing:</strong>
+<code>systemd-resolved</code> can route queries based on domain routing
+rules across multiple interfaces. For example, queries for an internal
+corporate domain can be directed over a VPN tunnel interface, while
+public queries go out through the default gateway.</li>
+</ul>
+<h2 id="key-architectural-differences">Key Architectural
+Differences</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Feature</th>
+<th style="text-align: left;">resolvconf</th>
+<th style="text-align: left;">systemd-resolved</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Local Caching</strong></td>
+<td style="text-align: left;">No (requires third-party daemon)</td>
+<td style="text-align: left;">Yes (built-in)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Configuration Model</strong></td>
+<td style="text-align: left;">Shell scripts updating static files</td>
+<td style="text-align: left;">D-Bus daemon and <code>resolvectl</code>
+CLI</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Loopback Stub</strong></td>
+<td style="text-align: left;">No (<code>/etc/resolv.conf</code> contains
+external IPs)</td>
+<td style="text-align: left;">Yes (uses <code>127.0.0.53</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Split-DNS / VPN
+Routing</strong></td>
+<td style="text-align: left;">Limited (requires custom hooks)</td>
+<td style="text-align: left;">Native (per-link DNS routing)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Modern Protocols</strong></td>
+<td style="text-align: left;">None (standard DNS only)</td>
+<td style="text-align: left;">DNSSEC, DoT, mDNS, LLMNR</td>
+</tr>
+</tbody>
+</table>
+<h2 id="managing-and-switching-implementations-on-debian">Managing and
+Switching Implementations on Debian</h2>
+<p>Debian allows administrators to choose which mechanism manages name
+resolution based on the system's requirements.</p>
+<h3 id="using-traditional-resolvconf">Using Traditional resolvconf</h3>
+<p>To use the traditional framework, install the package:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install resolvconf</span></code></pre></div>
+<p>Once installed, interfaces defined in
+<code>/etc/network/interfaces</code> can define nameservers using the
+<code>dns-nameservers</code> directive:</p>
+<pre class="text"><code>iface eth0 inet dhcp
+    dns-nameservers 1.1.1.1 8.8.8.8
+    dns-search example.com</code></pre>
+<h3 id="using-systemd-resolved">Using systemd-resolved</h3>
+<p>To switch to <code>systemd-resolved</code>, install the package and
+link the stub file:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install systemd-resolved</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> systemd-resolved</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ln <span class="at">-sf</span> /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf</span></code></pre></div>
+<p>You can view current DNS settings, query statistics, and per-link
+configurations using the management utility:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">resolvectl</span> status</span></code></pre></div>
+<p>To revert back to a standard configuration, disable the service,
+remove the package, and restore <code>/etc/resolv.conf</code> as a
+standard text file or symlink it back to the state managed by
+<code>resolvconf</code> or your active network manager.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

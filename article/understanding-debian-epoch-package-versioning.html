@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding Debian Epoch Package Versioning - debian</title>
+    <meta name="description" content="Debian package management relies on strict version comparison rules to determine upgrades, but upstream projects occasionally alter their release numbering in ways that break this logic. Epoch versioning is Debian&#39;s mechanism to override the standard alph">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/understanding-debian-epoch-package-versioning">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Understanding Debian Epoch Package Versioning - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/understanding-debian-epoch-package-versioning" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian package management relies on strict version comparison rules to determine upgrades, but upstream projects occasionally alter their release numbering in ways that break this logic. Epoch versioning is Debian&#39;s mechanism to override the standard alph" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="understanding-debian-epoch-package-versioning">Understanding
+Debian Epoch Package Versioning</h1>
+<p>Debian package management relies on strict version comparison rules
+to determine upgrades, but upstream projects occasionally alter their
+release numbering in ways that break this logic. Epoch versioning is
+Debian's mechanism to override the standard alphanumeric sorting rules
+used by <code>dpkg</code> and <code>apt</code>. By prepending a single
+integer followed by a colon to a package's version string, maintainers
+ensure that newer releases are correctly recognized as upgrades even if
+the new version string appears numerically or alphabetically lower than
+the previous one.</p>
+<h3 id="the-debian-version-structure">The Debian Version Structure</h3>
+<p>In Debian, a full package version string consists of three parts:</p>
+<pre><code>[epoch:]upstream_version[-debian_revision]</code></pre>
+<p>The <code>epoch</code> is an optional unsigned integer. If omitted,
+<code>dpkg</code> treats it implicitly as zero (<code>0</code>). The
+<code>upstream_version</code> is the version assigned by the software's
+original authors, and the <code>debian_revision</code> indicates the
+packaging release made by the Debian maintainer.</p>
+<h3 id="the-problem-with-upstream-version-changes">The Problem with
+Upstream Version Changes</h3>
+<p>The package manager uses deterministic string-parsing algorithms to
+determine whether one package is newer than another. Problems arise when
+an upstream project drastically alters its numbering scheme. Common
+scenarios include:</p>
+<ul>
+<li><strong>Switching from a date-based to a semantic scheme:</strong>
+An upstream project might switch from using release dates like
+<code>2024.10</code> to semantic versions like <code>1.0.0</code>. By
+standard sorting rules, <code>1.0.0</code> is lower than
+<code>2024.10</code>.</li>
+<li><strong>Dropping a major prefix:</strong> An application
+transitioning from a marketing release number like <code>95</code> or
+<code>2000</code> to a unified <code>1.0</code> engine release.</li>
+<li><strong>Typo corrections:</strong> An accidental upload of a version
+like <code>10.0</code> instead of <code>1.0</code>.</li>
+</ul>
+<p>Without an intervention mechanism, <code>dpkg</code> will view the
+newly released lower number as a downgrade and will refuse to install it
+during standard system upgrades.</p>
+<h3 id="the-significance-of-the-epoch">The Significance of the
+Epoch</h3>
+<p>The epoch serves as the highest-priority component in version
+comparison. When evaluating two version strings, Debian tools inspect
+the epoch before evaluating any other character in the upstream
+version:</p>
+<ol type="1">
+<li>If the epoch of package A is higher than package B, package A is
+always considered newer, regardless of what follows the colon.</li>
+<li>Only if the epochs are identical will the package manager proceed to
+compare the <code>upstream_version</code> components.</li>
+</ol>
+<p>For example, if an existing package has the version
+<code>2023.1</code> (implicitly <code>0:2023.1</code>) and the upstream
+developer switches to <code>1.0</code>, the maintainer sets the new
+version to <code>1:1.0</code>. Because <code>1</code> is greater than
+<code>0</code>, <code>dpkg</code> evaluates <code>1:1.0</code> as
+strictly newer than <code>2023.1</code>, allowing package managers to
+execute a standard upgrade cleanly across user systems.</p>
+<h3 id="permanence-and-best-practices">Permanence and Best
+Practices</h3>
+<p>While epochs resolve breaking version sequences, their use is
+strictly regulated within the Debian ecosystem:</p>
+<ul>
+<li><strong>Permanence:</strong> Once an epoch is introduced, it must
+remain on that package indefinitely. If a subsequent release drops the
+epoch, the version drops back to an implicit <code>0</code>, triggering
+downgrade detection again.</li>
+<li><strong>Last-Resort Measure:</strong> Debian packaging policy treats
+epochs as a last resort. Maintainers avoid using them for minor or
+cosmetic adjustments, reserving them strictly for resolving functional
+package upgrade blockers caused by upstream numbering shifts.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

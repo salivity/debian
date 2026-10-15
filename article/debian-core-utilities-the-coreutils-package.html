@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Core Utilities: The coreutils Package - debian</title>
+    <meta name="description" content="This article explains the foundational software package that provides the essential command-line tools across all Debian Linux installations. You will learn about the coreutils package, discover which core commands it provides, and understand why Debian c">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-core-utilities-the-coreutils-package">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Core Utilities: The coreutils Package - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-core-utilities-the-coreutils-package" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains the foundational software package that provides the essential command-line tools across all Debian Linux installations. You will learn about the coreutils package, discover which core commands it provides, and understand why Debian c" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-core-utilities-the-coreutils-package">Debian Core
+Utilities: The coreutils Package</h1>
+<p>This article explains the foundational software package that provides
+the essential command-line tools across all Debian Linux installations.
+You will learn about the <code>coreutils</code> package, discover which
+core commands it provides, and understand why Debian classifies it as an
+essential and unremovable component of the base operating system.</p>
+<h2 id="the-package-gnu-coreutils">The Package: GNU coreutils</h2>
+<p>The package responsible for the core set of essential command-line
+utilities in Debian is <strong><code>coreutils</code></strong> (GNU Core
+Utilities). It provides the basic file, shell, and text manipulation
+tools that users, system administrators, and automated scripts depend on
+daily. Without this package, a Debian system cannot function
+properly.</p>
+<h2 id="what-is-included-in-coreutils">What is Included in
+coreutils?</h2>
+<p>The <code>coreutils</code> package combines several historically
+separate GNU tool packages—specifically <code>fileutils</code>,
+<code>textutils</code>, and <code>sh-utils</code>—into a single unified
+bundle. It includes over one hundred standard utilities, which fall into
+three primary categories:</p>
+<ul>
+<li><strong>File Utilities:</strong> Tools used to inspect, create, and
+modify the filesystem, including <code>ls</code>, <code>cp</code>,
+<code>mv</code>, <code>rm</code>, <code>mkdir</code>,
+<code>rmdir</code>, <code>chmod</code>, <code>chown</code>,
+<code>touch</code>, <code>ln</code>, and <code>stat</code>.</li>
+<li><strong>Text Utilities:</strong> Tools designed to process and
+manipulate text streams and files, including <code>cat</code>,
+<code>head</code>, <code>tail</code>, <code>sort</code>,
+<code>uniq</code>, <code>cut</code>, <code>tr</code>, <code>wc</code>,
+and <code>md5sum</code>.</li>
+<li><strong>Shell and System Utilities:</strong> Tools that query or
+modify environment and system properties, including <code>echo</code>,
+<code>env</code>, <code>pwd</code>, <code>date</code>,
+<code>whoami</code>, <code>uname</code>, <code>printenv</code>,
+<code>sleep</code>, and <code>false</code>/<code>true</code>.</li>
+</ul>
+<h2 id="debian-package-priority-and-essentials">Debian Package Priority
+and Essentials</h2>
+<p>In the Debian package management architecture, <code>coreutils</code>
+has a special status:</p>
+<ol type="1">
+<li><strong>Priority: required:</strong> It is part of the minimal set
+of software necessary to boot, install, and repair the system.</li>
+<li><strong>Essential: yes:</strong> Debian’s package manager, APT and
+<code>dpkg</code>, flags <code>coreutils</code> as an essential package.
+This flag prevents the package from being removed through standard
+package management commands; attempting to remove it triggers strict
+warnings and requires explicit, destructive override flags.</li>
+</ol>
+<p>Because of this classification, <code>coreutils</code> is included
+automatically during the base bootstrap process
+(<code>debootstrap</code>) and is present in every Debian installation,
+from full desktop workstations to lightweight Docker container
+images.</p>
+<h2 id="related-base-packages">Related Base Packages</h2>
+<p>While <code>coreutils</code> provides the fundamental file and text
+utilities, it works alongside a few other strictly essential packages to
+form the complete base command-line environment:</p>
+<ul>
+<li><strong><code>util-linux</code>:</strong> Provides low-level
+hardware and system utilities such as <code>dmesg</code>,
+<code>mount</code>, <code>fdisk</code>, and <code>kill</code>.</li>
+<li><strong><code>findutils</code>:</strong> Provides search
+capabilities through <code>find</code> and <code>xargs</code>.</li>
+<li><strong><code>grep</code> and <code>sed</code>:</strong> Supply
+pattern matching and stream editing tools.</li>
+<li><strong><code>dash</code> and <code>bash</code>:</strong> Deliver
+the standard POSIX and interactive shells required to execute system
+scripts and invoke the commands provided by <code>coreutils</code>.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

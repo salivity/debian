@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Edu Deploys Linux in School Networks - debian</title>
+    <meta name="description" content="Debian Edu, also known as Skolelinux, is a specialized Debian pure blend engineered to provide an instantly functional, pre-configured IT infrastructure for schools. By leveraging centralized network architecture, automated PXE boot installations, diskles">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-edu-deploys-linux-in-school-networks">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Edu Deploys Linux in School Networks - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-edu-deploys-linux-in-school-networks" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian Edu, also known as Skolelinux, is a specialized Debian pure blend engineered to provide an instantly functional, pre-configured IT infrastructure for schools. By leveraging centralized network architecture, automated PXE boot installations, diskles" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-edu-deploys-linux-in-school-networks">How Debian Edu
+Deploys Linux in School Networks</h1>
+<p>Debian Edu, also known as Skolelinux, is a specialized Debian pure
+blend engineered to provide an instantly functional, pre-configured IT
+infrastructure for schools. By leveraging centralized network
+architecture, automated PXE boot installations, diskless client
+technologies, and unified directory services, Debian Edu enables system
+administrators to deploy and maintain dozens or hundreds of computers
+across a school campus with minimal manual intervention.</p>
+<h3 id="modular-architecture-and-installation-profiles">Modular
+Architecture and Installation Profiles</h3>
+<p>Debian Edu utilizes a profile-based system during installation that
+allows administrators to define the role of any machine on the network.
+Built around standard Debian packages, the distribution provides
+predefined profiles that configure necessary services automatically:</p>
+<ul>
+<li><strong>Main Server (Tjener):</strong> Acts as the network backbone,
+hosting core services such as LDAP directory management, Kerberos
+authentication, DNS, DHCP, Webmin/GOsa² administration tools, and
+Network File System (NFS) home directories.</li>
+<li><strong>LTSP Server:</strong> Hosts environments for diskless thin
+clients and diskless workstations.</li>
+<li><strong>Workstation:</strong> A standard PC with Debian installed on
+local storage that authenticates against the Main Server and accesses
+centralized user directories.</li>
+<li><strong>Roaming Workstation:</strong> Designed for laptops, enabling
+users to log in with school credentials while on campus and cache
+credentials for offline use outside school.</li>
+<li><strong>Standalone:</strong> An independent machine containing
+school software for environments without a permanent network
+connection.</li>
+</ul>
+<h3 id="network-based-automated-deployment-pxe">Network-Based Automated
+Deployment (PXE)</h3>
+<p>To eliminate the need for manual physical installation via USB drives
+or optical discs, Debian Edu relies heavily on Preboot Execution
+Environment (PXE) network booting. Once the Main Server is operational,
+it serves as a DHCP and TFTP server.</p>
+<p>When a bare-metal machine connects to the school network and boots
+from its network card, it receives an IP address and loads the Debian
+Edu boot menu over the local network. Administrators can deploy
+workstations automatically using Debian's automated installation
+framework (preseed files). These configuration files answer setup
+questions in advance, automating partitioning, desktop environment
+selection, repository configuration, and domain joining without
+requiring physical user input at each machine.</p>
+<h3 id="thin-clients-and-diskless-workstations-via-ltsp">Thin Clients
+and Diskless Workstations via LTSP</h3>
+<p>For classrooms with aging hardware or environments requiring zero
+local maintenance, Debian Edu integrates the Linux Terminal Server
+Project (LTSP). This model eliminates the need to install an operating
+system on individual client hard drives:</p>
+<ol type="1">
+<li><strong>Thin Clients:</strong> The client computer boots a minimal
+Linux kernel via PXE, connects to an LTSP server, and renders a
+graphical session (such as XFCE) that physically executes on the server
+hardware. This drastically reduces hardware requirements for student
+machines.</li>
+<li><strong>Diskless Workstations (Fat Clients):</strong> Modern systems
+download a full operating system image over the network into RAM and run
+software using local CPU and RAM resources, but store no persistent data
+on local drives. Operating system updates only need to be applied once
+to the central server image, automatically updating all client machines
+upon their next reboot.</li>
+</ol>
+<h3 id="centralized-authentication-and-file-sharing">Centralized
+Authentication and File Sharing</h3>
+<p>Debian Edu deploys an integrated user management structure using
+OpenLDAP and Kerberos. When any Debian workstation or client connects to
+the network, user authentication is handled centrally. A student or
+teacher can sit at any computer in the school, enter their credentials,
+and access their personalized desktop environment along with their
+centrally hosted NFS home directory.</p>
+<p>Network-wide administration is handled through a web-based interface
+(GOsa²), allowing school staff to manage user accounts, group
+permissions, and system configurations across the entire fleet from a
+single browser session. This unified infrastructure ensures that once
+Debian is deployed, ongoing administrative overhead remains low.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

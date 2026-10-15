@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Officially Supported Debian Release Architectures - debian</title>
+    <meta name="description" content="Debian is renowned for its portability across a wide variety of hardware platforms, referring to itself as &quot;the universal operating system.&quot; This article provides a comprehensive overview of the computer architectures officially qualified as release archi">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/officially-supported-debian-release-architectures">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Officially Supported Debian Release Architectures - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/officially-supported-debian-release-architectures" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian is renowned for its portability across a wide variety of hardware platforms, referring to itself as &quot;the universal operating system.&quot; This article provides a comprehensive overview of the computer architectures officially qualified as release archi" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="officially-supported-debian-release-architectures">Officially
+Supported Debian Release Architectures</h1>
+<p>Debian is renowned for its portability across a wide variety of
+hardware platforms, referring to itself as "the universal operating
+system." This article provides a comprehensive overview of the computer
+architectures officially qualified as release architectures in the
+current stable version of the Debian operating system, detailing what
+platforms are fully supported by Debian's security updates and
+installation media.</p>
+<h2 id="understanding-debian-release-architectures">Understanding Debian
+Release Architectures</h2>
+<p>In the Debian ecosystem, a port must meet strict requirements to be
+designated as an official "release architecture." These criteria include
+having a functional, redundant build daemon (buildd) infrastructure,
+active maintenance, a working Debian Installer, and full integration
+with Debian’s security tracking and archive management tools.
+Architectures that do not meet these criteria are relegated to
+"Debian-Ports," where they are maintained outside the main release
+archive.</p>
+<h2
+id="officially-supported-architectures-in-current-debian-stable">Officially
+Supported Architectures in Current Debian Stable</h2>
+<p>As of Debian 12 ("Bookworm"), the Debian project officially supports
+nine architectures across personal computers, enterprise servers, and
+embedded devices:</p>
+<ul>
+<li><strong>amd64 (64-bit PC / x86-64):</strong> The most common
+architecture for modern desktop computers, laptops, and enterprise
+servers using Intel and AMD 64-bit processors.</li>
+<li><strong>arm64 (64-bit ARM / AArch64):</strong> Designed for modern
+64-bit ARM processors, widely found in cloud servers, single-board
+computers, and modern mobile and embedded hardware.</li>
+<li><strong>armel (EABI ARM):</strong> Targets older 32-bit ARM
+processors (specifically ARMv5te and above) that utilize soft-float
+emulation.</li>
+<li><strong>armhf (ARM Hard Float):</strong> Designed for 32-bit ARM
+processors (ARMv7 and later) that include hardware floating-point units,
+common in devices like earlier Raspberry Pi models and various
+development boards.</li>
+<li><strong>i386 (32-bit PC / x86):</strong> Covers legacy 32-bit Intel
+and AMD processors. While primarily used today for legacy applications
+and multiarch compatibility, it remains an official architecture.</li>
+<li><strong>mips64el (64-bit MIPS Little-Endian):</strong> Supports
+64-bit MIPS processors operating in little-endian mode, typically used
+in embedded devices, routers, and specific server platforms.</li>
+<li><strong>mipsel (32-bit MIPS Little-Endian):</strong> Supports legacy
+32-bit MIPS hardware running in little-endian mode.</li>
+<li><strong>ppc64el (64-bit PowerPC Little-Endian):</strong> Tailored
+for 64-bit IBM POWER processors using the OpenPOWER Little-Endian ABI,
+commonly deployed in enterprise-grade data centers.</li>
+<li><strong>s390x (IBM System z / z/Architecture):</strong> Built for
+64-bit IBM mainframes, providing enterprise-level server support for
+legacy and modern computing tasks.</li>
+</ul>
+<h2 id="upcoming-changes-in-future-releases">Upcoming Changes in Future
+Releases</h2>
+<p>The list of official architectures changes based on hardware
+relevance, upstream kernel support, and maintainer availability. For
+future releases (beginning with Debian 13 "Trixie"), support for older
+architectures such as <code>mipsel</code> and <code>armel</code> has
+been phased out, while support for newer architectures, such as
+<code>riscv64</code> (64-bit RISC-V), has been integrated into the
+official release cycle.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Is a Debian Security Advisory (DSA)? - debian</title>
+    <meta name="description" content="A Debian Security Advisory (DSA) is an official alert issued by the Debian Security Team to inform users about confirmed security vulnerabilities affecting packages in the stable Debian release. This article explains what a DSA is, what information it con">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/what-is-a-debian-security-advisory-dsa">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Is a Debian Security Advisory (DSA)? - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/what-is-a-debian-security-advisory-dsa" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="A Debian Security Advisory (DSA) is an official alert issued by the Debian Security Team to inform users about confirmed security vulnerabilities affecting packages in the stable Debian release. This article explains what a DSA is, what information it con" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="what-is-a-debian-security-advisory-dsa">What Is a Debian
+Security Advisory (DSA)?</h1>
+<p>A Debian Security Advisory (DSA) is an official alert issued by the
+Debian Security Team to inform users about confirmed security
+vulnerabilities affecting packages in the stable Debian release. This
+article explains what a DSA is, what information it contains, how the
+Debian Security Team manages patches, and how system administrators can
+use these advisories to keep their systems secure.</p>
+<p>A Debian Security Advisory serves as a formal public notice whenever
+a vulnerability is discovered and fixed in the Debian operating system.
+The Debian Security Team handles these issues by backporting security
+fixes directly into the current stable version of the affected package.
+This approach ensures that vulnerabilities are eliminated without
+introducing new upstream features that could destabilize existing
+production environments.</p>
+<p>Each DSA includes standardized information designed to help
+administrators quickly assess risk:</p>
+<ul>
+<li><strong>Advisory Identifier:</strong> A unique tag formatted as
+<code>DSA-XXXX-Y</code> (for example, DSA-5500-1) where "XXXX" is a
+sequential number and "Y" represents the revision.</li>
+<li><strong>Date Reported:</strong> The exact date the advisory and
+corresponding patches were made public.</li>
+<li><strong>Affected Package:</strong> The specific software package
+containing the vulnerability.</li>
+<li><strong>Vulnerability Information:</strong> A concise description of
+the flaw, its potential impact (such as remote code execution, privilege
+escalation, or denial of service), and corresponding Common
+Vulnerabilities and Exposures (CVE) identifiers.</li>
+<li><strong>Resolution and Fixed Versions:</strong> Clear instructions
+indicating which package versions resolve the issue across the supported
+Debian releases, typically accompanied by the command required to apply
+the update.</li>
+</ul>
+<p>DSAs primarily cover Debian's current "stable" and occasionally
+"oldstable" distributions. Debian's testing and unstable branches do not
+receive formal DSAs; instead, they receive fixes through the normal
+package migration process as new upstream versions are uploaded.</p>
+<p>Administrators monitor DSAs through several channels. Debian
+publishes advisories on its official website and distributes them via
+the <code>debian-security-announce</code> mailing list. Additionally,
+automated audit tools, such as <code>debsecan</code> (Debian Security
+Analyzer), evaluate installed packages against the DSA database to alert
+administrators about missing patches on their systems. Regular system
+updates using <code>apt update</code> and <code>apt upgrade</code> apply
+the security fixes detailed in these advisories.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

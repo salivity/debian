@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Popcon Protects User Privacy - debian</title>
+    <meta name="description" content="Debian&#39;s Popularity Contest, commonly known as popcon, is an automated telemetry system designed to gather statistics on which software packages are actively used across the ecosystem. This data helps maintainers make critical decisions, such as which pac">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-popcon-protects-user-privacy">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Popcon Protects User Privacy - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-popcon-protects-user-privacy" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian&#39;s Popularity Contest, commonly known as popcon, is an automated telemetry system designed to gather statistics on which software packages are actively used across the ecosystem. This data helps maintainers make critical decisions, such as which pac" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-popcon-protects-user-privacy">How Debian Popcon
+Protects User Privacy</h1>
+<p>Debian's Popularity Contest, commonly known as popcon, is an
+automated telemetry system designed to gather statistics on which
+software packages are actively used across the ecosystem. This data
+helps maintainers make critical decisions, such as which packages should
+be included on primary installation media and where developer resources
+should be allocated. To balance system analytics with open-source
+ethical standards, Debian employs rigorous privacy-by-design principles,
+including an opt-in model, pseudonymization, minimal data collection,
+secure transmission, and strict server-side aggregation.</p>
+<h3 id="strict-opt-in-consent">Strict Opt-In Consent</h3>
+<p>Popcon is not enabled silently. During the initial installation of
+Debian, the installer explicitly prompts the user with an option to
+participate in the survey. If the user declines, the service remains
+disabled and transmits no information. Even if enabled initially, users
+can easily opt out at any time by running
+<code>dpkg-reconfigure popularity-contest</code> or by completely
+uninstalling the <code>popularity-contest</code> package.</p>
+<h3 id="pseudonymous-identification">Pseudonymous Identification</h3>
+<p>Rather than tying telemetry submissions to personal identities, IP
+addresses, or hardware signatures like MAC addresses, the popcon utility
+generates a random 128-bit identifier. This identifier is generated
+locally during the package installation and saved in
+<code>/etc/popularity-contest.conf</code>.</p>
+<p>This token allows the server to recognize updates from the same
+machine over time—preventing duplicate vote counts when weekly reports
+are submitted—without ever mapping back to an identifiable user,
+physical machine, or network interface.</p>
+<h3 id="minimal-high-level-data-collection">Minimal, High-Level Data
+Collection</h3>
+<p>The script collects only the minimum information necessary to compute
+package usage statistics. Specifically, popcon inspects:</p>
+<ul>
+<li>Installed package names</li>
+<li>Most recent access times (<code>atime</code>) of the executable
+files</li>
+<li>Installation or modification times
+(<code>ctime</code>/<code>mtime</code>)</li>
+</ul>
+<p>Popcon categorizes packages into specific groups based on these
+timestamps, such as actively used, installed but unused, or recently
+updated. The service completely ignores personal files, browsing
+histories, hardware serial numbers, user configurations, and network
+environments. Because the entire <code>popularity-contest</code> script
+is open-source shell and Perl code, users can review the exact data
+payload locally before it ever leaves their machine.</p>
+<h3 id="encrypted-and-transparent-transmission">Encrypted and
+Transparent Transmission</h3>
+<p>Popcon transmits its weekly survey report using standard, verifiable
+network protocols. By default, submissions are sent via HTTP or HTTPS
+POST requests to the official Debian metrics endpoint, or optionally via
+GPG-encrypted email directed to Debian's automated processing system.
+This prevents third parties on intermediate networks from intercepting
+or eavesdropping on software inventory profiles.</p>
+<h3 id="server-side-scrubbing-and-data-aggregation">Server-Side
+Scrubbing and Data Aggregation</h3>
+<p>Once the central Debian server receives a popcon report, immediate
+privacy safeguards are applied:</p>
+<ul>
+<li><strong>IP Address Discarding:</strong> Web server logs and email
+headers containing the originating IP addresses are stripped or
+discarded to prevent tracking users across submissions.</li>
+<li><strong>Public Aggregation:</strong> The raw survey files are kept
+restricted on secure Debian infrastructure. The publicly accessible
+statistics available on the Debian website only reflect combined
+aggregate numbers, ensuring that individual system configurations cannot
+be reverse-engineered or fingerprinted by the public.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

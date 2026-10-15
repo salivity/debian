@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian APT Pinning: Mix Repositories Safely - debian</title>
+    <meta name="description" content="APT pinning allows Debian administrators to selectively install packages from different release branches—such as Stable, Testing, and Unstable—without upgrading the entire operating system. By assigning numerical priorities to specific repositories, packa">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-apt-pinning-mix-repositories-safely">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian APT Pinning: Mix Repositories Safely - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-apt-pinning-mix-repositories-safely" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="APT pinning allows Debian administrators to selectively install packages from different release branches—such as Stable, Testing, and Unstable—without upgrading the entire operating system. By assigning numerical priorities to specific repositories, packa" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-apt-pinning-mix-repositories-safely">Debian APT Pinning:
+Mix Repositories Safely</h1>
+<p>APT pinning allows Debian administrators to selectively install
+packages from different release branches—such as Stable, Testing, and
+Unstable—without upgrading the entire operating system. By assigning
+numerical priorities to specific repositories, packages, or versions,
+APT evaluates these weights to prevent newer, potentially breaking
+packages from destabilizing a stable system. This article explains how
+APT pinning functions, the mechanics behind priority scoring, and how to
+configure it to maintain system stability while accessing newer
+software.</p>
+<h3 id="the-problem-of-mixing-repositories">The Problem of Mixing
+Repositories</h3>
+<p>Normally, adding a newer release repository (such as Debian
+Unstable/Sid) to a system running Debian Stable leads to an unintended
+full-system upgrade. The package manager, <code>apt</code>, inherently
+prefers the highest version number available for any given package.
+Because core libraries like <code>libc6</code> exist in higher versions
+in newer branches, running a standard <code>apt upgrade</code> will
+overwrite core components, effectively transforming a rock-solid Stable
+installation into a fragile "FrankenDebian" system with unresolved
+dependency conflicts.</p>
+<h3 id="how-pin-priority-works">How Pin-Priority Works</h3>
+<p>APT pinning neutralizes this behavior by altering the algorithm used
+to select package versions. Instead of strictly choosing the highest
+version number, APT uses a numerical score called
+<code>Pin-Priority</code>. When resolving dependencies and updates, the
+candidate with the highest priority score wins.</p>
+<p>The standard priority values operate under well-defined
+thresholds:</p>
+<ul>
+<li><strong>P &gt;= 1000:</strong> The version is installed even if it
+requires downgrading an existing package.</li>
+<li><strong>990 &lt;= P &lt; 1000:</strong> The version is installed
+even if it does not come from the target release, provided it is newer
+than the installed version.</li>
+<li><strong>500 &lt;= P &lt; 990:</strong> Standard priority for active
+repositories. The version is installed unless another repository offers
+a newer version with an equal or higher priority.</li>
+<li><strong>100 &lt;= P &lt; 500:</strong> The version is installed only
+if there is no other version installed or available in a higher-priority
+suite (ideal for backports or secondary branches).</li>
+<li><strong>0 &lt; P &lt; 100:</strong> The version is never installed
+automatically; it can only be installed if explicitly requested by the
+user.</li>
+<li><strong>P &lt; 0:</strong> The package is entirely prevented from
+being installed.</li>
+</ul>
+<h3 id="implementing-pinning-rules">Implementing Pinning Rules</h3>
+<p>Pinning configurations are placed in
+<code>/etc/apt/preferences</code> or separated into dedicated files
+inside <code>/etc/apt/preferences.d/</code>. Each block specifies three
+key parameters: <code>Package</code>, <code>Pin</code>, and
+<code>Pin-Priority</code>.</p>
+<p>To safely configure a mixed environment, administrators establish a
+safe baseline by prioritizing the primary release and de-prioritizing
+the secondary release. For instance:</p>
+<pre class="text"><code>Package: *
+Pin: release a=stable
+Pin-Priority: 900
+
+Package: *
+Pin: release a=testing
+Pin-Priority: 100</code></pre>
+<p>Under this configuration, packages from Debian Stable carry a
+priority of 900, while packages from Debian Testing carry a priority of
+100. Because 100 falls below the default 500 threshold, packages from
+Testing will never be installed automatically during regular updates,
+and base libraries will not be pulled in unless explicitly required.</p>
+<h3 id="safely-installing-packages-from-secondary-repositories">Safely
+Installing Packages from Secondary Repositories</h3>
+<p>Once the global rules are established, individual software packages
+from the newer branch can be elevated. For example, to install a
+specific modern utility (such as <code>ripgrep</code>) from the Testing
+branch without exposing the rest of the system:</p>
+<pre class="text"><code>Package: ripgrep
+Pin: release a=testing
+Pin-Priority: 990</code></pre>
+<p>With this rule, <code>apt</code> assigns a priority of 990
+exclusively to <code>ripgrep</code> from Testing. When executing
+<code>apt install ripgrep</code>, APT pulls the version from Testing.
+However, because dependencies inherit their default priorities, APT
+attempts to satisfy all library requirements using Debian Stable first.
+Only if <code>ripgrep</code> strictly requires a library version
+unavailable in Stable will APT attempt to fetch that dependency from
+Testing.</p>
+<p>By establishing strict priority hierarchies, APT pinning shifts
+control from arbitrary version numbers to explicit administrative
+policies, allowing users to combine the reliability of Debian Stable
+with selected packages from newer development branches.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

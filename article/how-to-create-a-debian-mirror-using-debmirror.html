@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Create a Debian Mirror Using debmirror - debian</title>
+    <meta name="description" content="This guide explains what the debmirror utility is and provides a direct, step-by-step approach for system administrators to build and maintain a private Debian operating system mirror. Creating a local mirror allows organizations to optimize network bandw">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-to-create-a-debian-mirror-using-debmirror">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Create a Debian Mirror Using debmirror - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-to-create-a-debian-mirror-using-debmirror" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide explains what the debmirror utility is and provides a direct, step-by-step approach for system administrators to build and maintain a private Debian operating system mirror. Creating a local mirror allows organizations to optimize network bandw" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-create-a-debian-mirror-using-debmirror">How to Create a
+Debian Mirror Using debmirror</h1>
+<p>This guide explains what the <code>debmirror</code> utility is and
+provides a direct, step-by-step approach for system administrators to
+build and maintain a private Debian operating system mirror. Creating a
+local mirror allows organizations to optimize network bandwidth,
+drastically reduce package installation latency across internal fleets,
+and maintain reliable software distribution in air-gapped or restricted
+infrastructure environments.</p>
+<h3 id="what-is-debmirror">What is debmirror?</h3>
+<p><code>debmirror</code> is a Perl-based command-line utility designed
+to create and update a partial or full mirror of Debian-based package
+repositories. Unlike raw syncing tools like standard <code>rsync</code>,
+<code>debmirror</code> intelligently parses repository metadata,
+verifies package checksums, validates cryptographic GPG signatures, and
+allows administrators to filter content by distribution release,
+hardware architecture, and repository section.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Before deploying a Debian mirror, ensure the host machine meets the
+following requirements:</p>
+<ul>
+<li><strong>Storage:</strong> A full mirror can exceed several
+terabytes. A filtered mirror (e.g., modern <code>amd64</code>
+architecture for a single release like <code>bookworm</code>) requires
+roughly 100 GB to 300 GB of storage.</li>
+<li><strong>Packages:</strong> Install <code>debmirror</code>,
+<code>rsync</code>, and GPG support utilities.</li>
+<li><strong>Web Server:</strong> A lightweight HTTP server such as Nginx
+or Apache to serve the mirrored packages to client machines.</li>
+</ul>
+<p>Run the following command on Debian to install the necessary
+tools:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install <span class="at">-y</span> debmirror rsync ed gpgv</span></code></pre></div>
+<h3 id="configuring-gpg-keyrings">Configuring GPG Keyrings</h3>
+<p><code>debmirror</code> validates packages against Debian's official
+archive keys. Import the active Debian archive keyrings into a dedicated
+keyring location:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /root/.gnupg</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gpg</span> <span class="at">--no-default-keyring</span> <span class="at">--keyring</span> /etc/apt/trusted.gpg.d/debian-archive-keyring.gpg <span class="at">--export</span> <span class="kw">|</span> <span class="ex">gpg</span> <span class="at">--no-default-keyring</span> <span class="at">--keyring</span> ~/.gnupg/trustedkeys.gpg <span class="at">--import</span></span></code></pre></div>
+<h3 id="creating-the-mirror-script">Creating the Mirror Script</h3>
+<p>To maintain consistent updates, create a dedicated script rather than
+running raw commands. Below is an example script targeting a modern
+Debian environment:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-e</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Target directory where packages will be stored</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="va">MIRROR_DIR</span><span class="op">=</span><span class="st">&quot;/var/www/html/debian&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Upstream Debian server</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="va">UPSTREAM_HOST</span><span class="op">=</span><span class="st">&quot;ftp.debian.org&quot;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="va">UPSTREAM_DIR</span><span class="op">=</span><span class="st">&quot;/debian&quot;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Architecture, distribution, and sections to mirror</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="va">ARCH</span><span class="op">=</span><span class="st">&quot;amd64&quot;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="va">DIST</span><span class="op">=</span><span class="st">&quot;bookworm,bookworm-updates,bookworm-security&quot;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="va">SECTION</span><span class="op">=</span><span class="st">&quot;main,contrib,non-free,non-free-firmware&quot;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="ex">debmirror</span> <span class="dt">\</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">--host</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${UPSTREAM_HOST}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">--root</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${UPSTREAM_DIR}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">--method</span><span class="op">=</span>rsync <span class="dt">\</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">--progress</span> <span class="dt">\</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">--dist</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${DIST}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">--section</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${SECTION}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">--arch</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${ARCH}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">--cleanup</span> <span class="dt">\</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">--nosource</span> <span class="dt">\</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">--rsync-extra</span><span class="op">=</span>none <span class="dt">\</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">--check-gpg</span> <span class="dt">\</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;</span><span class="va">${MIRROR_DIR}</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Key arguments explained:</p>
+<ul>
+<li><code>--method=rsync</code>: Specifies the transfer protocol (HTTP
+and FTP are also supported).</li>
+<li><code>--dist</code>: The Debian releases to fetch.</li>
+<li><code>--arch</code>: Limits packages to specified architectures
+(e.g., <code>amd64</code>, <code>arm64</code>). Omitting unused
+architectures saves massive amounts of disk space.</li>
+<li><code>--nosource</code>: Skips downloading source code packages
+(<code>.dsc</code> and <code>.tar.gz</code>) to conserve bandwidth and
+storage.</li>
+<li><code>--cleanup</code>: Deletes packages locally that have been
+removed from the upstream archive.</li>
+</ul>
+<p>Make the script executable and run the initial sync:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x /usr/local/bin/sync-debian-mirror.sh</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/usr/local/bin/sync-debian-mirror.sh</span></span></code></pre></div>
+<h3 id="serving-the-mirror-over-http">Serving the Mirror Over HTTP</h3>
+<p>Install and configure Nginx to expose the repository directory over
+the local network:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> nginx</span></code></pre></div>
+<p>Create an Nginx configuration file at
+<code>/etc/nginx/sites-available/debmirror</code>:</p>
+<pre class="nginx"><code>server {
+    listen 80;
+    server_name mirror.internal.lan;
+    root /var/www/html/debian;
+
+    location / {
+        autoindex on;
+    }
+}</code></pre>
+<p>Enable the configuration and reload Nginx:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ln <span class="at">-s</span> /etc/nginx/sites-available/debmirror /etc/nginx/sites-enabled/</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl reload nginx</span></code></pre></div>
+<h3 id="automating-repository-synchronization">Automating Repository
+Synchronization</h3>
+<p>Configure a cron job to keep the mirror updated on a scheduled basis,
+typically during off-peak hours:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> crontab <span class="at">-e</span></span></code></pre></div>
+<p>Add the following entry to update the mirror daily at 2:00 AM:</p>
+<pre class="cron"><code>0 2 * * * /usr/local/bin/sync-debian-mirror.sh &gt; /var/log/debmirror.log 2&gt;&amp;1</code></pre>
+<h3 id="configuring-client-machines">Configuring Client Machines</h3>
+<p>Update the <code>/etc/apt/sources.list</code> file on internal client
+machines to pull from the newly configured private mirror instead of
+external repositories:</p>
+<pre class="text"><code>deb http://mirror.internal.lan/debian bookworm main contrib non-free non-free-firmware
+deb http://mirror.internal.lan/debian bookworm-updates main contrib non-free non-free-firmware
+deb http://mirror.internal.lan/debian bookworm-security main contrib non-free non-free-firmware</code></pre>
+<p>Run <code>apt update</code> on the client to confirm successful
+connectivity and repository indexing.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

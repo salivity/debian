@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian usrmerge Converts Historic Directories - debian</title>
+    <meta name="description" content="The usrmerge package in Debian transitions systems from the legacy split-filesystem layout to a modernized, unified directory structure by consolidating /bin, /sbin, /lib, and related system directories into /usr. This article explains the technical mecha">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-usrmerge-converts-historic-directories">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian usrmerge Converts Historic Directories - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-usrmerge-converts-historic-directories" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The usrmerge package in Debian transitions systems from the legacy split-filesystem layout to a modernized, unified directory structure by consolidating /bin, /sbin, /lib, and related system directories into /usr. This article explains the technical mecha" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-usrmerge-converts-historic-directories">How Debian
+usrmerge Converts Historic Directories</h1>
+<p>The <code>usrmerge</code> package in Debian transitions systems from
+the legacy split-filesystem layout to a modernized, unified directory
+structure by consolidating <code>/bin</code>, <code>/sbin</code>,
+<code>/lib</code>, and related system directories into
+<code>/usr</code>. This article explains the technical mechanics behind
+this conversion, the historical reasons for the split, the safety checks
+performed during the merge, and how compatibility symlinks ensure
+uninterrupted system operation.</p>
+<h3 id="the-historical-split-vs-unified-paths">The Historical Split vs.
+Unified Paths</h3>
+<p>In early Unix and Linux environments, storage limitations
+necessitated splitting binaries and libraries across different physical
+drives or partitions. Vital maintenance and recovery tools were placed
+on the root filesystem in <code>/bin</code>, <code>/sbin</code>, and
+<code>/lib</code> to allow booting and repairs before the secondary
+<code>/usr</code> partition could be mounted.</p>
+<p>Modern hardware and initramfs systems made this distinction obsolete.
+Maintaining duplicate directory hierarchies added unnecessary complexity
+to package management, software search paths (<code>$PATH</code>), and
+system maintenance. A unified <code>/usr</code> directory tree
+simplifies the operating system layout, allowing the entire base OS to
+be mounted read-only, snapshotted, or shared across containers.</p>
+<h3 id="target-directories-for-conversion">Target Directories for
+Conversion</h3>
+<p>The <code>usrmerge</code> package converts four primary top-level
+directories into symbolic links pointing to their counterparts inside
+<code>/usr</code>:</p>
+<ul>
+<li><code>/bin</code> becomes a symlink to <code>usr/bin</code></li>
+<li><code>/sbin</code> becomes a symlink to <code>usr/sbin</code></li>
+<li><code>/lib</code> becomes a symlink to <code>usr/lib</code></li>
+<li>Architecture-specific libraries (such as <code>/lib32</code>,
+<code>/lib64</code>, and <code>/libo32</code>) become symlinks to their
+corresponding <code>/usr/lib*</code> paths.</li>
+</ul>
+<h3 id="pre-conversion-safety-and-sanity-checks">Pre-Conversion Safety
+and Sanity Checks</h3>
+<p>Before altering any files, the core conversion script
+(<code>convert-usrmerge</code>, written in Perl) executes a sequence of
+non-destructive integrity checks to prevent system breakage:</p>
+<ol type="1">
+<li><strong>Conflict Detection:</strong> The script scans both locations
+(for example, <code>/bin/grep</code> and <code>/usr/bin/grep</code>). If
+a file exists in both places, it inspects whether they are identical
+hard links, matching symlinks, or identical content. If two differing
+files share the same relative path, the script halts with an error to
+prevent data loss.</li>
+<li><strong>Symlink and Alias Validation:</strong> It verifies that
+directories are not already configured incorrectly, partially converted,
+or blocked by non-standard mounts.</li>
+<li><strong>Storage and Filesystem Checks:</strong> It ensures the
+destination filesystem inside <code>/usr</code> has sufficient free
+space, supported inode capacities, and does not reside on a separate
+read-only mount during migration.</li>
+</ol>
+<p>If any check fails, the conversion terminates immediately, leaving
+the existing filesystem untouched.</p>
+<h3 id="the-conversion-process">The Conversion Process</h3>
+<p>Once the environment passes all validation checks,
+<code>usrmerge</code> systematically migrates files and directories:</p>
+<ol type="1">
+<li><strong>Directory Tree Duplication:</strong> For any nested
+directory within a root path (such as subfolders within
+<code>/lib</code>), identical directory paths are created within
+<code>/usr</code>.</li>
+<li><strong>File Relocation:</strong> Files residing exclusively in root
+directories are moved to their respective <code>/usr</code>
+destinations. Because hard links cannot cross filesystem boundaries,
+files are copied and unlinked if separate partitions were historically
+used, though standard Debian configurations perform this directly within
+the same underlying filesystem.</li>
+<li><strong>Replacing Root Directories with Symlinks:</strong> Once an
+original root directory is emptied, it is deleted. The script
+immediately creates a relative symbolic link in its place pointing to
+the consolidated <code>/usr</code> path (e.g.,
+<code>ln -s usr/bin /bin</code>).</li>
+<li><strong>Dynamic Linker Handling:</strong> The dynamic linker (such
+as <code>/lib64/ld-linux-x86-64.so.2</code>) is handled carefully so
+executing processes, including the Perl interpreter running the
+migration script, do not lose access to shared runtime libraries
+mid-execution.</li>
+</ol>
+<h3 id="post-migration-compatibility">Post-Migration Compatibility</h3>
+<p>After the merge completes, existing software, hardcoded scripts, and
+shell configurations function without modification. A call to
+<code>/bin/sh</code> or <code>/usr/bin/sh</code> accesses the exact same
+binary because <code>/bin</code> directly resolves to
+<code>usr/bin</code>. Debian packages can then safely install files
+directly into <code>/usr</code>, completing the operating system's
+transition to a unified filesystem hierarchy.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

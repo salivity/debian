@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Alien Converts Foreign Packages to DEB - debian</title>
+    <meta name="description" content="The alien command-line utility serves as a package converter for Linux systems, enabling the installation of non-native packages on Debian-based distributions. This article explains the internal mechanics of alien, detailing how it unpacks source package">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-alien-converts-foreign-packages-to-deb">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Alien Converts Foreign Packages to DEB - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-alien-converts-foreign-packages-to-deb" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The alien command-line utility serves as a package converter for Linux systems, enabling the installation of non-native packages on Debian-based distributions. This article explains the internal mechanics of alien, detailing how it unpacks source package" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-alien-converts-foreign-packages-to-deb">How Alien Converts
+Foreign Packages to DEB</h1>
+<p>The <code>alien</code> command-line utility serves as a package
+converter for Linux systems, enabling the installation of non-native
+packages on Debian-based distributions. This article explains the
+internal mechanics of <code>alien</code>, detailing how it unpacks
+source package archives—such as Red Hat RPM, Slackware TGZ, Stampede
+SLP, and Solaris PKG—translates their structural metadata and control
+scripts into Debian-compliant formats, and rebuilds the resulting file
+tree into a functional <code>.deb</code> archive.</p>
+<h3 id="1-source-package-extraction">1. Source Package Extraction</h3>
+<p>When <code>alien</code> is executed against a foreign package format
+(such as an <code>.rpm</code> file), its first step is to unpack the
+archive into a temporary working directory. Rather than handling
+decompression natively, <code>alien</code> leverages standard system
+utilities corresponding to the target package type:</p>
+<ul>
+<li><strong>RPM:</strong> Invokes tools such as <code>rpm2cpio</code>
+piped to <code>cpio</code> to extract the embedded file system and
+payload.</li>
+<li><strong>Slackware (TGZ/TXZ):</strong> Utilizes standard
+<code>tar</code> utilities along with compression tools like
+<code>gzip</code> or <code>xz</code>.</li>
+<li><strong>Stampede SLP and Solaris PKG:</strong> Executes their
+respective system unpackers.</li>
+</ul>
+<p>Once unpacked, the entire directory tree of binaries, configuration
+files, and documentation is placed into a temporary root directory
+mimicking the target Linux filesystem (e.g., <code>/usr/bin</code>,
+<code>/etc</code>).</p>
+<h3 id="2-metadata-extraction-and-translation">2. Metadata Extraction
+and Translation</h3>
+<p>Debian packages rely on a specific <code>DEBIAN</code> control
+directory containing structured metadata that governs package
+management. <code>alien</code> translates foreign metadata into
+Debian-compatible files:</p>
+<ul>
+<li><strong>Control File Generation:</strong> <code>alien</code> queries
+the foreign package for metadata such as package name, version,
+architecture, and description. For an RPM, it queries tags via
+<code>rpm</code> or extracts the internal spec structure. It then maps
+these values to the fields required by Debian's
+<code>DEBIAN/control</code> file (e.g., <code>Package</code>,
+<code>Version</code>, <code>Architecture</code>,
+<code>Maintainer</code>, and <code>Description</code>).</li>
+<li><strong>Dependency Handling:</strong> Foreign package dependency
+names rarely match Debian package names. By default, <code>alien</code>
+does not automatically translate or enforce complex dependencies, which
+avoids breaking local package trees, though it can attempt basic
+dependency mapping if explicitly instructed.</li>
+<li><strong>Maintainer Scripts:</strong> If foreign pre-installation,
+post-installation, or removal scripts are present, <code>alien</code>
+extracts them. By default, it excludes them to prevent incompatible
+shell scripts from damaging the host system, but users can force their
+inclusion as standard Debian maintainer scripts (<code>preinst</code>,
+<code>postinst</code>, <code>prerm</code>, <code>postrm</code>).</li>
+</ul>
+<h3 id="3-assembling-the-debian-package">3. Assembling the Debian
+Package</h3>
+<p>After the filesystem hierarchy is prepared and the
+<code>DEBIAN</code> control directory is fully populated,
+<code>alien</code> builds the package:</p>
+<ol type="1">
+<li><strong>Permission Normalization:</strong> Permissions on files and
+directories are checked and normalized to conform to Debian policy,
+ensuring standard users cannot alter critical system binaries.</li>
+<li><strong>Archive Compilation:</strong> The utility executes Debian’s
+native packaging tool, <code>dpkg-deb</code>, using the command
+<code>dpkg-deb --build &lt;temporary_directory&gt; &lt;output_name&gt;.deb</code>.</li>
+<li><strong>Cleanup:</strong> Once <code>dpkg-deb</code> compiles the
+control information and payload into the final compressed
+<code>.deb</code> archive, the temporary directory is deleted.</li>
+</ol>
+<p>The resulting <code>.deb</code> file can then be installed directly
+on Debian, Ubuntu, and derivative operating systems using native package
+managers such as <code>dpkg -i</code> or <code>apt install</code>.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

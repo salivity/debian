@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiger Security Audits and Intrusion Checks on Debian - debian</title>
+    <meta name="description" content="Tiger is a modular, host-based security audit and intrusion detection tool that actively monitors the integrity of the Debian operating system. It performs periodic security audits by running an automated suite of POSIX-compliant shell scripts and C binar">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/tiger-security-audits-and-intrusion-checks-on-debian">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Tiger Security Audits and Intrusion Checks on Debian - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/tiger-security-audits-and-intrusion-checks-on-debian" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Tiger is a modular, host-based security audit and intrusion detection tool that actively monitors the integrity of the Debian operating system. It performs periodic security audits by running an automated suite of POSIX-compliant shell scripts and C binar" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="tiger-security-audits-and-intrusion-checks-on-debian">Tiger
+Security Audits and Intrusion Checks on Debian</h1>
+<p>Tiger is a modular, host-based security audit and intrusion detection
+tool that actively monitors the integrity of the Debian operating
+system. It performs periodic security audits by running an automated
+suite of POSIX-compliant shell scripts and C binaries triggered by
+system schedulers. These checks inspect file system permissions, system
+binaries, open network ports, user accounts, and kernel configurations
+against predefined security baselines, generating centralized reports
+that alert system administrators to anomalies, misconfigurations, and
+potential intrusions.</p>
+<h3 id="periodic-execution-via-cron">Periodic Execution via Cron</h3>
+<p>Tiger implements periodic scheduling through Debian’s native
+<code>cron</code> infrastructure. Upon installation via Debian's package
+manager, the package configures automated execution scripts located
+within <code>/etc/cron.d/tiger</code>,
+<code>/etc/cron.daily/tiger</code>, or
+<code>/etc/cron.monthly/tiger</code>.</p>
+<p>The daily cron job runs lightweight checks designed to detect
+immediate signs of intrusion, such as modifications to system binaries,
+unexpected root-level access, and altered system logs. The monthly cron
+execution runs a comprehensive, resource-intensive audit that reviews
+historical security baselines, dormant user accounts, file integrity
+across every mounted partition, and package-level checksum mismatches.
+Administrators can customize check frequencies and runtime behavior
+using the central configuration file located at
+<code>/etc/tiger/tigerrc</code>.</p>
+<h3 id="core-inspection-modules-and-vulnerability-scanning">Core
+Inspection Modules and Vulnerability Scanning</h3>
+<p>Tiger relies on independent, modular scripts located in
+<code>/usr/lib/tiger/systems/Linux/</code> and
+<code>/usr/lib/tiger/scripts/</code> to audit specific aspects of the
+Debian environment:</p>
+<ul>
+<li><strong>File System and Permissions:</strong> Scans for
+world-writable directories, unauthorized SUID/SGID executables, orphaned
+files without assigned owners, and hidden files across the root
+filesystem.</li>
+<li><strong>Account and Authentication Security:</strong> Parses
+<code>/etc/passwd</code>, <code>/etc/shadow</code>, and PAM
+configurations to identify empty passwords, duplicate user IDs,
+unauthorized root equivalencies (UID 0), and weak administrative
+credentials.</li>
+<li><strong>Network and Service Auditing:</strong> Invokes system
+networking utilities (<code>netstat</code>, <code>ss</code>, and
+<code>lsof</code>) to analyze listening TCP and UDP sockets, comparing
+active listeners against a predefined list of valid services to detect
+rogue processes or backdoors.</li>
+<li><strong>System Binary Integrity:</strong> Integrates with Debian
+tools such as <code>debsums</code> to compare the SHA-256 and MD5
+checksums of installed packages against the pristine checksums published
+in the Debian repository.</li>
+<li><strong>Kernel and Process Auditing:</strong> Checks
+<code>/proc</code> and kernel runtime variables (<code>sysctl</code>) to
+identify hidden processes, rootkit traces, unsecured network parameter
+flags (such as disabled SYN cookies or enabled IP forwarding), and
+unapplied kernel mitigations.</li>
+</ul>
+<h3 id="baseline-comparison-and-false-positive-reduction">Baseline
+Comparison and False Positive Reduction</h3>
+<p>To prevent false alarms during periodic checks, Tiger utilizes
+template baselines stored in <code>/etc/tiger/</code>. System
+administrators can define expected anomalies—such as legitimate custom
+SUID binaries or designated open ports—by recording them in
+configuration override files like <code>tiger.ignore</code>. During each
+scheduled audit, Tiger filters its findings through these ignore
+definitions, highlighting only new, unverified deviations from the
+established system state.</p>
+<h3 id="alerting-and-reporting-architecture">Alerting and Reporting
+Architecture</h3>
+<p>Once the periodic audit sequence finishes, Tiger compiles all output
+into a timestamped security report stored in
+<code>/var/log/tiger/security.report.&lt;date&gt;</code>. If configured,
+Tiger immediately pipes this report to the local mail server via
+<code>mailx</code> or <code>sendmail</code>, dispatching a summarized
+digest directly to the root mailbox or an external administrative email
+address. The report groups findings into critical severity flags: alerts
+requiring immediate action (FAIL), security warnings (WARN), and
+informational optimization suggestions (INFO).</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

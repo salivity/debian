@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Source Package Files Explained - debian</title>
+    <meta name="description" content="A Debian source package provides the necessary code and instructions to compile and build binary .deb packages for the Debian operating system. In the Debian archive, a standard source package typically consists of two to three distinct files: a control f">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-source-package-files-explained">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Source Package Files Explained - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-source-package-files-explained" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="A Debian source package provides the necessary code and instructions to compile and build binary .deb packages for the Debian operating system. In the Debian archive, a standard source package typically consists of two to three distinct files: a control f" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-source-package-files-explained">Debian Source Package
+Files Explained</h1>
+<p>A Debian source package provides the necessary code and instructions
+to compile and build binary <code>.deb</code> packages for the Debian
+operating system. In the Debian archive, a standard source package
+typically consists of two to three distinct files: a control file
+(<code>.dsc</code>), an upstream source tarball
+(<code>.orig.tar.*</code>), and a Debian-specific packaging tarball
+(<code>.debian.tar.*</code>). This modular structure separates the
+original software author's code from the Debian-specific modifications,
+facilitating easier maintenance and transparent tracking of downstream
+changes.</p>
+<h3 id="the-debian-source-control-file-dsc">The Debian Source Control
+File (<code>.dsc</code>)</h3>
+<p>The <code>.dsc</code> (Debian Source Control) file is a lightweight,
+human-readable text file that functions as the manifest for the entire
+source package. It is cryptographically signed using GnuPG by the
+package maintainer or the Debian build daemon. Key contents include:</p>
+<ul>
+<li><strong>Package Metadata:</strong> Package name, version, maintainer
+contact details, and source standards version.</li>
+<li><strong>Build Dependencies:</strong> A list of software packages and
+libraries required to build the source code (defined by
+<code>Build-Depends</code>).</li>
+<li><strong>Binary Packages:</strong> Names and architectures of the
+binary packages that this source generates.</li>
+<li><strong>File Checksums:</strong> File names, sizes, and
+cryptographic hashes (MD5, SHA-1, and SHA-256) of all accompanying files
+belonging to the source package, ensuring integrity and preventing
+tampering.</li>
+</ul>
+<h3 id="the-upstream-tarball-origtar">The Upstream Tarball
+(<code>.orig.tar.*</code>)</h3>
+<p>For non-native software (software created outside of Debian), the
+upstream source code is packaged in an original tarball. This file
+usually has the extension <code>.orig.tar.gz</code>,
+<code>.orig.tar.bz2</code>, or <code>.orig.tar.xz</code>.</p>
+<ul>
+<li><strong>Purity:</strong> It represents the pristine, unmodified
+release archive distributed by the upstream developers.</li>
+<li><strong>Multiple Tarballs:</strong> In cases where upstream projects
+distribute components across multiple archives, Debian supports multiple
+upstream tarballs using the format
+<code>&lt;package&gt;_&lt;version&gt;.orig-&lt;component&gt;.tar.xz</code>.</li>
+</ul>
+<h3 id="the-debian-packaging-tarball-debiantar">The Debian Packaging
+Tarball (<code>.debian.tar.*</code>)</h3>
+<p>In the modern standard "3.0 (quilt)" source format, all
+Debian-specific changes are packaged in a separate archive named
+<code>&lt;package&gt;_&lt;version&gt;.debian.tar.xz</code> (or
+<code>.gz</code>/<code>.bz2</code>). This archive unpacks directly into
+a <code>debian/</code> directory inside the extracted source root and
+contains:</p>
+<ul>
+<li><strong>Control Files:</strong> Files such as <code>control</code>
+(package descriptions and dependencies), <code>rules</code> (the
+executable Makefile that orchestrates the build process), and
+<code>changelog</code> (history of package updates).</li>
+<li><strong>Copyright and Documentation:</strong> License documentation
+(<code>copyright</code>) and distribution-specific manuals or
+notes.</li>
+<li><strong>Patches:</strong> A <code>patches/</code> directory managed
+by the quilt tool, storing downstream bug fixes or compatibility patches
+applied cleanly on top of the upstream source during build time.</li>
+</ul>
+<h3 id="variations-native-packages-and-legacy-formats">Variations:
+Native Packages and Legacy Formats</h3>
+<ul>
+<li><strong>Native Debian Packages:</strong> For software developed
+specifically for Debian (such as <code>dpkg</code> or <code>apt</code>),
+there is no concept of separate "upstream" code. A native package
+consists of only two files: the <code>.dsc</code> file and a single
+<code>&lt;package&gt;_&lt;version&gt;.tar.xz</code> file containing both
+the source code and the <code>debian/</code> directory.</li>
+<li><strong>Legacy "1.0" Format:</strong> In older archives, Debian
+non-native packages used a <code>.diff.gz</code> file instead of a
+<code>.debian.tar.*</code> file. This format stored all Debian files and
+upstream code modifications as a single monolithic diff against the
+<code>.orig.tar.gz</code> archive. While still readable by Debian
+package management tools, modern development strictly favors the cleaner
+"3.0 (quilt)" split.</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

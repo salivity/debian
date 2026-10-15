@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Bug Tracking System: How Debian Manages Bugs - debian</title>
+    <meta name="description" content="The Debian operating system tracks and manages software defects through its dedicated, email-driven platform known as the Debian Bug Tracking System (BTS). Rather than relying on standard web forms, the BTS orchestrates all bug reports, technical discussi">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-bug-tracking-system-how-debian-manages-bugs">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Bug Tracking System: How Debian Manages Bugs - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-bug-tracking-system-how-debian-manages-bugs" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian operating system tracks and manages software defects through its dedicated, email-driven platform known as the Debian Bug Tracking System (BTS). Rather than relying on standard web forms, the BTS orchestrates all bug reports, technical discussi" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-bug-tracking-system-how-debian-manages-bugs">Debian Bug
+Tracking System: How Debian Manages Bugs</h1>
+<p>The Debian operating system tracks and manages software defects
+through its dedicated, email-driven platform known as the Debian Bug
+Tracking System (BTS). Rather than relying on standard web forms, the
+BTS orchestrates all bug reports, technical discussions, and resolutions
+using an automated, transparent mail processing infrastructure. This
+article explains how the Debian BTS operates, from initial submission
+and triage to metadata management and its critical role in maintaining
+the stability of the Debian distribution.</p>
+<h3 id="email-driven-submission-and-bug-generation">Email-Driven
+Submission and Bug Generation</h3>
+<p>The foundation of the Debian BTS is entirely built on email. When a
+user or developer identifies a flaw, they submit an email formatted with
+specific headers to the tracking system's ingest address
+(<code>submit@bugs.debian.org</code>). Most users generate these reports
+using the command-line utility <code>reportbug</code>, which
+automatically gathers relevant system information, including package
+versions, kernel details, and system dependencies, before generating the
+message.</p>
+<p>Once received, the BTS assigns a unique numeric identifier to the
+issue, creates a persistent log, and forwards the entire report to the
+maintainer of the affected package. The system also confirms receipt
+with the submitter, providing the assigned bug number for future
+reference.</p>
+<h3 id="public-transparency-and-web-archival">Public Transparency and
+Web Archival</h3>
+<p>Every transaction within the BTS is public. While interaction occurs
+over email, the BTS simultaneously renders every conversation, patch,
+and status change to a searchable web interface. Anyone can monitor bugs
+by package name, maintainer, severity, or bug number.</p>
+<p>Subsequent communication regarding an issue occurs by sending emails
+directly to <code>&lt;bugnumber&gt;@bugs.debian.org</code>. These
+messages are automatically appended to the public log and forwarded to
+all subscribed parties, ensuring an open audit trail of the problem and
+its potential solutions.</p>
+<h3 id="categorization-severities-and-tags">Categorization: Severities
+and Tags</h3>
+<p>To organize tens of thousands of active reports, Debian classifies
+each bug using defined severities and descriptive tags:</p>
+<ul>
+<li><strong>Severities:</strong> Reports are categorized by impact,
+ranging from lowest to highest: <code>wishlist</code>,
+<code>minor</code>, <code>normal</code>, <code>important</code>,
+<code>serious</code>, <code>grave</code>, and <code>critical</code>. The
+top three tiers (<code>serious</code>, <code>grave</code>, and
+<code>critical</code>) are designated as Release-Critical (RC)
+bugs.</li>
+<li><strong>Tags:</strong> Tags provide specific technical context.
+Common tags include <code>patch</code> (a fix is attached),
+<code>security</code> (vulnerabilities), <code>wontfix</code> (the
+maintainer intentionally declines the request), <code>upstream</code>
+(the issue originates from the original software authors), and
+<code>pending</code> (a fix is committed and awaiting upload).</li>
+</ul>
+<h3 id="the-control-bot-managing-bug-lifecycles">The Control Bot:
+Managing Bug Lifecycles</h3>
+<p>Maintainers and contributors adjust bug states using an automated
+processing bot reached at <code>control@bugs.debian.org</code>. Instead
+of clicking interface buttons, developers send text commands within the
+body of an email to instruct the bot. Common commands include:</p>
+<ul>
+<li><code>reassign</code>: Moves a bug to a different package if the
+fault was misattributed.</li>
+<li><code>severity</code>: Adjusts the priority tier of the issue.</li>
+<li><code>tags</code>: Adds or removes context labels.</li>
+<li><code>merge</code>: Combines duplicate bug reports so that updates
+to one apply to all duplicates.</li>
+<li><code>close</code>: Marks the bug as resolved, typically accompanied
+by an explanation or reference to a package version that includes the
+fix.</li>
+</ul>
+<p>Maintainers can also close bugs automatically through the Debian
+package archive software (DAK) by including a changelog entry formatted
+as <code>Closes: #123456</code> in an uploaded package release.</p>
+<h3 id="release-management-and-package-migration">Release Management and
+Package Migration</h3>
+<p>The BTS acts as a gatekeeper for Debian’s release lifecycle. Debian
+uses multiple branches, primarily <code>unstable</code> (where new
+packages land) and <code>testing</code> (the staging ground for the next
+stable release).</p>
+<p>Automated scripts continuously query the BTS for Release-Critical
+bugs. If a package in <code>unstable</code> has an unresolved RC bug, or
+if an update introduces a new RC bug, the package is blocked from
+migrating into <code>testing</code>. By tethering package progression
+directly to open bug data, the BTS ensures that the eventual stable
+release of Debian remains exceptionally reliable.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

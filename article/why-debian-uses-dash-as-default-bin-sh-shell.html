@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why Debian Uses Dash as Default /bin/sh Shell - debian</title>
+    <meta name="description" content="Debian uses the Debian Almquist Shell (dash) as its default system shell (/bin/sh) instead of the GNU Bourne-Again Shell (bash) to achieve faster execution speeds, lower resource consumption, and strict POSIX standard compliance. While interactive user ac">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/why-debian-uses-dash-as-default-bin-sh-shell">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Why Debian Uses Dash as Default /bin/sh Shell - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/why-debian-uses-dash-as-default-bin-sh-shell" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian uses the Debian Almquist Shell (dash) as its default system shell (/bin/sh) instead of the GNU Bourne-Again Shell (bash) to achieve faster execution speeds, lower resource consumption, and strict POSIX standard compliance. While interactive user ac" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="why-debian-uses-dash-as-default-binsh-shell">Why Debian Uses
+Dash as Default /bin/sh Shell</h1>
+<p>Debian uses the Debian Almquist Shell (dash) as its default system
+shell (<code>/bin/sh</code>) instead of the GNU Bourne-Again Shell
+(bash) to achieve faster execution speeds, lower resource consumption,
+and strict POSIX standard compliance. While interactive user accounts
+continue to use bash by default, shifting the non-interactive
+<code>/bin/sh</code> target to dash optimizes system boot times, package
+installation hooks, and maintenance scripts without altering the
+day-to-day terminal experience of users.</p>
+<h3 id="superior-execution-speed-and-faster-boot-times">Superior
+Execution Speed and Faster Boot Times</h3>
+<p>Dash is significantly lighter and faster than bash. Because operating
+systems run hundreds of shell scripts during startup, shutdown, and
+package management operations, the overhead of the interpreter directly
+impacts system latency. Dash initializes faster, executes basic control
+flow more rapidly, and avoids the computational overhead of the advanced
+scripting features present in bash. When Debian transitioned
+<code>/bin/sh</code> to dash in Debian 6.0 (Squeeze), the immediate
+result was a measurable reduction in system boot and maintenance
+times.</p>
+<h3 id="minimal-resource-footprint">Minimal Resource Footprint</h3>
+<p>Bash is a feature-rich, complex program designed primarily for
+interactive use, resulting in a large binary size and substantial memory
+overhead. In contrast, dash is derived from the NetBSD Almquist Shell
+and focuses purely on simplicity. The dash binary is typically under 150
+KB, whereas the bash binary often exceeds 1 MB. This small memory
+footprint makes dash ideal for resource-constrained environments, such
+as embedded hardware, minimal containers, and virtual machines. Dash
+also has fewer library dependencies, making it more resilient during
+system recovery or low-memory conditions.</p>
+<h3 id="strict-posix-compliance-and-portability">Strict POSIX Compliance
+and Portability</h3>
+<p>According to the Single UNIX Specification and POSIX standards,
+scripts specifying <code>#!/bin/sh</code> must adhere strictly to
+portable shell syntax. Because bash contains numerous non-standard
+extensions—commonly referred to as "bashisms"—developers writing scripts
+under a bash-linked <code>/bin/sh</code> frequently introduce
+non-portable code without realizing it. Dash implements only the
+standard POSIX shell specifications. By making dash the system shell,
+Debian forces system packages and maintainers to write clean, portable
+scripts, ensuring that code functions consistently across other
+UNIX-like platforms.</p>
+<h3 id="reduced-attack-surface">Reduced Attack Surface</h3>
+<p>Complex software containing extensive feature sets inherently carries
+a higher risk of security vulnerabilities. Dash contains only the logic
+required to parse and execute standard shell syntax, resulting in a much
+smaller codebase. This simplicity reduces the attack surface of critical
+system tasks. Notable security vulnerabilities that affected bash in the
+past, such as the "Shellshock" vulnerability, had no effect on
+dash-powered systems.</p>
+<h3 id="system-shell-vs-user-login-shell">System Shell vs. User Login
+Shell</h3>
+<p>It is essential to distinguish between the system shell
+(<code>/bin/sh</code>) and the interactive login shell. Debian uses dash
+strictly for <code>/bin/sh</code>, which is intended for non-interactive
+scripts. When a user creates a new account or opens a terminal emulator,
+the default login shell remains bash. This architecture gives users the
+advanced interactive features of bash—such as command completion,
+history management, and custom aliases—while reserving the high
+efficiency of dash for background operating system operations.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian RFP Bugs: Tracking Community Demand - debian</title>
+    <meta name="description" content="A Request for Package (RFP) bug in the Debian operating system is a formal submission filed in the Debian Bug Tracking System that asks volunteer maintainers to package and include new software in the official distribution. This article explains the techn">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-rfp-bugs-tracking-community-demand">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian RFP Bugs: Tracking Community Demand - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-rfp-bugs-tracking-community-demand" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="A Request for Package (RFP) bug in the Debian operating system is a formal submission filed in the Debian Bug Tracking System that asks volunteer maintainers to package and include new software in the official distribution. This article explains the techn" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-rfp-bugs-tracking-community-demand">Debian RFP Bugs:
+Tracking Community Demand</h1>
+<p>A Request for Package (RFP) bug in the Debian operating system is a
+formal submission filed in the Debian Bug Tracking System that asks
+volunteer maintainers to package and include new software in the
+official distribution. This article explains the technical purpose of an
+RFP bug, how it operates within Debian's Work-Needing and Prospective
+Packages (WNPP) infrastructure, and the specific mechanisms by which it
+aggregates, tracks, and signals community demand for new tools.</p>
+<h3 id="what-is-a-request-for-package-rfp-bug">What Is a Request for
+Package (RFP) Bug?</h3>
+<p>In the Debian ecosystem, the Bug Tracking System (BTS) does not
+exclusively handle software defects; it also tracks development
+workflows and prospective software. An RFP is a specific type of bug
+report submitted against the <code>wnpp</code> (Work-Needing and
+Prospective Packages) pseudo-package.</p>
+<p>When a user identifies an open-source tool that would benefit the
+Debian ecosystem but lacks the time, permissions, or packaging knowledge
+to maintain it themselves, they submit an RFP. The bug report serves as
+a formal public proposal for another Debian developer or maintainer to
+adopt the upstream software and create the corresponding
+<code>.deb</code> package.</p>
+<p>To create an RFP, users typically use Debian’s command-line tool
+<code>reportbug</code>, which guides them through providing essential
+metadata:</p>
+<ul>
+<li><strong>Package name:</strong> The upstream name of the
+software.</li>
+<li><strong>URL:</strong> The upstream repository or website.</li>
+<li><strong>License:</strong> Verification that the software complies
+with the Debian Free Software Guidelines (DFSG).</li>
+<li><strong>Description:</strong> An explanation of what the tool does
+and why it is useful.</li>
+</ul>
+<h3 id="how-rfp-bugs-track-community-demand">How RFP Bugs Track
+Community Demand</h3>
+<p>Debian relies almost entirely on volunteer maintainers who select
+software to package based on interest, utility, and broader community
+need. RFP bugs serve as the primary mechanism for measuring this demand
+in several ways:</p>
+<ol type="1">
+<li><p><strong>Centralized Discovery and Aggregation</strong><br />
+All RFP submissions are cataloged in Debian's WNPP database and mirrored
+across dedicated mailing lists and web portals. Maintainers seeking new
+projects browse these listings to identify which tools are missing from
+the archive.</p></li>
+<li><p><strong>User Interaction and BTS Feedback</strong><br />
+Users interested in a requested tool can subscribe to the RFP bug report
+via Debian’s Bug Tracking System. By adding context, technical use
+cases, or dependency requirements to the bug log, users generate
+discussion that signals high utility. A bug thread with extensive
+engagement and multiple confirmations of interest highlights that
+packaging the software will benefit a wide audience rather than a single
+niche use case.</p></li>
+<li><p><strong>Duplication Metrics</strong><br />
+When multiple users request the same tool independently, the BTS allows
+maintainers to merge duplicate reports. An RFP bug that has multiple
+merged reports or explicit links to other packaging requests across
+Debian derivatives (such as Ubuntu) acts as an empirical indicator of
+rising popularity.</p></li>
+<li><p><strong>Integration with the Packaging Lifecycle</strong><br />
+When a maintainer decides that an RFP shows sufficient community value
+and aligns with their packaging workload, they retitle the bug from
+<strong>RFP</strong> to <strong>ITP</strong> (Intent to Package). This
+transition communicates to the entire community that packaging is
+actively underway, preventing duplicated effort and closing the loop on
+the original community request once the software enters Debian's
+<code>unstable</code> archive.</p></li>
+</ol></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

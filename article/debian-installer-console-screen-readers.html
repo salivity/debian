@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Installer Console Screen Readers - debian</title>
+    <meta name="description" content="The Debian GNU/Linux operating system is widely recognized for its robust accessibility features, offering built-in tools that allow visually impaired users to complete the installation process independently. Within Debian&#39;s text-mode installer, console-l">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-installer-console-screen-readers">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Installer Console Screen Readers - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-installer-console-screen-readers" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian GNU/Linux operating system is widely recognized for its robust accessibility features, offering built-in tools that allow visually impaired users to complete the installation process independently. Within Debian&#39;s text-mode installer, console-l" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-installer-console-screen-readers">Debian Installer
+Console Screen Readers</h1>
+<p>The Debian GNU/Linux operating system is widely recognized for its
+robust accessibility features, offering built-in tools that allow
+visually impaired users to complete the installation process
+independently. Within Debian's text-mode installer, console-level screen
+reading is driven primarily by <strong>Speakup</strong> paired with
+<strong>Espeakup</strong>, alongside <strong>BRLTTY</strong> for
+refreshable Braille displays. This article details the specific
+console-level screen reader components integrated into the Debian
+installer and how they function during text-mode setup.</p>
+<h3 id="speakup-and-espeakup">Speakup and Espeakup</h3>
+<p>The core speech-synthesis environment in the Debian text installer
+relies on Speakup and Espeakup:</p>
+<ul>
+<li><strong>Speakup:</strong> This is an in-kernel console screen reader
+tailored specifically for Linux text consoles. Speakup interacts
+directly with the Linux virtual console subsystem, reviewing text
+written to the screen and sending it to a speech synthesizer. It
+supports both traditional hardware speech synthesizers (connected via
+serial ports or USB-to-serial adapters) and software synthesizers.</li>
+<li><strong>Espeakup:</strong> Because modern systems rarely include
+dedicated hardware speech synthesizers, Debian bundles Espeakup, a
+lightweight user-space connector daemon. Espeakup acts as a bridge
+between the kernel-level Speakup module and <strong>eSpeak-ng</strong>
+(a software speech synthesizer). This combination allows the installer
+to generate voice output directly through the system's standard sound
+card without requiring external speech hardware.</li>
+</ul>
+<h3 id="brltty-for-braille-consoles">BRLTTY for Braille Consoles</h3>
+<p>While not an audio screen reader, <strong>BRLTTY</strong> is an
+essential console-level screen access utility bundled into the Debian
+text installer. BRLTTY provides access to the text console for users
+operating a refreshable Braille display. It automatically probes and
+supports a vast range of Braille terminals via USB, serial, or Bluetooth
+connections, translating the text screen buffer into Braille output in
+real time.</p>
+<h3 id="activating-the-console-screen-reader">Activating the Console
+Screen Reader</h3>
+<p>During the boot stage of the Debian installation media, the console
+screen reader can be triggered without sighted assistance:</p>
+<ul>
+<li><strong>Sound Alert:</strong> Modern Debian installation media emit
+an acoustic beep upon loading the bootloader menu (GRUB or
+ISOLINUX).</li>
+<li><strong>Keyboard Trigger:</strong> Pressing the <code>s</code> key
+(or selecting the speech synthesis option in the menu) immediately
+launches the text installer with <code>speakup</code> and
+<code>espeakup</code> activated.</li>
+<li><strong>Sound Card Selection:</strong> If multiple audio devices are
+present, the installer can be configured with specific boot parameters
+to route speech output to the desired audio device.</li>
+</ul>
+<h3 id="post-installation-persistence">Post-Installation
+Persistence</h3>
+<p>Any accessibility configuration selected during the installation
+phase automatically carries over to the target system. When Debian is
+installed using the speech-enabled text installer, the installer copies
+<code>espeakup</code>, <code>speakup</code>, and relevant audio packages
+to the target installation and configures the
+<code>espeakup.service</code> systemd service to start automatically on
+subsequent boots, ensuring seamless access to the installed Linux
+console.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

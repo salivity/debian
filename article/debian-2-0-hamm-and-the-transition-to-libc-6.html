@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian 2.0 Hamm and the Transition to Libc6 - debian</title>
+    <meta name="description" content="Debian 2.0, codenamed &quot;Hamm&quot; and released in July 1998, represents a watershed milestone in the history of the Debian operating system due to its comprehensive transition from the older Linux libc5 to the modern GNU C Library 2, packaged as libc6. This ar">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-2-0-hamm-and-the-transition-to-libc-6">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian 2.0 Hamm and the Transition to Libc6 - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-2-0-hamm-and-the-transition-to-libc-6" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian 2.0, codenamed &quot;Hamm&quot; and released in July 1998, represents a watershed milestone in the history of the Debian operating system due to its comprehensive transition from the older Linux libc5 to the modern GNU C Library 2, packaged as libc6. This ar" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-20-hamm-and-the-transition-to-libc6">Debian 2.0 Hamm and
+the Transition to Libc6</h1>
+<p>Debian 2.0, codenamed "Hamm" and released in July 1998, represents a
+watershed milestone in the history of the Debian operating system due to
+its comprehensive transition from the older Linux libc5 to the modern
+GNU C Library 2, packaged as libc6. This article explores why this
+foundational transition was necessary, the technical hurdles Debian
+developers overcame to recompile the distribution without breaking
+existing installations, and how this architectural shift established
+modern standards for Debian's stability and multi-architecture
+capabilities.</p>
+<h3 id="the-need-to-move-from-libc5-to-libc6">The Need to Move from
+libc5 to libc6</h3>
+<p>During the mid-1990s, the Linux ecosystem relied primarily on Linux
+libc5, an independent fork of an earlier GNU C Library release tailored
+specifically for the Linux kernel. While libc5 served Linux well during
+its early growth, it faced significant limitations:</p>
+<ul>
+<li><strong>Standards Compliance:</strong> It drifted away from emerging
+POSIX, ISO C, and Single UNIX Specification standards.</li>
+<li><strong>Architecture Limitations:</strong> It was heavily tied to
+the x86 architecture and lacked clean support for 64-bit processors,
+such as the DEC Alpha.</li>
+<li><strong>Threading and Localization:</strong> It provided limited
+internationalization (NLA/locales) and lacked robust threading
+implementations.</li>
+</ul>
+<p>The Free Software Foundation resolved these issues with GNU C Library
+2 (glibc 2). Because glibc 2 was a major revision, Debian packaged it
+under the soname <code>libc6</code>. However, libc6 altered application
+binary interfaces (ABIs), meaning dynamic binaries compiled against
+libc5 could not run against libc6 libraries without causing application
+crashes.</p>
+<h3 id="engineering-the-migration-in-hamm">Engineering the Migration in
+Hamm</h3>
+<p>Transitioning an entire operating system to an incompatible core C
+library required recompiling thousands of packages and ensuring existing
+user systems remained bootable and functional throughout the upgrade.
+Debian 2.0 achieved this through several deliberate engineering
+steps:</p>
+<ol type="1">
+<li><strong>Parallel Library Support:</strong> To prevent installed
+proprietary software and un-migrated packages from breaking, Debian
+maintained compatibility packages. The runtime linker
+(<code>ld.so</code>) was updated to manage paths for both libc5
+(<code>/lib/libc.so.5</code>) and libc6 (<code>/lib/libc.so.6</code>)
+simultaneously.</li>
+<li><strong>Coordinated Recompilation:</strong> Developers had to
+bootstrap the compiler toolchain (<code>gcc</code>,
+<code>binutils</code>, and <code>make</code>) against libc6, then
+recompile packages in strict dependency order. Core utilities like
+<code>dpkg</code>, <code>bash</code>, and <code>tar</code> had to be
+transitioned first.</li>
+<li><strong>Upgrade Path Solutions:</strong> Because the package manager
+(<code>dpkg</code>) itself relied on the C library, standard upgrade
+paths risked circular dependency failure. The development community
+created a standalone shell utility known as <code>autoup.sh</code>,
+which manually unpacked base libc6 packages in a fail-safe order. Debian
+2.0 also marked the initial, experimental introduction of the Advanced
+Package Tool (<code>apt</code>), laying the groundwork for automated
+upgrades in future releases.</li>
+</ol>
+<h3 id="lasting-impact-on-the-debian-ecosystem">Lasting Impact on the
+Debian Ecosystem</h3>
+<p>Debian 2.0 Hamm proved that a decentralized, community-driven
+distribution could execute a deep architectural overhaul across an
+entire software archive.</p>
+<p>The move to libc6 enabled Debian to officially support multiple
+hardware architectures. Hamm was the first release to officially include
+the Motorola 68000 (<code>m68k</code>) architecture alongside
+<code>i386</code>, with ports to Alpha, Sparc, and PowerPC rapidly
+following. By standardizing on glibc, Debian established an
+enterprise-grade foundation that streamlined long-term binary stability,
+international localization, and the modern packaging workflows still
+used today.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/debian'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
