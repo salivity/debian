@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automate Debian Provisioning with virt-install - debian</title>
+    <meta name="description" content="This article explores virt-install, a command-line provisioning tool for libvirt-based virtualization, and details how it automates the deployment of Debian guest operating systems. Readers will learn the core concepts of virt-install, its integration wit">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/automate-debian-provisioning-with-virt-install">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Automate Debian Provisioning with virt-install - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/automate-debian-provisioning-with-virt-install" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores virt-install, a command-line provisioning tool for libvirt-based virtualization, and details how it automates the deployment of Debian guest operating systems. Readers will learn the core concepts of virt-install, its integration wit" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="automate-debian-provisioning-with-virt-install">Automate Debian
+Provisioning with virt-install</h1>
+<p>This article explores <code>virt-install</code>, a command-line
+provisioning tool for libvirt-based virtualization, and details how it
+automates the deployment of Debian guest operating systems. Readers will
+learn the core concepts of <code>virt-install</code>, its integration
+with the KVM hypervisor, and the exact mechanisms—specifically Debian
+preseed files and unattended installation flags—used to deploy fully
+configured Debian virtual machines without manual intervention.</p>
+<hr />
+<h3 id="what-is-virt-install">What is virt-install?</h3>
+<p><code>virt-install</code> is a command-line utility used to provision
+new virtual machines (VMs) running on top of hypervisors like KVM
+(Kernel-based Virtual Machine) and Xen through the <code>libvirt</code>
+management daemon. It provides an interface to configure hardware
+parameters—such as CPU cores, memory allocation, storage paths, and
+network interfaces—while orchestrating the operating system installation
+process.</p>
+<p>Because <code>virt-install</code> operates entirely from the command
+line, it integrates cleanly into Bash scripts, infrastructure pipelines,
+and configuration management tools such as Ansible.</p>
+<hr />
+<h3 id="the-mechanism-of-debian-automation">The Mechanism of Debian
+Automation</h3>
+<p>Standard operating system installations require a user to step
+through interactive menus to configure localization, network interfaces,
+disk partitioning, and user accounts. To automate this process for
+Debian, <code>virt-install</code> pairs network installation sources
+with Debian's native automation framework: the <strong>Preseed
+file</strong>.</p>
+<p>A preseed file (<code>preseed.cfg</code>) contains predetermined
+answers to all questions normally posed by the Debian Installer
+(<code>debian-installer</code>). When combined with
+<code>virt-install</code>, the provisioning flow works as follows:</p>
+<ol type="1">
+<li><strong>Direct Kernel/Initrd Fetching:</strong> Using the
+<code>--location</code> flag, <code>virt-install</code> retrieves the
+Debian kernel and initial RAM disk (<code>initrd.gz</code>) directly
+from a local ISO or a remote Debian mirror (HTTP/FTP).</li>
+<li><strong>Passing Installer Arguments:</strong> Using the
+<code>--extra-args</code> flag, parameters are appended directly to the
+kernel command line. This tells the installer to run non-interactively
+and points it to the preseed file location.</li>
+<li><strong>Unattended Execution:</strong> The Debian installer boots,
+reads the preseed answers, sets up the disks, installs the base system,
+and configures the environment without manual intervention.</li>
+</ol>
+<hr />
+<h3 id="key-components-for-automated-debian-deployment">Key Components
+for Automated Debian Deployment</h3>
+<h4 id="1-the-preseed-configuration">1. The Preseed Configuration</h4>
+<p>A <code>preseed.cfg</code> file must be made accessible to the VM
+during installation, commonly via a local web server (e.g.,
+<code>http://192.168.122.1/preseed.cfg</code>) or embedded into an
+initrd image. A basic preseed handles:</p>
+<ul>
+<li>Language and locale settings.</li>
+<li>Automated network interface selection via DHCP.</li>
+<li>Disk partitioning schemes (e.g., automated LVM or regular
+partitions).</li>
+<li>Root password and default user creation.</li>
+<li>Package selection (e.g., OpenSSH server).</li>
+<li>Automatic reboot upon completion.</li>
+</ul>
+<h4 id="2-the-virt-install-command">2. The virt-install Command</h4>
+<p>To trigger the automated setup, run a command formatted like the
+following:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virt-install</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--name</span> debian-guest-01 <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--ram</span> 2048 <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--vcpus</span> 2 <span class="dt">\</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--disk</span> path=/var/lib/libvirt/images/debian-guest-01.qcow2,size=20,format=qcow2 <span class="dt">\</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--os-variant</span> debian12 <span class="dt">\</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--network</span> network=default <span class="dt">\</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--graphics</span> none <span class="dt">\</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--console</span> pty,target_type=serial <span class="dt">\</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--location</span> <span class="st">&#39;http://deb.debian.org/debian/dists/bookworm/main/installer-amd64/&#39;</span> <span class="dt">\</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--extra-args</span> <span class="st">&#39;auto=true priority=critical console=ttyS0,115200n8 preseed/url=http://192.168.122.1/preseed.cfg&#39;</span> <span class="dt">\</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">--wait</span> <span class="at">-1</span></span></code></pre></div>
+<h4 id="parameter-breakdown">Parameter Breakdown:</h4>
+<ul>
+<li><strong><code>--graphics none</code> &amp;
+<code>--console pty...</code>:</strong> Directs output to a serial
+console, allowing headless management via the terminal without needing a
+VNC or SPICE client.</li>
+<li><strong><code>--location</code>:</strong> Specifies the network
+repository source for the installer assets.</li>
+<li><strong><code>--extra-args</code>:</strong>
+<ul>
+<li><code>auto=true priority=critical</code>: Suppresses standard
+interactive prompts and stops only for fatal errors.</li>
+<li><code>console=ttyS0,115200n8</code>: Sends the installation log
+output directly to the terminal serial output.</li>
+<li><code>preseed/url=...</code>: Tells the installer where to download
+the automated answers.</li>
+</ul></li>
+<li><strong><code>--wait -1</code>:</strong> Keeps the
+<code>virt-install</code> process running until the guest finishes
+installing and reboots, which helps sequential deployment scripts track
+completion.</li>
+</ul>
+<hr />
+<h3 id="alternative-native---unattended-option">Alternative: Native
+<code>--unattended</code> Option</h3>
+<p>In modern versions of <code>virt-install</code>, the tool includes a
+built-in <code>--unattended</code> flag, which abstracts preseed
+generation via <code>libosinfo</code>.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">virt-install</span> <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--name</span> debian-auto <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--ram</span> 2048 <span class="dt">\</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--vcpus</span> 2 <span class="dt">\</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--disk</span> path=/var/lib/libvirt/images/debian-auto.qcow2,size=20 <span class="dt">\</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--os-variant</span> debian12 <span class="dt">\</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--cdrom</span> /path/to/debian-12.iso <span class="dt">\</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--unattended</span> user-password=secret,admin-password=secret</span></code></pre></div>
+<p>This approach generates a minimal preseed automatically and injects
+it into the installer, eliminating the need to manually host a
+<code>preseed.cfg</code> file for basic deployments. However, the manual
+preseed method remains standard for advanced customizations, custom disk
+partitioning, and software installation scripts.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/automate-debian-provisioning-with-virt-install';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

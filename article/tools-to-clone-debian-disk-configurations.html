@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tools to Clone Debian Disk Configurations - debian</title>
+    <meta name="description" content="Cloning disk configurations across identical machines running Debian allows system administrators to deploy uniform storage layouts quickly and minimize human error. Depending on whether an administrator needs to duplicate raw partition schemes, logical v">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/tools-to-clone-debian-disk-configurations">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Tools to Clone Debian Disk Configurations - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/tools-to-clone-debian-disk-configurations" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Cloning disk configurations across identical machines running Debian allows system administrators to deploy uniform storage layouts quickly and minimize human error. Depending on whether an administrator needs to duplicate raw partition schemes, logical v" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="tools-to-clone-debian-disk-configurations">Tools to Clone Debian
+Disk Configurations</h1>
+<p>Cloning disk configurations across identical machines running Debian
+allows system administrators to deploy uniform storage layouts quickly
+and minimize human error. Depending on whether an administrator needs to
+duplicate raw partition schemes, logical volumes, or entire block
+devices, Debian supports several native utilities and specialized
+deployment frameworks. This guide outlines the most effective tools for
+cloning partition layouts, volume groups, and full disk images across
+identical hardware.</p>
+<h3 id="sfdisk-and-sgdisk-partition-layout-replication">sfdisk and
+sgdisk (Partition Layout Replication)</h3>
+<p>For administrators who only need to copy the partition scheme without
+transferring user data or filesystems, <code>sfdisk</code> (for MBR and
+GPT) and <code>sgdisk</code> (for GPT specifically) provide lightweight,
+native CLI solutions.</p>
+<ul>
+<li><strong>sfdisk:</strong> Included in the <code>util-linux</code>
+package, <code>sfdisk</code> can dump a drive's layout to a text file
+and apply it directly to a target drive.
+<ul>
+<li>Export: <code>sfdisk -d /dev/sda &gt; layout.txt</code></li>
+<li>Apply: <code>sfdisk /dev/sda &lt; layout.txt</code></li>
+</ul></li>
+<li><strong>sgdisk:</strong> Part of the <code>gdisk</code> package,
+<code>sgdisk</code> replicates GUID Partition Tables (GPT) and ensures
+unique disk and partition UUIDs are regenerated on the target.
+<ul>
+<li>Replication:
+<code>sgdisk -R /dev/sdb /dev/sda &amp;&amp; sgdisk -G /dev/sdb</code></li>
+</ul></li>
+</ul>
+<h3 id="lvm-utilities-replicating-logical-volume-structures">LVM
+Utilities (Replicating Logical Volume Structures)</h3>
+<p>When systems use the Logical Volume Manager (LVM), partition
+replication alone is insufficient. Debian includes built-in LVM
+configuration tools to reproduce volume group metadata.</p>
+<ul>
+<li><strong>vgcfgbackup and vgcfgrestore:</strong> Administrators can
+dump the metadata of a volume group to a plain-text configuration file
+using <code>vgcfgbackup -f vg_backup.txt &lt;vg_name&gt;</code>.</li>
+<li>After the underlying physical partitions are matched on the target
+machine with <code>sfdisk</code> or <code>pvcreate</code>,
+<code>vgcfgrestore</code> can re-create the exact volume group
+boundaries and logical volumes using the exported file.</li>
+</ul>
+<h3 id="clonezilla-block-and-filesystem-level-cloning">Clonezilla (Block
+and Filesystem Level Cloning)</h3>
+<p>Clonezilla is an open-source bare-metal disk imaging and cloning tool
+that integrates directly with Debian environments via Clonezilla Live or
+the DRBL (Diskless Remote Boot in Linux) server.</p>
+<ul>
+<li>Unlike raw bitstream copiers, Clonezilla uses <code>Partclone</code>
+to copy only used blocks for supported filesystems (such as ext4, Btrfs,
+and XFS), drastically speeding up the process.</li>
+<li>For multi-machine rollouts, DRBL allows administrators to broadcast
+a master disk image to hundreds of identical machines simultaneously via
+PXE and multicast networking.</li>
+</ul>
+<h3 id="dd-and-ddrescue-raw-sector-copying">dd and ddrescue (Raw Sector
+Copying)</h3>
+<p>For bit-for-bit duplication of drives, the standard GNU coreutils
+tool <code>dd</code> remains the baseline approach.</p>
+<ul>
+<li>Command:
+<code>dd if=/dev/sda of=/dev/sdb bs=64K status=progress conv=noerror,sync</code></li>
+<li>Because <code>dd</code> copies every sector indiscriminately, the
+target disk must be of identical size or larger.</li>
+<li><code>ddrescue</code> operates similarly but is resilient to bad
+blocks, automatically skipping unreadable sectors if the master drive
+has hardware degradation.</li>
+</ul>
+<h3 id="fai-fully-automatic-installation-and-setup-storage">FAI (Fully
+Automatic Installation) and setup-storage</h3>
+<p>FAI is an enterprise-grade automated deployment system created
+specifically for Debian-based infrastructures.</p>
+<ul>
+<li>Within FAI, the <code>setup-storage</code> utility defines complex
+disk layouts using human-readable configuration files.</li>
+<li>It automatically handles disk partitioning, LVM configuration,
+software RAID, and encryption layers (<code>LUKS</code>) across
+identical target machines without needing disk images, building the
+storage layout natively during network boot.</li>
+</ul>
+<h3 id="debian-preseed-with-partman-auto">Debian Preseed with
+partman-auto</h3>
+<p>For unassisted installations using the official Debian installer,
+Debian Preseed automates the entire OS installation, including storage
+configuration.</p>
+<ul>
+<li>By configuring <code>partman-auto/expert_recipe</code> inside a
+preseed configuration file, administrators can enforce exact partition
+sizes, filesystem types, mount points, and LVM parameters.</li>
+<li>When machines boot the Debian installer with the preseed file
+loaded, the installer slices and configures the drives automatically to
+match the predefined specification.</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/tools-to-clone-debian-disk-configurations';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

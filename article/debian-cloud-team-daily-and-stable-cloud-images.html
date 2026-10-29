@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Cloud Team: Daily and Stable Cloud Images - debian</title>
+    <meta name="description" content="The Debian Cloud Team is a specialized group within the Debian project responsible for creating, testing, and maintaining official Debian operating system images for cloud environments. This article explores how the team builds and distributes both daily">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-cloud-team-daily-and-stable-cloud-images">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Cloud Team: Daily and Stable Cloud Images - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-cloud-team-daily-and-stable-cloud-images" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian Cloud Team is a specialized group within the Debian project responsible for creating, testing, and maintaining official Debian operating system images for cloud environments. This article explores how the team builds and distributes both daily" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-cloud-team-daily-and-stable-cloud-images">Debian Cloud
+Team: Daily and Stable Cloud Images</h1>
+<p>The Debian Cloud Team is a specialized group within the Debian
+project responsible for creating, testing, and maintaining official
+Debian operating system images for cloud environments. This article
+explores how the team builds and distributes both daily development
+images and production-ready stable releases across public cloud
+platforms such as Amazon Web Services (AWS), Microsoft Azure, and Google
+Cloud Platform (GCP), as well as private cloud infrastructures like
+OpenStack.</p>
+<h2 id="core-mission-and-architecture">Core Mission and
+Architecture</h2>
+<p>The primary objective of the Debian Cloud Team is to ensure that
+Debian runs efficiently and securely across diverse virtualized
+environments. Cloud providers rely on standardized, headless operating
+system templates rather than traditional ISO-based installation media.
+The team designs automated pipelines that produce tailored disk images
+featuring cloud-specific drivers, kernel optimizations, and essential
+initialization tooling like <code>cloud-init</code>.</p>
+<h2 id="producing-stable-cloud-images">Producing Stable Cloud
+Images</h2>
+<p>Stable cloud images are the production-grade artifacts deployed by
+organizations for mission-critical workloads. For every official point
+release of Debian Stable, the Cloud Team coordinates with the Debian
+Release Team and Debian Security Team to publish updated images.</p>
+<p>These images undergo rigorous validation:</p>
+<ul>
+<li><strong>Consistency:</strong> The software packages inside the
+stable image mirror those found in the official Debian stable
+repositories without non-free bloat or unauthorized third-party
+software.</li>
+<li><strong>Security Updates:</strong> Base images are periodically
+rebuilt to incorporate current security updates, reducing the time
+required for <code>apt upgrade</code> upon an instance's initial
+boot.</li>
+<li><strong>Marketplace Publishing:</strong> The team manages official
+distribution channels, including public marketplaces on AWS, Azure, and
+Google Cloud, ensuring users launch authentic, cryptographically
+verified images directly from Debian.</li>
+</ul>
+<h2 id="building-and-distributing-daily-images">Building and
+Distributing Daily Images</h2>
+<p>In addition to stable releases, the Cloud Team maintains automated
+continuous integration (CI) workflows that generate daily images. These
+daily builds target Debian Testing and Debian Sid (Unstable), as well as
+current development branches of the Stable release.</p>
+<p>The daily build infrastructure serves several distinct purposes:</p>
+<ul>
+<li><strong>Early Bug Detection:</strong> Automated daily builds catch
+upstream regressions, integration issues with <code>cloud-init</code>,
+and kernel incompatibility before code reaches stable releases.</li>
+<li><strong>Automated Testing:</strong> Daily images are booted in real
+cloud test harnesses to confirm network configuration, partition
+expansion, and provider-specific agents function properly.</li>
+<li><strong>Developer Access:</strong> Developers and early adopters
+gain immediate access to the latest Debian software stack tuned for
+cloud platforms, allowing them to test applications against forthcoming
+Debian updates.</li>
+</ul>
+<h2 id="tooling-and-reproducibility">Tooling and Reproducibility</h2>
+<p>The Debian Cloud Team relies heavily on Debian's native tools,
+particularly <code>fai-diskimage</code> (Fully Automatic Installation)
+and GitLab CI pipelines hosted on Debian's Salsa platform. The entire
+build configuration is open source and maintained as code. This
+infrastructure prioritizes reproducible builds, enabling independent
+verification that an official image matches its corresponding source
+code without unexpected modifications.</p>
+<p>Through automated build pipelines, transparent development practices,
+and close collaboration with public cloud vendors, the Debian Cloud Team
+provides the foundational infrastructure required to run Debian reliably
+anywhere in the cloud.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-cloud-team-daily-and-stable-cloud-images';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packaging CUDA and ROCm Toolkits on Debian - debian</title>
+    <meta name="description" content="This article examines the packaging strategies employed to distribute the NVIDIA CUDA and AMD ROCm GPU compute platforms on the Debian operating system. It explores how Debian&#39;s strict adherence to software freedom affects archive placement, contrasts AMD">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/packaging-cuda-and-ro-cm-toolkits-on-debian">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Packaging CUDA and ROCm Toolkits on Debian - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/packaging-cuda-and-ro-cm-toolkits-on-debian" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article examines the packaging strategies employed to distribute the NVIDIA CUDA and AMD ROCm GPU compute platforms on the Debian operating system. It explores how Debian&#39;s strict adherence to software freedom affects archive placement, contrasts AMD" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="packaging-cuda-and-rocm-toolkits-on-debian">Packaging CUDA and
+ROCm Toolkits on Debian</h1>
+<p>This article examines the packaging strategies employed to distribute
+the NVIDIA CUDA and AMD ROCm GPU compute platforms on the Debian
+operating system. It explores how Debian's strict adherence to software
+freedom affects archive placement, contrasts AMD's open-source
+source-build methodology with NVIDIA's proprietary binary-repackaging
+pipeline, and details the dependency management and modularization
+practices used by Debian package maintainers to manage these complex
+toolkits.</p>
+<h2 id="licensing-and-debian-archive-placement">Licensing and Debian
+Archive Placement</h2>
+<p>Debian strictly categorizes software into components based on the
+Debian Free Software Guidelines (DFSG):</p>
+<ul>
+<li><strong>AMD ROCm (Debian <code>main</code>):</strong> ROCm is
+designed around open-source components, including driver interfaces,
+compilers, and mathematical libraries. Because the upstream code is
+primarily licensed under permissive licenses (such as MIT and Apache
+2.0), the Debian ROCm Team packages the stack directly into
+<code>main</code>.</li>
+<li><strong>NVIDIA CUDA (Debian <code>contrib</code> and
+<code>non-free</code>):</strong> CUDA relies on closed-source,
+proprietary components, including the <code>nvcc</code> compiler
+backend, proprietary runtime libraries (such as cuBLAS and cuDNN), and
+the proprietary NVIDIA display driver. As a result, the toolchain itself
+is packaged in <code>non-free</code>. Free software packages that build
+against CUDA but require it to function are placed in
+<code>contrib</code>.</li>
+</ul>
+<h2 id="rocm-packaging-strategy-source-builds-and-modularization">ROCm
+Packaging Strategy: Source Builds and Modularization</h2>
+<p>Debian packages ROCm by building the entire stack directly from
+source code, rather than redistributing upstream binary tarballs. This
+approach requires strict dependency management and integration with
+existing system components:</p>
+<ul>
+<li><strong>LLVM/Clang Integration:</strong> ROCm relies on AMD's
+customized LLVM forks (AMD Device Libs, ROCm Device Libs). The Debian
+packaging effort works toward decoupling ROCm from pinned forks,
+compiling against system versions of LLVM/Clang where possible, or
+maintaining target-specific intermediate libraries.</li>
+<li><strong>Component Modularization:</strong> Upstream ROCm releases
+are decomposed into distinct, fine-grained source packages:
+<ul>
+<li>Low-level drivers and runtimes: <code>rocm-core</code>,
+<code>libhsa-runtime64</code>, and <code>rocminfo</code>.</li>
+<li>Toolchain components: <code>hip-runtime-amd</code>,
+<code>hipcc</code>, and associated header files.</li>
+<li>Accelerated math and ML libraries: <code>rocblas</code>,
+<code>rocfft</code>, <code>rocrand</code>, and
+<code>miopen-hip</code>.</li>
+</ul></li>
+<li><strong>Hardware Architecture Splitting:</strong> Because
+pre-compiling GPU code for every GCN/RDNA generation (e.g.,
+<code>gfx900</code>, <code>gfx1030</code>, <code>gfx1100</code>) leads
+to immense package sizes and long build times, maintainers selectively
+target common architectures and use Debian build profiles to manage
+storage footprints.</li>
+</ul>
+<h2 id="cuda-packaging-strategy-binary-redistribution-and-stubs">CUDA
+Packaging Strategy: Binary Redistribution and Stubs</h2>
+<p>Because NVIDIA does not release the full source code for the CUDA
+compiler or libraries, the Debian NVIDIA Maintainers team uses a
+redistribution and wrapping strategy:</p>
+<ul>
+<li><strong>Repackaging Upstream Runfiles:</strong> The core
+<code>nvidia-cuda-toolkit</code> package unpacks and inspects upstream
+installer archives, distributing headers, documentation, tools, and
+binaries into DFSG-compliant filesystem locations (e.g., standard
+directories under <code>/usr/lib/x86_64-linux-gnu</code> instead of
+monolithic directories like <code>/usr/local/cuda</code>).</li>
+<li><strong>Driver Decoupling via Stubs:</strong> Debian separates the
+user-space development toolkit from the kernel-level driver. It packages
+CUDA stub libraries (<code>libcuda.so.1</code> stubs), allowing
+developers to compile CUDA-accelerated software on build nodes that lack
+physical NVIDIA hardware or loaded kernel modules.</li>
+<li><strong>Granular Dependency Tiers:</strong> Debian organizes CUDA
+packages into logical units:
+<ul>
+<li>Runtime dependencies: Essential shared objects packaged to fulfill
+runtime requirements without pulling in heavy developer tooling.</li>
+<li>Development packages: Headers and compiler wrappers
+(<code>nvidia-cuda-toolkit</code>) designated exclusively for build
+environments.</li>
+<li>Co-installability management: Using Debian's
+<code>update-alternatives</code> mechanism to switch between GCC
+versions that match CUDA’s supported compiler constraints.</li>
+</ul></li>
+</ul>
+<h2 id="technical-maintenance-differences">Technical Maintenance
+Differences</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Strategy Aspect</th>
+<th style="text-align: left;">AMD ROCm</th>
+<th style="text-align: left;">NVIDIA CUDA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Source Availability</strong></td>
+<td style="text-align: left;">Built completely from source via standard
+Debian build daemons.</td>
+<td style="text-align: left;">Repackaged from proprietary upstream
+binaries.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Archive Section</strong></td>
+<td style="text-align: left;"><code>main</code></td>
+<td style="text-align: left;"><code>non-free</code> (libraries/drivers)
+and <code>contrib</code> (client tools).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Compiler Toolchain</strong></td>
+<td style="text-align: left;">Integrated into host Clang/LLVM.</td>
+<td style="text-align: left;">Uses standalone <code>nvcc</code>
+requiring specific host GCC versions.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Build Host
+Requirements</strong></td>
+<td style="text-align: left;">Standard CPU architectures; no GPU
+required during compile time.</td>
+<td style="text-align: left;">Standard CPU architectures; utilizes stub
+libraries to link without GPU hardware.</td>
+</tr>
+</tbody>
+</table></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/packaging-cuda-and-ro-cm-toolkits-on-debian';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

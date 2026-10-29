@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How GRUB 2 Works on Debian for UEFI and BIOS - debian</title>
+    <meta name="description" content="GRUB 2 (GRand Unified Bootloader version 2) is the default bootloader for the Debian operating system, responsible for initializing system hardware, presenting the boot menu, and loading the Linux kernel into memory. While GRUB 2 provides a uniform user i">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-grub-2-works-on-debian-for-uefi-and-bios">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How GRUB 2 Works on Debian for UEFI and BIOS - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-grub-2-works-on-debian-for-uefi-and-bios" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="GRUB 2 (GRand Unified Bootloader version 2) is the default bootloader for the Debian operating system, responsible for initializing system hardware, presenting the boot menu, and loading the Linux kernel into memory. While GRUB 2 provides a uniform user i" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-grub-2-works-on-debian-for-uefi-and-bios">How GRUB 2 Works
+on Debian for UEFI and BIOS</h1>
+<p>GRUB 2 (GRand Unified Bootloader version 2) is the default bootloader
+for the Debian operating system, responsible for initializing system
+hardware, presenting the boot menu, and loading the Linux kernel into
+memory. While GRUB 2 provides a uniform user interface and configuration
+system across installations, its underlying operation diverges
+significantly depending on whether the host machine uses legacy BIOS
+(Basic Input/Output System) or modern UEFI (Unified Extensible Firmware
+Interface). Understanding these mechanisms illustrates how Debian
+achieves reliable system startups across diverse hardware
+architectures.</p>
+<h2 id="grub-2-architecture-on-legacy-bios-systems">GRUB 2 Architecture
+on Legacy BIOS Systems</h2>
+<p>On legacy BIOS systems, Debian relies on the <code>grub-pc</code>
+package. The BIOS boot process is constrained by historical x86
+architectural limits, requiring GRUB 2 to execute in multiple distinct
+stages to transition from 16-bit real mode to 32-bit or 64-bit protected
+mode:</p>
+<ol type="1">
+<li><strong>Stage 1 (<code>boot.img</code>):</strong> The system BIOS
+reads the Master Boot Record (MBR) from the first 512-byte sector of the
+boot drive. Because of severe space constraints (446 bytes available for
+executable code), <code>boot.img</code> contains only enough code to
+locate and load the next component.</li>
+<li><strong>Stage 1.5 (<code>core.img</code>):</strong>
+<code>boot.img</code> loads <code>core.img</code>, which is dynamically
+generated during installation and typically stored in the MBR gap (the
+unpartitioned sectors between the MBR and the first partition) or in a
+dedicated BIOS Boot Partition on GPT-partitioned drives. This image
+includes minimal filesystem drivers and decompression code.</li>
+<li><strong>Stage 2 (Normal Mode):</strong> Once <code>core.img</code>
+executes and mounts the <code>/boot</code> partition, it dynamically
+loads GRUB 2 runtime modules from <code>/boot/grub/i386-pc/</code>. It
+then processes <code>/boot/grub/grub.cfg</code>, renders the graphical
+or text boot menu, and waits for user selection or timeout.</li>
+</ol>
+<h2 id="grub-2-architecture-on-uefi-systems">GRUB 2 Architecture on UEFI
+Systems</h2>
+<p>On modern UEFI systems, Debian employs the
+<code>grub-efi-amd64</code> (or
+<code>grub-efi-ia32</code>/<code>grub-efi-arm64</code>) package. UEFI
+replaces the MBR-based multi-stage process with a standardized execution
+environment capable of reading FAT-formatted filesystems natively:</p>
+<ol type="1">
+<li><strong>Firmware Hand-off:</strong> During boot, the UEFI firmware
+reads boot variables stored in NVRAM. For Debian, this entry points to
+an executable on the EFI System Partition (ESP), typically mounted at
+<code>/boot/efi</code>.</li>
+<li><strong>Secure Boot and Shim:</strong> When UEFI Secure Boot is
+enabled, the firmware first loads <code>shimx64.efi</code>, a small
+bootloader signed by Microsoft's third-party UEFI CA. The shim verifies
+the signature of Debian's official <code>grubx64.efi</code> binary using
+Debian's embedded keys before executing it.</li>
+<li><strong>Direct Execution:</strong> Because UEFI executes standard
+PE/COFF binaries in protected/long mode directly, GRUB 2 does not
+require intermediate stage images like <code>boot.img</code> or
+<code>core.img</code>. The <code>grubx64.efi</code> application loads
+the necessary modules from <code>/boot/grub/x86_64-efi/</code> and reads
+<code>/boot/grub/grub.cfg</code>.</li>
+</ol>
+<h2 id="configuration-management-in-debian">Configuration Management in
+Debian</h2>
+<p>Regardless of whether the platform is BIOS or UEFI, GRUB 2 utilizes a
+unified configuration structure:</p>
+<ul>
+<li><strong>/boot/grub/grub.cfg:</strong> The main configuration file
+executed by GRUB during boot. It is non-human-editable and is
+regenerated automatically.</li>
+<li><strong>/etc/default/grub:</strong> The primary user-facing
+configuration file where system administrators define parameters like
+kernel command-line arguments (<code>GRUB_CMDLINE_LINUX</code>), menu
+timeouts, and terminal displays.</li>
+<li><strong>/etc/grub.d/:</strong> A directory containing executable
+shell scripts (such as <code>10_linux</code> and
+<code>30_os-prober</code>) that dynamically discover installed kernels
+and alternative operating systems.</li>
+</ul>
+<p>Running the Debian utility <code>update-grub</code> (a wrapper script
+for <code>grub-mkconfig -o /boot/grub/grub.cfg</code>) aggregates the
+settings from <code>/etc/default/grub</code> and the scripts in
+<code>/etc/grub.d/</code> to generate the finalized
+<code>grub.cfg</code>.</p>
+<h2 id="kernel-handoff">Kernel Handoff</h2>
+<p>Once the user selects an operating system entry (or the timeout
+expires), GRUB 2 reads the target Linux kernel (<code>vmlinuz</code>)
+and initial RAM filesystem (<code>initrd.img</code>) from
+<code>/boot</code> into system memory. GRUB 2 appends the configured
+kernel parameters, sets up the video framebuffer, and transfers
+execution control directly to the kernel's setup code. At this point,
+GRUB 2 releases system control, allowing the Linux kernel to initialize
+hardware drivers, mount the root filesystem, and start the system's
+<code>init</code> process (<code>systemd</code>).</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-grub-2-works-on-debian-for-uefi-and-bios';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

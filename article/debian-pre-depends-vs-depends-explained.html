@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Pre-Depends vs Depends Explained - debian</title>
+    <meta name="description" content="In the Debian package management system, dependencies control the installation order and operational requirements of software. While the standard Depends field ensures that a prerequisite package is unpacked and configured by the time the dependent packag">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-pre-depends-vs-depends-explained">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Pre-Depends vs Depends Explained - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-pre-depends-vs-depends-explained" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In the Debian package management system, dependencies control the installation order and operational requirements of software. While the standard Depends field ensures that a prerequisite package is unpacked and configured by the time the dependent packag" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-pre-depends-vs-depends-explained">Debian Pre-Depends vs
+Depends Explained</h1>
+<p>In the Debian package management system, dependencies control the
+installation order and operational requirements of software. While the
+standard <code>Depends</code> field ensures that a prerequisite package
+is unpacked and configured by the time the dependent package is
+configured, the <code>Pre-Depends</code> field enforces a much stricter
+installation sequence. Specifically, <code>Pre-Depends</code> requires
+that the target dependency is completely unpacked and configured
+<em>before</em> the dependent package even begins its unpacking process.
+This article details the structural, operational, and system-level
+differences between these two relationship fields.</p>
+<h3 id="the-standard-depends-field">The Standard <code>Depends</code>
+Field</h3>
+<p>The <code>Depends</code> field is the default relationship used in
+Debian packaging. When Package A depends on Package B, the package
+manager (<code>dpkg</code> and frontend tools like <code>apt</code>)
+guarantees that Package B will be installed and configured before
+Package A is considered fully configured and usable.</p>
+<p>However, standard dependencies allow significant flexibility during
+the unpacking stage:</p>
+<ul>
+<li><strong>Interleaved Unpacking:</strong> <code>dpkg</code> can unpack
+Package A before Package B is unpacked or configured.</li>
+<li><strong>Script Limitations:</strong> Because Package B might not be
+configured when Package A is being unpacked, Package A's
+<code>preinst</code> (pre-installation) script cannot reliably call
+binaries or services provided by Package B.</li>
+<li><strong>Circular Dependencies:</strong> Standard dependencies can
+tolerate circular references (Package A depends on Package B, and
+Package B depends on Package A). The package manager breaks the loop by
+unpacking both packages first and configuring them sequentially
+afterward.</li>
+</ul>
+<h3 id="the-pre-depends-field">The <code>Pre-Depends</code> Field</h3>
+<p>The <code>Pre-Depends</code> field was designed to handle critical
+scenarios where normal dependency ordering is insufficient. If Package A
+has a <code>Pre-Depends</code> relationship with Package B:</p>
+<ol type="1">
+<li><strong>Strict Ordering:</strong> <code>dpkg</code> will refuse to
+unpack Package A until Package B is fully unpacked and configured (in
+the <code>installed</code> state).</li>
+<li><strong>Availability in <code>preinst</code>:</strong> If Package A
+must execute a binary or use a shared library provided by Package B
+inside its <code>preinst</code> script, <code>Pre-Depends</code> ensures
+that resource is already functioning on the host system.</li>
+<li><strong>No Interleaving:</strong> The package manager cannot unpack
+the dependent package and resolve the dependency later; the state
+transitions are strictly serial.</li>
+</ol>
+<h3 id="key-operational-differences">Key Operational Differences</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Feature</th>
+<th style="text-align: left;"><code>Depends</code></th>
+<th style="text-align: left;"><code>Pre-Depends</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Enforcement Point</strong></td>
+<td style="text-align: left;">Enforced before the package is
+<strong>configured</strong> (<code>postinst</code>).</td>
+<td style="text-align: left;">Enforced before the package is
+<strong>unpacked</strong> (<code>preinst</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Availability in
+<code>preinst</code></strong></td>
+<td style="text-align: left;">Not guaranteed; dependency may be
+unconfigured or not yet unpacked.</td>
+<td style="text-align: left;">Guaranteed; dependency is fully configured
+and usable.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Dependency Cycles</strong></td>
+<td style="text-align: left;">Resolvable by unpacking both packages
+before configuring.</td>
+<td style="text-align: left;">Cannot easily resolve cycles; often
+results in upgrade deadlocks.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Package Manager
+Burden</strong></td>
+<td style="text-align: left;">Minimal; allows maximum flexibility in
+scheduling installations.</td>
+<td style="text-align: left;">High; forces strict serial operations and
+complicates dependency solving.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="when-to-use-each-relation">When to Use Each Relation</h3>
+<p>Standard dependencies should be used for virtually all software
+packages. They provide the package manager with the leeway required to
+optimize download and extraction order, handle complex dependency
+graphs, and upgrade large numbers of packages simultaneously.</p>
+<p><code>Pre-Depends</code> is reserved strictly for specialized,
+low-level system operations, such as:</p>
+<ul>
+<li>An essential package upgrade where the new version relies on a newer
+core library (such as <code>libc6</code>) to execute any binary,
+including basic archive extraction tools.</li>
+<li>A package whose <code>preinst</code> script must run a specific
+utility (like an archive unpacker or a database migration tool) provided
+by another package to prepare the system before extracting its own
+files.</li>
+</ul>
+<p>According to Debian Policy, maintainers must not use
+<code>Pre-Depends</code> without explicit consensus from the Debian
+development community, as inappropriate usage can cause dependency
+resolution deadlocks and break system upgrades.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-pre-depends-vs-depends-explained';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

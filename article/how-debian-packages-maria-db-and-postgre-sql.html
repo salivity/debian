@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Packages MariaDB and PostgreSQL - debian</title>
+    <meta name="description" content="This article explores how the Debian operating system packages, configures, and maintains relational database management systems, focusing specifically on MariaDB and PostgreSQL. It covers the distribution&#39;s packaging policies, versioning strategies, main">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-packages-maria-db-and-postgre-sql">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Packages MariaDB and PostgreSQL - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-packages-maria-db-and-postgre-sql" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores how the Debian operating system packages, configures, and maintains relational database management systems, focusing specifically on MariaDB and PostgreSQL. It covers the distribution&#39;s packaging policies, versioning strategies, main" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-packages-mariadb-and-postgresql">How Debian Packages
+MariaDB and PostgreSQL</h1>
+<p>This article explores how the Debian operating system packages,
+configures, and maintains relational database management systems,
+focusing specifically on MariaDB and PostgreSQL. It covers the
+distribution's packaging policies, versioning strategies, maintenance
+automations, and architectural distinctions between engines—such as
+multi-version cluster management in PostgreSQL and unified configuration
+defaults in MariaDB. Readers will gain an understanding of how Debian
+provides long-term stability, automated upgrades, and secure runtime
+environments for critical database services.</p>
+<h3 id="debian-packaging-philosophy-for-databases">Debian Packaging
+Philosophy for Databases</h3>
+<p>Debian applies rigorous packaging standards defined by the Debian
+Policy Manual and the Debian Free Software Guidelines (DFSG). For
+database software, packaging involves unbundling third-party libraries
+contained in upstream source archives and linking against shared system
+libraries instead. This minimizes duplication across the system and
+ensures that security patches to libraries like OpenSSL, zlib, or PCRE
+immediately apply to running database engines.</p>
+<p>Debian divides database software into modular packages:</p>
+<ul>
+<li><strong>Client packages</strong> (e.g.,
+<code>postgresql-client</code>, <code>mariadb-client</code>) containing
+command-line interfaces, basic administrative tools, and client-side
+manual pages.</li>
+<li><strong>Server packages</strong> (e.g., <code>postgresql-15</code>,
+<code>mariadb-server</code>) containing the main daemons, storage
+engines, and initial cluster creation scripts.</li>
+<li><strong>Common and configuration packages</strong> (e.g.,
+<code>postgresql-common</code>, <code>mariadb-common</code>) containing
+cross-version tooling, configuration file layouts, and base system
+integration scripts.</li>
+</ul>
+<h3
+id="postgresql-architecture-multi-version-and-cluster-management">PostgreSQL
+Architecture: Multi-Version and Cluster Management</h3>
+<p>PostgreSQL packaging in Debian is uniquely structured around the
+<code>postgresql-common</code> framework. Unlike most standard Linux
+distributions that permit only one active version of PostgreSQL, Debian
+allows concurrent installations of multiple PostgreSQL major versions
+and multiple instances (clusters) per version.</p>
+<p>Key components of Debian's PostgreSQL maintenance include:</p>
+<ol type="1">
+<li><strong>Wrapper Scripts (<code>pg_wrapper</code>)</strong>: Binaries
+such as <code>psql</code>, <code>pg_dump</code>, and
+<code>createdb</code> in <code>/usr/bin/</code> are symlinks to
+<code>pg_wrapper</code>. This tool automatically inspects the
+environment, user configuration (<code>~/.pg_wrapper</code>), and active
+local clusters to route commands to the appropriate PostgreSQL binary
+version.</li>
+<li><strong>Cluster Abstraction
+(<code>pg_createcluster</code>)</strong>: Debian defines a "cluster" as
+a distinct database catalog collection running under its own port, UNIX
+domain socket, and data directory
+(<code>/var/lib/postgresql/&lt;version&gt;/&lt;cluster_name&gt;</code>).
+Administrators manage instances using tools like
+<code>pg_createcluster</code>, <code>pg_dropcluster</code>, and
+<code>pg_ctlcluster</code>.</li>
+<li><strong>Configuration Structure</strong>: Configuration files are
+separated from database storage. Files like <code>postgresql.conf</code>
+and <code>pg_hba.conf</code> reside in
+<code>/etc/postgresql/&lt;version&gt;/&lt;cluster_name&gt;/</code>,
+ensuring configuration persistence and integration with Debian's
+standard <code>/etc</code> backup workflows.</li>
+<li><strong>Automated Upgrades
+(<code>pg_upgradecluster</code>)</strong>: When upgrading across Debian
+releases that introduce a newer PostgreSQL major version, Debian
+provides <code>pg_upgradecluster</code>. This utility uses either
+<code>pg_dump</code> or PostgreSQL's native <code>pg_upgrade</code>
+engine to migrate data from the old version cluster to a newly
+instantiated target cluster with minimal downtime.</li>
+</ol>
+<h3
+id="mariadb-architecture-default-engine-and-system-integration">MariaDB
+Architecture: Default Engine and System Integration</h3>
+<p>Since the release of Debian 9 ("Stretch"), Debian has used MariaDB as
+its default implementation of the MySQL relational database
+interface.</p>
+<p>Debian's management of MariaDB focuses on standardization and
+security:</p>
+<ol type="1">
+<li><strong>Metapackages and Alternatives</strong>: Debian uses virtual
+metapackages—<code>default-mysql-server</code> and
+<code>default-mysql-client</code>—which depend directly on current
+MariaDB packages. This allows other Debian packages needing an SQL
+backend to declare generic dependencies without binding explicitly to a
+specific upstream fork.</li>
+<li><strong>Socket Authentication</strong>: Modern Debian installations
+configure MariaDB to use the <code>unix_socket</code> authentication
+plugin for the local <code>root</code> user by default. This eliminates
+the historical practice of generating random administrative passwords
+stored in plain-text files (such as <code>/etc/mysql/debian.cnf</code>),
+allowing administrative access solely to users with root or
+<code>sudo</code> privileges on the host system.</li>
+<li><strong>Modular Configuration Hierarchy</strong>: MariaDB
+configuration files are organized under <code>/etc/mysql/</code>.
+Configuration directives are broken down into drop-in directories, such
+as <code>/etc/mysql/mariadb.conf.d/</code> and
+<code>/etc/mysql/conf.d/</code>. Debian packages place engine-specific
+defaults in these directories, while allowing local administrators to
+override settings via lexically ordered configuration snippets (e.g.,
+<code>50-server.cnf</code>).</li>
+</ol>
+<h3 id="maintenance-security-and-systemd-lifecycle">Maintenance,
+Security, and Systemd Lifecycle</h3>
+<p>Debian maintains database servers throughout the stable release
+lifecycle using defined operational safeguards:</p>
+<ul>
+<li><strong>Security Updates</strong>: Debian's Security Team backports
+critical vulnerability fixes directly to the version bundled with the
+stable distribution, preserving binary compatibility and preventing
+unexpected breaking changes from upstream point releases.</li>
+<li><strong>Process Management via Systemd</strong>: Both engines are
+managed through customized systemd unit files. PostgreSQL leverages
+template unit files
+(<code>postgresql@&lt;version&gt;-&lt;cluster&gt;.service</code>)
+generated dynamically by the cluster framework, while MariaDB runs under
+a unified <code>mariadb.service</code> unit configured with system-level
+hardening (e.g., <code>ProtectSystem=full</code>,
+<code>PrivateDevices=true</code>).</li>
+<li><strong>Debian Maintenance Scripts</strong>: Pre-installation
+(<code>preinst</code>), post-installation (<code>postinst</code>), and
+pre-removal (<code>prerm</code>) scripts automate tasks such as creating
+system user accounts (<code>postgres</code> and <code>mysql</code>),
+initializing empty databases via <code>initdb</code> or
+<code>mariadb-install-db</code>, managing log rotation via
+<code>logrotate</code>, and triggering necessary catalog upgrade
+routines on package update.</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-debian-packages-maria-db-and-postgre-sql';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

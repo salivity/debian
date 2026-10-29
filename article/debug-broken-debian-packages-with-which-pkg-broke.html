@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Broken Debian Packages with which-pkg-broke - debian</title>
+    <meta name="description" content="Package management issues on Debian can cause software to fail unexpectedly when shared libraries or dependencies change. The which-pkg-broke utility, included in the debian-goodies package, simplifies troubleshooting by analyzing the dependency tree of a">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debug-broken-debian-packages-with-which-pkg-broke">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debug Broken Debian Packages with which-pkg-broke - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debug-broken-debian-packages-with-which-pkg-broke" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Package management issues on Debian can cause software to fail unexpectedly when shared libraries or dependencies change. The which-pkg-broke utility, included in the debian-goodies package, simplifies troubleshooting by analyzing the dependency tree of a" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debug-broken-debian-packages-with-which-pkg-broke">Debug Broken
+Debian Packages with which-pkg-broke</h1>
+<p>Package management issues on Debian can cause software to fail
+unexpectedly when shared libraries or dependencies change. The
+<code>which-pkg-broke</code> utility, included in the
+<code>debian-goodies</code> package, simplifies troubleshooting by
+analyzing the dependency tree of a malfunctioning package and listing
+its dependencies in order of their installation or upgrade times. This
+article explains how <code>which-pkg-broke</code> works, how to run it,
+and how to use its output to pinpoint and resolve broken dependencies on
+Debian systems.</p>
+<h2 id="the-challenge-of-debian-dependency-breakage">The Challenge of
+Debian Dependency Breakage</h2>
+<p>Debian's package management ecosystem—powered by <code>dpkg</code>
+and <code>apt</code>—is renowned for its dependency resolution. However,
+systems pulling packages from mixed repositories (such as combining
+<code>stable</code> with <code>testing</code> or third-party PPAs) can
+experience subtle breakages. A newly upgraded shared library might
+maintain binary compatibility on paper while introducing regressions or
+removing symbols required by an older, previously working program. When
+this happens, the affected application crashes or fails to launch, yet
+<code>apt</code> does not flag any obvious broken packages because all
+declared dependencies remain technically satisfied.</p>
+<h2 id="what-is-which-pkg-broke">What is which-pkg-broke?</h2>
+<p><code>which-pkg-broke</code> is a specialized diagnostic script
+provided by the <code>debian-goodies</code> toolbox, a collection of
+lightweight utilities designed to enhance standard Debian administrative
+tasks. Rather than checking whether a package's dependencies are
+physically present, <code>which-pkg-broke</code> investigates the
+timeline of changes across a package’s entire dependency graph.</p>
+<p>The tool inspects the <code>/var/lib/dpkg/info/</code> metadata
+directory to determine when each dependent package was last configured
+or updated. It then correlates this information against the target
+package, surfacing which upstream components changed recently.</p>
+<h2 id="how-to-install-and-run-the-tool">How to Install and Run the
+Tool</h2>
+<p>To use <code>which-pkg-broke</code>, install the
+<code>debian-goodies</code> package via standard package management:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install debian-goodies</span></code></pre></div>
+<p>Once installed, you can analyze any problematic package by providing
+its name as an argument:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">which-pkg-broke</span> <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span></code></pre></div>
+<p>For example, if the video player <code>mpv</code> suddenly stops
+launching after a system update:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">which-pkg-broke</span> mpv</span></code></pre></div>
+<h3 id="analyzing-reverse-dependencies">Analyzing Reverse
+Dependencies</h3>
+<p>By default, the command inspects packages that your target package
+depends on. However, if an update to a core package breaks other
+software on your system, you can use the <code>-b</code> flag to check
+reverse dependencies (packages that depend on the target):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">which-pkg-broke</span> <span class="at">-b</span> <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span></code></pre></div>
+<p>This reverse lookup helps identify downstream software impacted by a
+specific library upgrade.</p>
+<h2 id="interpreting-the-output">Interpreting the Output</h2>
+<p>When executed, <code>which-pkg-broke</code> walks the dependency tree
+recursively and outputs a list of packages formatted chronologically.
+The output generally displays:</p>
+<ol type="1">
+<li>The target package and its installation timestamp.</li>
+<li>Direct and indirect dependencies that were configured <em>after</em>
+the target package.</li>
+<li>The exact dates and times those dependencies were installed or
+upgraded.</li>
+</ol>
+<p>Any dependency installed or updated more recently than the target
+package represents a potential point of failure. If <code>mpv</code> was
+installed on June 1st, and an underlying audio library like
+<code>libasound2</code> was updated on June 10th right before the
+application began crashing, that library is the primary suspect.</p>
+<h2 id="resolving-identified-issues">Resolving Identified Issues</h2>
+<p>Once <code>which-pkg-broke</code> highlights the most recently
+modified packages in the dependency tree, you can take targeted
+action:</p>
+<ul>
+<li><strong>Inspect Changelogs:</strong> Run
+<code>apt-listchanges</code> or check
+<code>/usr/share/doc/&lt;package&gt;/changelog.Debian.gz</code> for the
+culprit package to see what modifications were introduced in the latest
+release.</li>
+<li><strong>Downgrade the Culprit:</strong> Use
+<code>apt install &lt;package&gt;=&lt;older-version&gt;</code> to roll
+back the offending dependency to its prior functioning state.</li>
+<li><strong>Hold the Working Version:</strong> Prevent <code>apt</code>
+from automatically upgrading the dependency again until a bug fix is
+released by executing
+<code>sudo apt-mark hold &lt;package&gt;</code>.</li>
+<li><strong>File a Bug Report:</strong> Use Debian's
+<code>reportbug</code> tool to submit a detailed report against the
+offending package, citing the version incompatibility discovered during
+your analysis.</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debug-broken-debian-packages-with-which-pkg-broke';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

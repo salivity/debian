@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Packaging for Corosync and Pacemaker - debian</title>
+    <meta name="description" content="This article provides an overview of how the Debian operating system packages, structures, and maintains enterprise-grade high-availability clustering software, focusing specifically on Corosync and Pacemaker. It explores the role of the Debian High Avail">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-packaging-for-corosync-and-pacemaker">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Packaging for Corosync and Pacemaker - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-packaging-for-corosync-and-pacemaker" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides an overview of how the Debian operating system packages, structures, and maintains enterprise-grade high-availability clustering software, focusing specifically on Corosync and Pacemaker. It explores the role of the Debian High Avail" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-packaging-for-corosync-and-pacemaker">Debian Packaging
+for Corosync and Pacemaker</h1>
+<p>This article provides an overview of how the Debian operating system
+packages, structures, and maintains enterprise-grade high-availability
+clustering software, focusing specifically on Corosync and Pacemaker. It
+explores the role of the Debian High Availability team, package
+modularization, dependency management, and how the distribution ensures
+cluster stability across its release lifecycles.</p>
+<h3 id="maintenance-by-the-debian-high-availability-team">Maintenance by
+the Debian High Availability Team</h3>
+<p>Corosync and Pacemaker are maintained within Debian by the Debian HA
+(High Availability) team. The packaging sources are tracked on Debian’s
+GitLab instance (Salsa), where maintainers collaborate on upstream
+tracking, patch integration, and Debian policy compliance. The team
+coordinates releases to align with Debian's freeze schedules, applying
+Debian-specific adjustments such as systemd service hardening, compiler
+flag enforcements (like hardening against buffer overflows), and
+compliance with the Filesystem Hierarchy Standard (FHS).</p>
+<h3 id="modular-packaging-architecture">Modular Packaging
+Architecture</h3>
+<p>Debian breaks large upstream projects into smaller, targeted binary
+packages to minimize footprint and maintain security boundaries:</p>
+<ul>
+<li><strong>Corosync:</strong> The core engine is packaged as
+<code>corosync</code>, which provides the cluster communication
+infrastructure and the <code>corosync.service</code> systemd unit.
+Related libraries—such as <code>libcmap</code>, <code>libcfg</code>,
+<code>libcpg</code>, and <code>libquorum</code>—are split into
+individual shared library packages (e.g.,
+<code>libcorosync-common4</code>, <code>libcmap4</code>) along with
+their corresponding development headers (<code>*-dev</code>). Debian
+also packages <code>corosync-qdevice</code> and
+<code>corosync-qnetd</code> separately for arbitrary quorum node
+configurations.</li>
+<li><strong>Pacemaker:</strong> The cluster resource manager is split
+into core utilities, daemons, and libraries. The primary daemon package
+is <code>pacemaker</code>, while administrative tools like
+<code>crm_mon</code>, <code>crm_resource</code>, and
+<code>crm_attribute</code> are included within or modularized into
+packages like <code>pacemaker-cli-utils</code>. The actual C-libraries
+powering Pacemaker are distributed as <code>libpacemaker1</code>.</li>
+<li><strong>Shared Dependencies:</strong> Low-level libraries shared by
+the ecosystem, such as <code>libqb</code> (high-performance IPC and
+logging) and <code>libknet</code> (Kronosnet, handling the transport
+layer for Corosync), are packaged as separate independent packages with
+strict upstream version pinning to maintain deterministic ABI
+stability.</li>
+</ul>
+<h3 id="resource-and-fence-agents-segregation">Resource and Fence Agents
+Segregation</h3>
+<p>Pacemaker relies on external scripts to manage resources and perform
+node fencing (STONITH). Debian separates these scripts from the core
+engine into dedicated packages:</p>
+<ul>
+<li><code>resource-agents</code>: Contains the standard Open Cluster
+Framework (OCF) scripts for managing virtual IPs, filesystems, and
+generic application services.</li>
+<li><code>fence-agents</code>: Contains the STONITH modules for
+interacting with hardware management interfaces (IPMI, iLO, DRAC) and
+cloud provider APIs.</li>
+</ul>
+<p>This separation prevents a cluster controller node from needing to
+install every hypervisor or cloud SDK unless explicitly required by the
+administrator.</p>
+<h3 id="management-interfaces">Management Interfaces</h3>
+<p>Debian provides user-space management utilities through separate
+packages:</p>
+<ul>
+<li><code>crmsh</code>: The classic command-line interface shell for
+cluster configuration.</li>
+<li><code>pcs</code>: The Pacemaker/Corosync configuration system,
+providing both a CLI and an optional web-based GUI daemon
+(<code>pcsd</code>).</li>
+</ul>
+<p>Because both tools modify cluster XML configurations directly, Debian
+allows administrators to select their preferred management toolset
+without forcing one as an absolute dependency of the Pacemaker core.</p>
+<h3 id="lifecycle-stability-and-upgrades">Lifecycle, Stability, and
+Upgrades</h3>
+<p>Debian follows a conservative release cycle. Once a Debian version
+enters the "Stable" branch, the versions of Corosync and Pacemaker are
+frozen. Upstream bug fixes and security patches are backported rather
+than updated to new upstream point releases, ensuring cluster behavior
+remains predictable throughout the system's support window.</p>
+<p>For deployments needing newer upstream features (such as newer
+fencing APIs or enhanced multi-site capabilities), packages are
+periodically ported to Debian Backports, allowing targeted upgrades of
+the clustering stack without changing the underlying base operating
+system. Configuration files are stored under <code>/etc/corosync/</code>
+and <code>/etc/pacemaker/</code>, with Debian maintaining backward
+compatibility using post-installation scripts that detect and preserve
+local modifications during upgrades.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-packaging-for-corosync-and-pacemaker';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

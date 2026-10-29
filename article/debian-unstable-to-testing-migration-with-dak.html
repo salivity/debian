@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Unstable to Testing Migration with Dak - debian</title>
+    <meta name="description" content="This article explains how the Debian Archive Kit (dak) coordinates the automated transition of software packages from Debian&#39;s unstable repository (Sid) into the testing distribution. It explores the interplay between dak and the migration engine Britney,">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-unstable-to-testing-migration-with-dak">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Unstable to Testing Migration with Dak - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-unstable-to-testing-migration-with-dak" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how the Debian Archive Kit (dak) coordinates the automated transition of software packages from Debian&#39;s unstable repository (Sid) into the testing distribution. It explores the interplay between dak and the migration engine Britney," />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-unstable-to-testing-migration-with-dak">Debian Unstable
+to Testing Migration with Dak</h1>
+<p>This article explains how the Debian Archive Kit (dak) coordinates
+the automated transition of software packages from Debian's unstable
+repository (Sid) into the testing distribution. It explores the
+interplay between dak and the migration engine Britney, details the
+specific health and stability criteria a package must meet before being
+promoted, and outlines how coordinated multi-package transitions are
+safely executed to keep the testing suite stable and installable.</p>
+<h3 id="the-roles-of-dak-and-britney">The Roles of Dak and Britney</h3>
+<p>In the Debian infrastructure, archive operations on
+<code>ftp-master</code> are driven by <code>dak</code> (Debian Archive
+Kit). While <code>dak</code> handles core repository maintenance—such as
+package ingestion, metadata generation, and database updates—it
+delegates the mathematical and logical validation of testing migrations
+to a dedicated sub-program called Britney (specifically Britney2).</p>
+<p>During the migration pipeline, <code>dak</code> exports the state of
+both the unstable and testing suites into structured files. Britney
+reads these inputs, evaluates candidates against release criteria,
+computes dependency graphs, and generates a list of approved package
+transitions. Once Britney finishes its run, <code>dak</code> executes
+the results by updating the database references and moving the approved
+binaries and source packages into the testing archive.</p>
+<h3 id="core-migration-criteria">Core Migration Criteria</h3>
+<p>For <code>dak</code> and Britney to allow a package to enter testing,
+the package must meet strict quality checks:</p>
+<ol type="1">
+<li><strong>Quarantine (Age Requirement):</strong> The package must sit
+in unstable for a designated number of days without being superseded by
+a newer upload. The duration depends on the package upload urgency:
+<ul>
+<li><strong>High urgency:</strong> 2 days</li>
+<li><strong>Medium urgency:</strong> 5 days</li>
+<li><strong>Low urgency:</strong> 10 days</li>
+</ul></li>
+<li><strong>Build Availability (Arch Parity):</strong> The new version
+must be successfully compiled and built across all release architectures
+supported by Debian. If a package builds on <code>amd64</code> but fails
+on <code>arm64</code>, the entire migration is halted.</li>
+<li><strong>No New Release-Critical (RC) Bugs:</strong> The package must
+not introduce new RC bugs (bugs with severities of <em>serious</em>,
+<em>grave</em>, or <em>critical</em> in the Debian Bug Tracking System).
+It is permissible for a package to migrate if it has an existing RC bug
+that is also present in testing, provided no <em>new</em> RC bugs were
+introduced.</li>
+<li><strong>Co-Installability:</strong> Migrating the package must not
+render existing packages in testing uninstallable. Britney verifies that
+all runtime dependencies (<code>Depends</code>,
+<code>Pre-Depends</code>) can be satisfied by packages already present
+in testing or migrating simultaneously.</li>
+</ol>
+<h3 id="coordinated-group-migrations-and-transitions">Coordinated Group
+Migrations and Transitions</h3>
+<p>When libraries undergo ABI/API changes (soname transitions), updating
+a single package would immediately break reverse dependencies. Britney
+handles these events through smooth updates and composite migration
+items:</p>
+<ul>
+<li><strong>Group Migrations:</strong> If package A depends on a new
+version of library B, neither can migrate alone. Britney analyzes the
+dependency graph to find a minimal set of packages that can migrate
+together safely.</li>
+<li><strong>Smooth Updates:</strong> For shared libraries, the older
+binary packages can occasionally remain in testing temporarily while the
+new source package and its associated binaries migrate. This allows
+reverse dependencies to be rebuilt against the new library without
+breaking currently installed applications.</li>
+</ul>
+<h3 id="manual-overrides-and-release-team-hints">Manual Overrides and
+Release Team Hints</h3>
+<p>When automatic dependency resolution cannot solve circular conflicts
+or massive library transitions, the Debian Release Team intervenes using
+manual hints. These hints instruct Britney how to process tricky
+packages:</p>
+<ul>
+<li><strong><code>unblock</code> / <code>block</code>:</strong>
+Explicitly allows or prevents a package from migrating, often used
+during the pre-release freeze.</li>
+<li><strong><code>easy</code>:</strong> Informs Britney to try migrating
+an explicit group of packages simultaneously.</li>
+<li><strong><code>remove</code>:</strong> Drops an outdated,
+unmaintained, or buggy package from testing to allow the rest of the
+dependency graph to migrate smoothly.</li>
+</ul>
+<h3 id="archive-finalization">Archive Finalization</h3>
+<p>Once Britney concludes its evaluation and outputs the valid
+transaction list, <code>dak</code> runs its suite synchronization steps.
+The database pointers for the testing distribution are updated to
+reference the new package versions, older versions are cleared out from
+testing (unless kept for a smooth transition), and the suite's metadata
+files (<code>Packages</code>, <code>Sources</code>, and
+<code>InRelease</code>) are regenerated and cryptographically signed.
+The testing repository is then ready for public mirroring.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-unstable-to-testing-migration-with-dak';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

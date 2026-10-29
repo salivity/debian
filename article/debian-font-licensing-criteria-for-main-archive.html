@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Font Licensing Criteria for Main Archive - debian</title>
+    <meta name="description" content="Debian maintains strict standards for packages entering its main archive, requiring all software, documentation, and typefaces to adhere strictly to the Debian Free Software Guidelines (DFSG). For fonts to be accepted into this primary repository, they mu">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-font-licensing-criteria-for-main-archive">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Font Licensing Criteria for Main Archive - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-font-licensing-criteria-for-main-archive" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian maintains strict standards for packages entering its main archive, requiring all software, documentation, and typefaces to adhere strictly to the Debian Free Software Guidelines (DFSG). For fonts to be accepted into this primary repository, they mu" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-font-licensing-criteria-for-main-archive">Debian Font
+Licensing Criteria for Main Archive</h1>
+<p>Debian maintains strict standards for packages entering its
+<code>main</code> archive, requiring all software, documentation, and
+typefaces to adhere strictly to the Debian Free Software Guidelines
+(DFSG). For fonts to be accepted into this primary repository, they must
+not only carry a recognized open-source license but must also provide
+verifiable source files, allow unrestricted commercial and
+non-commercial redistribution, and permit derivative works without
+burdensome legal restrictions.</p>
+<h3 id="adherence-to-the-debian-free-software-guidelines-dfsg">Adherence
+to the Debian Free Software Guidelines (DFSG)</h3>
+<p>To enter Debian <code>main</code>, a font license must satisfy all
+ten criteria of the DFSG. The most critical requirements during license
+audits include:</p>
+<ul>
+<li><strong>Unrestricted Redistribution (DFSG 1):</strong> The license
+must permit anyone to sell or give away the font as part of an aggregate
+software distribution without requiring royalties or fees.</li>
+<li><strong>No Discrimination Against Fields of Endeavor (DFSG
+6):</strong> Licenses that prohibit commercial usage, restrict
+deployment to non-profit entities, or ban specific fields such as
+government or military use are strictly forbidden. Common freeware
+clauses like "free for personal use" immediately disqualify a font.</li>
+<li><strong>Permission for Derived Works (DFSG 3):</strong> Users must
+have the legal right to modify outlines, add glyphs, alter kerning, and
+redistribute those modified versions under the same terms. Licenses
+containing "No Derivatives" (ND) clauses fail this requirement.</li>
+</ul>
+<h3 id="the-source-code-requirement-for-fonts">The "Source Code"
+Requirement for Fonts</h3>
+<p>DFSG 2 requires the availability of source code, defined as the
+preferred form for making modifications. For digital typography, this is
+one of the most strictly evaluated hurdles:</p>
+<ul>
+<li><strong>True Source Formats:</strong> Debian package maintainers and
+the FTP master team evaluate whether the distributed files are the
+author's working format. If a font was created using FontForge
+(<code>.sfd</code>), Unified Font Object (<code>.ufo</code>), Glyphs
+(<code>.glyphs</code>), or proprietary tooling, the compiled binary
+(<code>.ttf</code> or <code>.otf</code>) is treated as executable code.
+Providing only the binary without the editable source violates DFSG
+2.</li>
+<li><strong>Reproducible Build Toolchains:</strong> If a source format
+exists, Debian requires that the compiled font can be generated from
+that source using entirely free tools already present in the Debian
+archive. If compiling the font requires proprietary software, the font
+cannot be included in <code>main</code>.</li>
+<li><strong>Direct Binary Exceptions:</strong> If the author created or
+edited the font directly inside a binary container without a separate
+source file, the binary itself may be accepted as the source, provided
+upstream explicitly confirms this development practice.</li>
+</ul>
+<h3
+id="handling-renaming-clauses-and-the-sil-open-font-license">Handling
+Renaming Clauses and the SIL Open Font License</h3>
+<p>DFSG 4 permits licenses to require modified versions to carry a
+different name from the original design to preserve the author’s
+reputation:</p>
+<ul>
+<li><strong>Reserved Font Names (RFN):</strong> The SIL Open Font
+License (OFL) is the industry standard for open fonts and includes a
+mechanism where copyright holders can declare Reserved Font Names.
+Debian recognizes the OFL 1.1 as DFSG-compliant, provided that any RFN
+terms are cleanly documented.</li>
+<li><strong>Clear Renaming Rules:</strong> If a font is modified within
+Debian or by downstream users, the license must allow redistribution
+under a different name without requiring permission from the original
+author.</li>
+</ul>
+<h3 id="commonly-accepted-vs-disqualified-font-licenses">Commonly
+Accepted vs. Disqualified Font Licenses</h3>
+<p>Debian strictly validates licenses against established legal
+precedents maintained by the project:</p>
+<ul>
+<li><strong>Approved for Debian Main:</strong>
+<ul>
+<li><strong>SIL Open Font License 1.1 (OFL):</strong> Accepted with or
+without Reserved Font Names.</li>
+<li><strong>GNU General Public License (GPL) with Font
+Exception:</strong> Standard GPL terms with an explicit exception
+allowing documents embedding the font to remain under their own
+licensing terms.</li>
+<li><strong>Permissive Licenses:</strong> MIT (Expat), BSD (2-Clause or
+3-Clause), and Apache 2.0.</li>
+<li><strong>Public Domain / CC0:</strong> Unconditional dedications to
+the public domain.</li>
+</ul></li>
+<li><strong>Disqualified (Rejected or relegated to
+<em>non-free</em>):</strong>
+<ul>
+<li><strong>Creative Commons Non-Commercial (CC-BY-NC):</strong> Fails
+DFSG 6.</li>
+<li><strong>Creative Commons No-Derivatives (CC-BY-ND):</strong> Fails
+DFSG 3.</li>
+<li><strong>Microsoft Core Fonts (EULA):</strong> Redistribution is
+restricted and modifications are prohibited.</li>
+<li><strong>GPL without Font Exception:</strong> Incompatible with
+typical font usage due to copyleft contamination of documents that embed
+the font data.</li>
+</ul></li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-font-licensing-criteria-for-main-archive';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

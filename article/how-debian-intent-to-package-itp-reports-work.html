@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Intent to Package (ITP) Reports Work - debian</title>
+    <meta name="description" content="An Intent to Package (ITP) report is a specialized bug submission within Debian&#39;s Bug Tracking System (BTS) that officially signals a maintainer&#39;s plan to introduce a new software package to the Debian archive. By submitting this notice through the Work-N">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-intent-to-package-itp-reports-work">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Intent to Package (ITP) Reports Work - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-intent-to-package-itp-reports-work" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="An Intent to Package (ITP) report is a specialized bug submission within Debian&#39;s Bug Tracking System (BTS) that officially signals a maintainer&#39;s plan to introduce a new software package to the Debian archive. By submitting this notice through the Work-N" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-intent-to-package-itp-reports-work">How Debian Intent
+to Package (ITP) Reports Work</h1>
+<p>An Intent to Package (ITP) report is a specialized bug submission
+within Debian's Bug Tracking System (BTS) that officially signals a
+maintainer's plan to introduce a new software package to the Debian
+archive. By submitting this notice through the Work-Needing and
+Prospective Packages (WNPP) database, prospective and existing Debian
+contributors establish a public record of their ongoing work. This
+process prevents redundant packaging efforts across the global
+community, invites early technical review on software licensing and
+suitability, and serves as the foundational tracking ticket that is
+closed once the software successfully enters the distribution.</p>
+<h3 id="the-role-of-wnpp-and-the-debian-bts">The Role of WNPP and the
+Debian BTS</h3>
+<p>Debian maintains a pseudo-package in its BTS known as
+<code>wnpp</code> (Work-Needing and Prospective Packages). Rather than
+reporting a defect in existing software, contributors use the WNPP
+system to track the life cycle of prospective, orphaned, or neglected
+software packages.</p>
+<p>When a developer intends to package new software, they file a
+wishlist bug against <code>wnpp</code> with a subject prefixed by
+<code>ITP:</code>. This entry is indexed publicly on Debian's
+infrastructure, notifying the community that active packaging is
+underway.</p>
+<h3 id="required-information-in-an-itp-report">Required Information in
+an ITP Report</h3>
+<p>To provide sufficient context, an ITP submission requires a
+standardized set of metadata about the software:</p>
+<ul>
+<li><strong>Package Name:</strong> The prospective binary and source
+package names, adhering to Debian naming conventions.</li>
+<li><strong>Version and Upstream Author:</strong> The upstream software
+version being packaged and the upstream author's identity.</li>
+<li><strong>URL:</strong> The primary website or source repository for
+the upstream project.</li>
+<li><strong>License:</strong> The software license under which the code
+is released, allowing Debian developers to evaluate compatibility with
+the Debian Free Software Guidelines (DFSG).</li>
+<li><strong>Description:</strong> A short summary and an extended
+description detailing what the program does and why it is valuable to
+Debian users.</li>
+</ul>
+<h3 id="preventing-redundant-work">Preventing Redundant Work</h3>
+<p>The primary operational purpose of an ITP is coordination. Because
+Debian is a decentralized project with thousands of independent
+contributors worldwide, multiple individuals might independently decide
+to package popular emerging tools. Before beginning work, a contributor
+checks the WNPP database. If an open ITP exists, they can contact the
+maintainer to offer assistance rather than duplicating the effort.
+Filing the report effectively registers the contributor's intent and
+reserves the packaging effort.</p>
+<h3 id="facilitating-community-review-and-sponsorship">Facilitating
+Community Review and Sponsorship</h3>
+<p>Once an ITP is submitted, an automated copy is forwarded to the
+<code>debian-devel</code> mailing list. This allows the broader Debian
+community to evaluate the prospective software:</p>
+<ol type="1">
+<li><strong>Licensing and DFSG Compliance:</strong> Experienced
+maintainers examine the specified license to detect any non-free
+clauses, patent issues, or terms incompatible with Debian's strict
+software standards.</li>
+<li><strong>Naming Conflicts:</strong> Developers verify that the
+proposed package name does not conflict with existing utilities or
+violate policy.</li>
+<li><strong>Packaging Sponsorship:</strong> If the submitter is not yet
+a Debian Developer (DD) or Debian Maintainer (DM) with upload rights,
+the ITP serves as an introduction to prospective sponsors. A DD can
+follow the progress of the ITP and agree to review and sponsor the
+package upload into the Debian archive.</li>
+</ol>
+<h3 id="closing-the-itp">Closing the ITP</h3>
+<p>The ITP bug remains active throughout the packaging and testing
+phases. Once the package is fully assembled, linted, and built, it is
+uploaded to the Debian <code>NEW</code> queue. The package's
+<code>debian/changelog</code> file includes a reference to the bug (for
+example, <code>Initial release (Closes: #123456)</code>). When Debian's
+FTP masters approve the software and it enters the <code>unstable</code>
+repository, the BTS automatically marks the ITP report as resolved,
+concluding the formal onboarding process.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-debian-intent-to-package-itp-reports-work';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
