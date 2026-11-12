@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Package Tracker: How tracker.debian.org Works - debian</title>
+    <meta name="description" content="This article provides an overview of tracker.debian.org, the central package tracking service for the Debian operating system. It details the platform&#39;s primary functions, the critical technical data it aggregates, and how Debian maintainers, contributors">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-package-tracker-how-tracker-debian-org-works">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Package Tracker: How tracker.debian.org Works - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-package-tracker-how-tracker-debian-org-works" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides an overview of tracker.debian.org, the central package tracking service for the Debian operating system. It details the platform&#39;s primary functions, the critical technical data it aggregates, and how Debian maintainers, contributors" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-package-tracker-how-trackerdebianorg-works">Debian
+Package Tracker: How tracker.debian.org Works</h1>
+<p>This article provides an overview of <a
+href="https://tracker.debian.org">tracker.debian.org</a>, the central
+package tracking service for the Debian operating system. It details the
+platform's primary functions, the critical technical data it aggregates,
+and how Debian maintainers, contributors, and end-users utilize it to
+monitor software packages across Debian's different distribution
+branches.</p>
+<h3 id="centralized-package-metadata-and-status">Centralized Package
+Metadata and Status</h3>
+<p>The primary function of <a
+href="https://tracker.debian.org">tracker.debian.org</a> is to act as a
+unified dashboard for every source package available in the Debian
+archive. Instead of requiring users to query multiple distinct
+infrastructure services, the tracker aggregates real-time data into a
+single web interface.</p>
+<p>Key information provided for each package includes:</p>
+<ul>
+<li><strong>Archive Versions:</strong> The exact version of the package
+currently present in each Debian suite: <em>Experimental</em>,
+<em>Unstable</em> (Sid), <em>Testing</em>, <em>Stable</em>, and
+<em>Oldstable</em>.</li>
+<li><strong>Package Relations:</strong> Identification of the package
+maintainer, co-maintainers, Debian teams, and links to the upstream
+project's source repositories and version control systems (such as
+Salsa/GitLab).</li>
+<li><strong>Architecture Availability:</strong> Build status across all
+supported hardware architectures (e.g., amd64, arm64, riscv64), linking
+directly to Debian's automated build daemon network (buildd).</li>
+</ul>
+<h3 id="testing-migration-monitoring">Testing Migration Monitoring</h3>
+<p>For Debian contributors and users awaiting updates, the tracker
+serves as the primary tool to monitor "testing migration." It displays
+the output of the Britney migration script, which determines when a
+package can move from <em>Unstable</em> to <em>Testing</em>.</p>
+<p>The tracker explicitly lists:</p>
+<ul>
+<li>The age requirements of the package in <em>Unstable</em>.</li>
+<li>Passing or failing autopkgtest results.</li>
+<li>Dependency blockers or missing builds on specific
+architectures.</li>
+<li>Release-critical bugs that are preventing the package from
+advancing.</li>
+</ul>
+<h3 id="bug-tracking-and-security-integration">Bug Tracking and Security
+Integration</h3>
+<p>The tracker links directly with the Debian Bug Tracking System (BTS)
+and the Debian Security Team's resources. It provides a real-time count
+and classification of outstanding issues, including:</p>
+<ul>
+<li><strong>Release-Critical (RC) Bugs:</strong> Flaws that can prevent
+a package from being included in the next stable Debian release.</li>
+<li><strong>General Bugs:</strong> Regular, minor, and wishlist bug
+counts.</li>
+<li><strong>Security Advisories:</strong> CVE notices, security
+vulnerabilities, and direct links to Debian Security Advisories (DSAs)
+relevant to that specific codebase.</li>
+</ul>
+<h3 id="communication-and-subscription-system">Communication and
+Subscription System</h3>
+<p>Beyond displaying static data, <a
+href="https://tracker.debian.org">tracker.debian.org</a> operates a
+granular subscription service via email. Maintainers, downstream
+distributors, and interested end-users can subscribe to specific package
+feeds to receive notifications regarding:</p>
+<ul>
+<li>New package uploads and changelogs.</li>
+<li>BTS bug activity (new bugs opened, tagged, or closed).</li>
+<li>Build failures reported by buildd.</li>
+<li>Lintian QA warnings and automated code review issues.</li>
+<li>Package adoption, orphaned status, or removal notices.</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-package-tracker-how-tracker-debian-org-works';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

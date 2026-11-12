@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Installer Kernel Command Line Parameters - debian</title>
+    <meta name="description" content="Configuring the Linux kernel command line during the boot stage allows administrators to automate, customize, and troubleshoot the Debian installation process. By passing specific parameters to the Debian Installer (debian-installer or d-i), you can suppr">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-installer-kernel-command-line-parameters">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Installer Kernel Command Line Parameters - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-installer-kernel-command-line-parameters" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring the Linux kernel command line during the boot stage allows administrators to automate, customize, and troubleshoot the Debian installation process. By passing specific parameters to the Debian Installer (debian-installer or d-i), you can suppr" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-installer-kernel-command-line-parameters">Debian
+Installer Kernel Command Line Parameters</h1>
+<p>Configuring the Linux kernel command line during the boot stage
+allows administrators to automate, customize, and troubleshoot the
+Debian installation process. By passing specific parameters to the
+Debian Installer (<code>debian-installer</code> or <code>d-i</code>),
+you can suppress interactive prompts, configure network settings before
+fetching configuration files, select automated installation templates,
+and dictate hardware behavior. This guide outlines the most effective
+kernel parameters available to control the Debian installer.</p>
+<h2 id="installation-mode-and-automation">Installation Mode and
+Automation</h2>
+<p>These parameters control the installer's operational mode and the
+visibility of questions asked during installation:</p>
+<ul>
+<li><strong><code>auto=true</code></strong> or
+<strong><code>auto</code></strong>: Enforces automatic installation. It
+delays certain configuration questions until the network is configured
+so that a preseed file can be loaded.</li>
+<li><strong><code>priority=critical</code></strong>: Sets the minimum
+priority of debconf questions displayed to the user. Options are
+<code>low</code>, <code>medium</code>, <code>high</code>, and
+<code>critical</code>. Setting this to <code>critical</code> skips
+almost all interactive questions by applying default values.</li>
+<li><strong><code>expert</code></strong>: Equivalent to setting
+<code>priority=low</code>, giving total control over the setup,
+including partition flags, base system components, and module
+parameters.</li>
+<li><strong><code>rescue/enable=true</code></strong>: Bypasses the
+standard installation procedure and boots straight into Debian's rescue
+environment for system recovery.</li>
+</ul>
+<h2 id="preseeding-configurations">Preseeding Configurations</h2>
+<p>Preseeding allows unattended installation by pre-populating answers
+to debconf questions. The installer can retrieve preseed files via
+network protocols or local storage:</p>
+<ul>
+<li><strong><code>preseed/url=http://example.com/preseed.cfg</code></strong>
+(or <strong><code>url=http://...</code></strong>): Instructs the
+installer to download a preseed configuration over HTTP, HTTPS, or
+FTP.</li>
+<li><strong><code>preseed/file=/hd-media/preseed.cfg</code></strong> (or
+<strong><code>file=/path</code></strong>): Directs the installer to read
+a configuration file located on a local filesystem or mounted
+drive.</li>
+<li><strong><code>preseed/interactive=false</code></strong>: Ensures the
+installer halts with an error if a question is not answered by the
+preseed file instead of prompting the user.</li>
+</ul>
+<h2 id="network-configuration">Network Configuration</h2>
+<p>When using network-based preseed files or performing netboot
+installations, network parameters must often be configured directly on
+the kernel command line:</p>
+<ul>
+<li><strong><code>netcfg/choose_interface=auto</code></strong>:
+Automatically selects the first active network interface. You can
+specify a dedicated device, such as
+<code>netcfg/choose_interface=eth0</code> or
+<code>netcfg/choose_interface=ens3</code>.</li>
+<li><strong><code>netcfg/disable_autoconfig=true</code></strong>:
+Prevents the installer from requesting network information via DHCP,
+prompting instead for static configuration.</li>
+<li><strong><code>netcfg/get_ipaddress=192.168.1.100</code></strong>:
+Defines the static IP address.</li>
+<li><strong><code>netcfg/get_netmask=255.255.255.0</code></strong>: Sets
+the subnet mask.</li>
+<li><strong><code>netcfg/get_gateway=192.168.1.1</code></strong>: Sets
+the default network gateway.</li>
+<li><strong><code>netcfg/get_nameservers=192.168.1.1</code></strong>:
+Configures the primary DNS server.</li>
+<li><strong><code>netcfg/get_hostname=debian-node</code></strong>:
+Specifies the system hostname.</li>
+<li><strong><code>netcfg/get_domain=localdomain</code></strong>:
+Specifies the domain name.</li>
+</ul>
+<h2 id="localization-and-interface-settings">Localization and Interface
+Settings</h2>
+<p>To avoid language and region selection prompts at boot:</p>
+<ul>
+<li><strong><code>locale=en_US.UTF-8</code></strong>: Sets the system
+language and region code simultaneously.</li>
+<li><strong><code>keymap=us</code></strong>: Defines the keyboard layout
+directly without showing selection dialogs.</li>
+<li><strong><code>theme=dark</code></strong>: Activates the
+high-contrast dark theme in the graphical installer.</li>
+</ul>
+<h2 id="hardware-and-console-redirection">Hardware and Console
+Redirection</h2>
+<p>For headless systems, serial installations, and systems with
+incompatible graphics hardware:</p>
+<ul>
+<li><strong><code>console=ttyS0,115200n8</code></strong>: Directs the
+installer interface to a serial console, specifying the port
+(<code>ttyS0</code>), baud rate (<code>115200</code>), parity
+(<code>n</code>), and bits (<code>8</code>).</li>
+<li><strong><code>vga=normal</code></strong>: Disables framebuffer modes
+and forces standard VGA text output.</li>
+<li><strong><code>fb=false</code></strong>: Completely disables the
+Linux framebuffer driver in the text-mode installer.</li>
+<li><strong><code>nomodeset</code></strong>: Prevents the kernel from
+loading video drivers before the display server starts, fixing blank
+screen issues on problematic GPUs.</li>
+</ul>
+<h2 id="generic-debconf-parameter-passing">Generic Debconf Parameter
+Passing</h2>
+<p>Any Debian configuration parameter handled by debconf can be passed
+directly via the kernel command line using its question path. The
+installer checks the command line and applies the values directly:</p>
+<ul>
+<li><strong>Syntax</strong>:
+<code>[owner/][path/to/variable]=[value]</code></li>
+<li><strong>Example</strong>:
+<code>passwd/root-password-crypted=$6$...</code> passes a pre-hashed
+root password.</li>
+<li><strong>Example</strong>: <code>partman-auto/method=regular</code>
+configures standard disk partitioning without manual confirmation.</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-installer-kernel-command-line-parameters';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

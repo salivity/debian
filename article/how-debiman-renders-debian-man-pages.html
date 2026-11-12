@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debiman Renders Debian Man Pages - debian</title>
+    <meta name="description" content="Debiman is the custom, Go-based documentation engine responsible for powering Debian&#39;s official online manual repository at manpages.debian.org. It processes hundreds of thousands of manual pages packaged across various Debian suites, formats them from ra">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debiman-renders-debian-man-pages">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debiman Renders Debian Man Pages - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debiman-renders-debian-man-pages" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debiman is the custom, Go-based documentation engine responsible for powering Debian&#39;s official online manual repository at manpages.debian.org. It processes hundreds of thousands of manual pages packaged across various Debian suites, formats them from ra" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debiman-renders-debian-man-pages">How Debiman Renders Debian
+Man Pages</h1>
+<p>Debiman is the custom, Go-based documentation engine responsible for
+powering Debian's official online manual repository at
+manpages.debian.org. It processes hundreds of thousands of manual pages
+packaged across various Debian suites, formats them from raw roff
+sources into modern HTML, and delivers them rapidly through an optimized
+combination of static generation and dynamic request routing. This
+article examines the ingestion pipeline, the rendering mechanisms,
+cross-referencing logic, and the serving architecture that enables
+debiman to present Debian's software documentation seamlessly.</p>
+<h3 id="archive-ingestion-and-package-extraction">Archive Ingestion and
+Package Extraction</h3>
+<p>Debiman operates directly on the Debian package archive mirrors.
+Instead of installing packages into a virtual environment, it inspects
+the Debian <code>Contents</code> indices and downloads raw binary
+package archives (<code>.deb</code> files) across multiple suites,
+including stable, testing, unstable, and experimental, as well as
+backports.</p>
+<p>Once acquired, debiman inspects the packages internally:</p>
+<ul>
+<li>It scans standard manual directories, primarily
+<code>/usr/share/man/</code>.</li>
+<li>It detects and decompresses manual source files, which are commonly
+compressed with <code>gzip</code>.</li>
+<li>It extracts metadata from the Debian control files, such as package
+name, version, architecture, and suite, attaching this context to every
+extracted manual page.</li>
+</ul>
+<h3 id="the-conversion-pipeline-from-roff-to-html">The Conversion
+Pipeline: From roff to HTML</h3>
+<p>Manual pages in Unix-like systems are authored using
+<code>roff</code> (specifically <code>troff</code> or
+<code>groff</code>) macro packages like <code>man</code> and
+<code>mdoc</code>. Debiman converts these raw markup files into semantic
+HTML using <code>mandoc</code>, a specialized compiler designed to parse
+manual page formats quickly and safely.</p>
+<p>Using <code>mandoc</code> instead of traditional <code>groff</code>
+pipelines provides significant performance improvements and emits
+structured HTML5 instead of terminal control sequences. Debiman
+interfaces directly with <code>mandoc</code> to:</p>
+<ol type="1">
+<li>Parse the structural tags of the manual page (such as
+<code>SH</code> for section headers, <code>TP</code> for tagged
+paragraphs, and <code>B</code>/<code>I</code> for bold/italic
+styling).</li>
+<li>Clean up non-standard or malformed markup that exists across older
+software packages.</li>
+<li>Emit uniform HTML elements that adhere to modern accessibility and
+responsive design standards.</li>
+</ol>
+<h3 id="link-resolution-and-dynamic-cross-referencing">Link Resolution
+and Dynamic Cross-Referencing</h3>
+<p>A critical feature of debiman is its ability to build an
+interconnected web of manual pages out of isolated source files. When a
+manual page references another utility—such as <code>tar(1)</code>
+referencing <code>gzip(1)</code>—debiman dynamically resolves these
+references into functional hyperlinks.</p>
+<p>During the conversion phase, debiman builds an internal index
+containing:</p>
+<ul>
+<li>The command or function name.</li>
+<li>The section number (e.g., 1 for user commands, 2 for system calls, 3
+for library functions, 5 for file formats).</li>
+<li>The language or locale code.</li>
+<li>The originating Debian suite and package version.</li>
+</ul>
+<p>If a reference to <code>example(2)</code> is parsed, debiman queries
+this index to determine the canonical path for that page within the same
+suite and language, wrapping the text in an <code>&lt;a&gt;</code>
+anchor tag that targets the correct relative or absolute URL.</p>
+<h3 id="content-deduplication-and-storage">Content Deduplication and
+Storage</h3>
+<p>Debian maintains vast numbers of packages, many of which share
+identical manual pages across architectures and even across releases. To
+prevent redundant computation and conserve storage, debiman implements
+content-addressable deduplication:</p>
+<ul>
+<li>Debiman calculates cryptographic hashes (such as SHA-256) of the raw
+and rendered manual page files.</li>
+<li>If a package in Debian <code>testing</code> contains the exact same
+man page binary or roff source as <code>stable</code>, debiman reuses
+the previously rendered HTML asset.</li>
+<li>Symlinks or alias references are mapped in an internal database,
+ensuring that updates to packages only trigger re-rendering for assets
+that have actually changed.</li>
+</ul>
+<h3 id="hybrid-dynamic-serving-static-html-with-dynamic-routing">Hybrid
+Dynamic Serving: Static HTML with Dynamic Routing</h3>
+<p>While debiman generates HTML files ahead of time to ensure low
+latency and high scalability, the end-user experience behaves
+dynamically through an intelligent HTTP redirect and lookup layer known
+as <code>debiman-auxserver</code>.</p>
+<p>When a user requests a URL like <code>/grep</code>:</p>
+<ol type="1">
+<li>The auxiliary server receives the request and determines the
+client's preferred language through HTTP <code>Accept-Language</code>
+headers.</li>
+<li>It evaluates the suite hierarchy, defaulting to the current Debian
+stable release unless an explicit path (such as <code>/testing/</code>
+or <code>/unstable/</code>) is requested.</li>
+<li>It performs an in-memory route lookup to locate the best matching
+static file (e.g., <code>/jessie/grep.1.en.html</code> or
+<code>/bookworm/grep.1.fr.html</code>).</li>
+<li>The server redirects the user or directly serves the resolved static
+page with appropriate caching headers.</li>
+</ol>
+<p>This hybrid model allows debiman to handle millions of page
+variations, historical versions, and localization preferences with
+minimal CPU overhead while maintaining the responsiveness of a dynamic
+web application.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-debiman-renders-debian-man-pages';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

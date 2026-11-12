@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian NMU Delayed Queue System Explained - debian</title>
+    <meta name="description" content="When a Debian contributor performs a Non-Maintainer Upload (NMU) to fix a bug in a package they do not officially maintain, the upload is typically routed through the Debian delayed queue system. This system acts as a temporary holding buffer on the Debia">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-nmu-delayed-queue-system-explained">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian NMU Delayed Queue System Explained - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-nmu-delayed-queue-system-explained" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="When a Debian contributor performs a Non-Maintainer Upload (NMU) to fix a bug in a package they do not officially maintain, the upload is typically routed through the Debian delayed queue system. This system acts as a temporary holding buffer on the Debia" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-nmu-delayed-queue-system-explained">Debian NMU Delayed
+Queue System Explained</h1>
+<p>When a Debian contributor performs a Non-Maintainer Upload (NMU) to
+fix a bug in a package they do not officially maintain, the upload is
+typically routed through the Debian delayed queue system. This system
+acts as a temporary holding buffer on the Debian upload servers
+(<code>ftp-master</code>), giving the package's primary maintainer a
+designated grace period to review the proposed changes, acknowledge the
+fix, upload their own alternative revision, or cancel the upload
+altogether before it permanently enters the archive.</p>
+<h2 id="purpose-of-the-delayed-queue">Purpose of the Delayed Queue</h2>
+<p>In the Debian workflow, maintaining package ownership and
+coordination is paramount. While NMUs allow contributors to fix
+release-critical bugs, apply important patches, or resolve long-standing
+issues, uploading directly without maintainer consultation can cause
+conflicts.</p>
+<p>The delayed queue balances package velocity with maintainer autonomy.
+It provides:</p>
+<ul>
+<li>A safety buffer against unintentional breakages or duplicate
+work.</li>
+<li>Time for the package maintainer to react, review the
+<code>diff</code>, or apply a cleaner long-term fix.</li>
+<li>A predictable timeline after which fixes automatically deploy if the
+maintainer is inactive or unresponsive.</li>
+</ul>
+<h2 id="how-the-staging-process-works">How the Staging Process
+Works</h2>
+<p>When an uploader prepares an NMU, they specify a target delay
+window—typically ranging from 0 to 15 days—using their upload client
+(such as <code>dput</code> or <code>dput-ng</code>):</p>
+<ol type="1">
+<li><strong>Targeting the Queue:</strong> The contributor uploads the
+package to a specific delayed directory on the host (e.g.,
+<code>ftp-master.debian.org</code> under <code>DEFERRED/N</code>, where
+<em>N</em> represents the number of days from 0 to 15).</li>
+<li><strong>Notification:</strong> Once the package is received by the
+Debian Archive Kit (DAK), an automated notification including the
+<code>.changes</code> file and patch information is dispatched to the
+maintainer via the Debian bug tracking system (BTS) and the package's
+mailing list address.</li>
+<li><strong>Daily Decrements:</strong> A scheduled cron job runs daily
+on the archive servers. Each day, packages move down one level (e.g.,
+from <code>DEFERRED/5</code> to <code>DEFERRED/4</code>).</li>
+<li><strong>Archive Ingestion:</strong> When a package reaches
+<code>DEFERRED/0</code>, the archive software moves it directly into the
+regular <code>incoming</code> processing queue, where it is accepted
+into the <code>unstable</code> (Sid) repository.</li>
+</ol>
+<h2 id="typical-delay-conventions">Typical Delay Conventions</h2>
+<p>Debian NMU guidelines prescribe recommended waiting times based on
+the urgency and nature of the fix:</p>
+<ul>
+<li><strong>0-day (<code>DELAYED/0</code>):</strong> Used when the
+maintainer has explicitly approved the NMU, for security team uploads,
+or during urgent release transitions with authorization.</li>
+<li><strong>2 to 5 days:</strong> Common for release-critical (RC) bugs
+close to a release freeze, or when prior notice was already provided on
+the BTS.</li>
+<li><strong>7 to 10 days:</strong> The standard default for regular NMUs
+addressing non-RC bugs or standard upstream updates, providing
+maintainers adequate time across work cycles and weekends.</li>
+<li><strong>15 days:</strong> The maximum allowable delay, reserved for
+non-urgent changes or major disruptive updates.</li>
+</ul>
+<h2 id="actions-maintainers-can-take">Actions Maintainers Can Take</h2>
+<p>During the delay period, the maintainer retains full control and can
+take several actions:</p>
+<ul>
+<li><strong>Acknowledge and Accept:</strong> The maintainer can do
+nothing, allowing the package to count down and enter the archive
+automatically.</li>
+<li><strong>Supersede:</strong> The maintainer can upload their own new
+revision to the archive (using a higher version number), which
+supersedes the NMU.</li>
+<li><strong>Cancel or Reschedule:</strong> Both the maintainer and the
+original NMU uploader can interact directly with the delayed queue by
+uploading a cryptographically signed <code>.commands</code> file. This
+mechanism allows them to delete the queued files or alter the delay
+counter (either speeding it up or postponing it).</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-nmu-delayed-queue-system-explained';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

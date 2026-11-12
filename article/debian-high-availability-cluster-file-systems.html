@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian High-Availability Cluster File Systems - debian</title>
+    <meta name="description" content="High-availability (HA) setups running on Debian rely on shared-disk cluster file systems or distributed storage solutions to provide concurrent multi-node read and write access without data corruption. Debian natively supports the underlying kernel infras">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-high-availability-cluster-file-systems">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian High-Availability Cluster File Systems - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-high-availability-cluster-file-systems" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="High-availability (HA) setups running on Debian rely on shared-disk cluster file systems or distributed storage solutions to provide concurrent multi-node read and write access without data corruption. Debian natively supports the underlying kernel infras" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-high-availability-cluster-file-systems">Debian
+High-Availability Cluster File Systems</h1>
+<p>High-availability (HA) setups running on Debian rely on shared-disk
+cluster file systems or distributed storage solutions to provide
+concurrent multi-node read and write access without data corruption.
+Debian natively supports the underlying kernel infrastructure and
+userspace utilities for prominent shared-disk file systems like GFS2 and
+OCFS2, alongside modern distributed alternatives such as CephFS.</p>
+<h3 id="gfs2-global-file-system-2">GFS2 (Global File System 2)</h3>
+<p>GFS2 is a shared-disk cluster file system designed for shared storage
+networks (such as SAN or iSCSI) where multiple nodes mount the same
+block device concurrently.</p>
+<ul>
+<li><strong>Kernel Support:</strong> The GFS2 kernel driver
+(<code>gfs2</code>) is included natively in standard Debian kernel
+packages (<code>linux-image-*</code>).</li>
+<li><strong>Userspace Utilities:</strong> Debian provides the
+<code>gfs2-utils</code> package via its standard APT repositories. This
+package provides administrative commands such as <code>mkfs.gfs2</code>,
+<code>fsck.gfs2</code>, and <code>gfs2_grow</code>.</li>
+<li><strong>Lock Management:</strong> GFS2 relies on the Distributed
+Lock Manager (DLM) to coordinate access across nodes. Debian provides
+the necessary user-space locking daemon via the
+<code>dlm-controld</code> package, which integrates directly with the
+Corosync and Pacemaker high-availability stack.</li>
+</ul>
+<h3 id="ocfs2-oracle-cluster-file-system-2">OCFS2 (Oracle Cluster File
+System 2)</h3>
+<p>OCFS2 is an open-source, general-purpose shared-disk file system that
+allows concurrent read/write access over shared block devices.</p>
+<ul>
+<li><strong>Kernel Support:</strong> Debian’s default Linux kernel
+includes native compilation for OCFS2 modules (<code>ocfs2</code> and
+<code>ocfs2_nodemanager</code>).</li>
+<li><strong>Userspace Utilities:</strong> The <code>ocfs2-tools</code>
+package supplies management commands such as <code>mkfs.ocfs2</code>,
+<code>fsck.ocfs2</code>, and cluster management scripts.</li>
+<li><strong>Cluster Stacks:</strong> OCFS2 can operate using its
+built-in cluster stack (<code>o2cb</code>) or integrate with standard
+cluster infrastructure using the <code>pacemaker</code> and
+<code>dlm</code> frameworks supported on Debian.</li>
+</ul>
+<h3 id="distributed-high-availability-alternatives">Distributed
+High-Availability Alternatives</h3>
+<p>When physical shared storage (SAN/SAS) is unavailable, Debian
+natively supports distributed network file systems that provide high
+availability across commodity hardware:</p>
+<ul>
+<li><strong>CephFS:</strong> A POSIX-compliant file system layered on
+top of Ceph's distributed object store. Debian maintains native support
+via the <code>ceph-common</code> and <code>ceph-mds</code> packages,
+offering automated failover, replication, and node self-healing.</li>
+<li><strong>GlusterFS:</strong> An aggregated network storage solution
+capable of scaling to petabytes. Native client and server packages
+(<code>glusterfs-client</code> and <code>glusterfs-server</code>) allow
+administrators to configure multi-node replication (redundancy) without
+relying on shared block devices.</li>
+</ul>
+<h3 id="infrastructure-prerequisites-on-debian">Infrastructure
+Prerequisites on Debian</h3>
+<p>Running shared-disk cluster file systems natively on Debian requires
+configuring complementary high-availability components:</p>
+<ol type="1">
+<li><strong>Corosync &amp; Pacemaker:</strong> Handles node membership,
+quorum, and cluster resource failover.</li>
+<li><strong>STONITH/Fencing:</strong> Mandatory for GFS2 and OCFS2 to
+isolate non-responsive nodes and prevent split-brain file
+corruption.</li>
+<li><strong>DLM:</strong> Coordinates block-level file locks between
+operational nodes across the private cluster network.</li>
+</ol></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-high-availability-cluster-file-systems';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

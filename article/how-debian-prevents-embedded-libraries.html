@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Prevents Embedded Libraries - debian</title>
+    <meta name="description" content="The Debian operating system strictly regulates software packages to prevent the inclusion of embedded or &quot;vendored&quot; third-party libraries, a practice known in Debian terminology as including convenience copies of code. To ensure system-wide security, redu">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-prevents-embedded-libraries">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Prevents Embedded Libraries - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-prevents-embedded-libraries" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian operating system strictly regulates software packages to prevent the inclusion of embedded or &quot;vendored&quot; third-party libraries, a practice known in Debian terminology as including convenience copies of code. To ensure system-wide security, redu" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-prevents-embedded-libraries">How Debian Prevents
+Embedded Libraries</h1>
+<p>The Debian operating system strictly regulates software packages to
+prevent the inclusion of embedded or "vendored" third-party libraries, a
+practice known in Debian terminology as including convenience copies of
+code. To ensure system-wide security, reduce memory footprints, and
+streamline vulnerability patching, Debian mandates that all software
+rely on shared, independently maintained system libraries. Debian
+enforces this compliance through formal policy requirements, upstream
+source sanitization, automated linting, manual archive screening, and
+build-system patching.</p>
+<h3 id="the-debian-policy-requirement">The Debian Policy
+Requirement</h3>
+<p>Debian Policy Section 4.13 explicitly dictates that packages must not
+contain embedded copies of software that is already available in the
+archive, or that can be packaged separately. When an upstream project
+bundles a third-party dependency directly within its source tree, Debian
+maintainers are required to decouple it. By linking against shared
+libraries, a single security patch applied to a base dependency
+automatically secures every application on the system that relies on
+it.</p>
+<h3 id="source-sanitization-via-repacking">Source Sanitization via
+Repacking</h3>
+<p>Maintainers often neutralize embedded libraries at the source archive
+level before building begins. Using Debian's package tracking
+utilities—specifically <code>uscan</code> and
+<code>mk-origtgz</code>—maintainers declare directories and files to
+strip in the <code>debian/copyright</code> file under the
+<code>Files-Excluded</code> field. When new upstream source code is
+downloaded, the utility automatically removes bundled third-party
+directories and generates a sanitized tarball, frequently appending a
+<code>+ds</code> (Debian source) or <code>+dfsg</code> suffix to the
+upstream version string.</p>
+<h3 id="build-system-patching-and-unbundling">Build-System Patching and
+Unbundling</h3>
+<p>Once embedded code is removed from the source tree, maintainers patch
+the software’s build systems (such as CMake, Meson, or GNU Autotools)
+via Quilt patches stored in <code>debian/patches/</code>. These
+modifications reroute include paths and linker flags to reference
+system-wide headers and shared objects provided by other Debian
+packages. The maintainer then declares these external libraries in the
+<code>Build-Depends</code> control field, ensuring the package cannot
+compile unless the system versions are present.</p>
+<h3 id="automated-static-analysis-with-lintian">Automated Static
+Analysis with Lintian</h3>
+<p>Enforcement is continuously monitored using Lintian, Debian's
+automated static analysis tool. Lintian inspects source and binary
+packages for patterns, embedded signatures, known header files, and
+shared code commonly associated with popular bundled libraries (such as
+zlib, libpng, or SQLite). If Lintian detects evidence of an embedded
+code copy during package builds or archive uploads, it issues warnings
+or errors that prevent smooth integration into the distribution.</p>
+<h3 id="ftp-master-inspection-and-the-new-queue">FTP Master Inspection
+and the NEW Queue</h3>
+<p>Every new package, or existing package introducing a new binary name,
+must pass through Debian's "NEW" queue. This checkpoint involves manual
+inspection by the Debian FTP Master team. Reviewers check source
+structures and licensing to verify that upstream convenience copies have
+been either stripped or justified. If a package contains unauthorized
+embedded dependencies, the FTP Masters reject the upload, requiring the
+maintainer to resolve the bundling issue before admission into the
+archive.</p>
+<h3 id="exceptions-and-security-tracking">Exceptions and Security
+Tracking</h3>
+<p>In rare circumstances where unbundling is technically infeasible—such
+as software requiring heavily modified internal forks or ecosystems with
+deep static dependency models like Rust or Go—exceptions require
+explicit documentation. When an embedded copy is granted an exception,
+it must be registered with the Debian Security Tracker. This ensures the
+Debian Security Team can track vulnerabilities affecting the embedded
+library and mandate coordinated updates whenever a Common
+Vulnerabilities and Exposures (CVE) identifier is assigned.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-debian-prevents-embedded-libraries';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

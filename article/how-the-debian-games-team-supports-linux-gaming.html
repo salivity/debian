@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How the Debian Games Team Supports Linux Gaming - debian</title>
+    <meta name="description" content="The Debian Games Team is a dedicated group of package maintainers, developers, and open-source gaming enthusiasts responsible for bringing native, free, and open-source games to the Debian operating system. Through meticulous packaging, license auditing,">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-the-debian-games-team-supports-linux-gaming">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How the Debian Games Team Supports Linux Gaming - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-the-debian-games-team-supports-linux-gaming" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian Games Team is a dedicated group of package maintainers, developers, and open-source gaming enthusiasts responsible for bringing native, free, and open-source games to the Debian operating system. Through meticulous packaging, license auditing," />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-the-debian-games-team-supports-linux-gaming">How the Debian
+Games Team Supports Linux Gaming</h1>
+<p>The Debian Games Team is a dedicated group of package maintainers,
+developers, and open-source gaming enthusiasts responsible for bringing
+native, free, and open-source games to the Debian operating system.
+Through meticulous packaging, license auditing, bug fixing, and
+cross-architecture maintenance, the team ensures that hundreds of games,
+game engines, and supporting multimedia libraries are readily
+installable, fully functional, and compliant with Debian's strict
+software standards.</p>
+<h3 id="packaging-games-engines-and-libraries">Packaging Games, Engines,
+and Libraries</h3>
+<p>The primary task of the team is packaging software for the Debian
+repositories. This involves writing and maintaining recipes that turn
+source code into binary <code>.deb</code> packages. The team does not
+only package standalone games, but also the underlying infrastructure
+required to run them, such as:</p>
+<ul>
+<li><strong>Game Engines:</strong> Maintaining standalone open-source
+engines like Godot, OpenMW (for Morrowind), Yamagi Quake II, and
+ioquake3.</li>
+<li><strong>Development Libraries:</strong> Packaging audio, graphics,
+and input libraries such as SDL, Allegro, SFML, and physics engines that
+game developers rely on.</li>
+<li><strong>Utility Tools:</strong> Providing editors, map compilers,
+asset extraction tools, and package helpers tailored for gaming
+software.</li>
+</ul>
+<h3 id="enforcing-license-and-dfsg-compliance">Enforcing License and
+DFSG Compliance</h3>
+<p>One of the most complex responsibilities is ensuring all packaged
+content adheres to the Debian Free Software Guidelines (DFSG). Games
+often feature code that is open source, but art assets, music, voice
+lines, or levels that carry restrictive non-commercial or proprietary
+licenses. The Debian Games Team meticulously audits these assets to:</p>
+<ul>
+<li>Strip non-free media and package code-only engines in Debian's
+<code>main</code> repository.</li>
+<li>Place games with proprietary assets into <code>contrib</code> or
+<code>non-free</code> sections.</li>
+<li>Package game data downloaders (like <code>game-data-packager</code>)
+that allow users to legally supply their own commercial assets from
+platforms like GOG or Steam to run on open-source engines.</li>
+</ul>
+<h3
+id="architecture-portability-and-hardware-compatibility">Architecture
+Portability and Hardware Compatibility</h3>
+<p>Debian supports a wide variety of hardware architectures, ranging
+from x86_64 and ARM64 to RISC-V and s390x. The Games Team ensures that
+game code is portable and can compile and run beyond standard desktop
+PCs. This involves resolving endianness issues, fixing 32-bit versus
+64-bit memory handling bugs, and configuring build systems to interface
+reliably with graphics APIs like OpenGL, Vulkan, and Mesa drivers.</p>
+<h3 id="quality-assurance-and-debian-policy-integration">Quality
+Assurance and Debian Policy Integration</h3>
+<p>To ensure games integrate seamlessly into a modern desktop
+environment, the team implements Debian system policies across all game
+packages. Key quality assurance tasks include:</p>
+<ul>
+<li>Configuring games to save states and configuration files according
+to the XDG Base Directory Specification rather than cluttering root home
+directories.</li>
+<li>Writing and maintaining desktop entry files, icons, and AppStream
+metadata so games appear correctly in software centers like GNOME
+Software and KDE Discover.</li>
+<li>Handling reproducible builds and continuous integration (CI) testing
+to catch regression issues early.</li>
+</ul>
+<h3 id="bug-triaging-and-upstream-collaboration">Bug Triaging and
+Upstream Collaboration</h3>
+<p>The team actively monitors the Debian Bug Tracking System (BTS) for
+reports regarding crashes, audio issues, display scaling problems, and
+performance regressions. Because many open-source games are historical
+or run by small development teams, Debian Games maintainers frequently
+write patches to support modern compilers (such as newer GCC or Clang
+releases) and submit those improvements back to the upstream projects.
+Additionally, their packaging efforts directly benefit downstream
+distributions, including Ubuntu, Linux Mint, and Raspberry Pi OS.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-the-debian-games-team-supports-linux-gaming';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

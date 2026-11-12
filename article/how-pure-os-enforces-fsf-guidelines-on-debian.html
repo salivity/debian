@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How PureOS Enforces FSF Guidelines on Debian - debian</title>
+    <meta name="description" content="PureOS is a security-focused, privacy-respecting GNU/Linux distribution developed by Purism that achieves the rare distinction of being fully endorsed by the Free Software Foundation (FSF). Although it uses Debian as its upstream base, PureOS actively mod">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-pure-os-enforces-fsf-guidelines-on-debian">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How PureOS Enforces FSF Guidelines on Debian - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-pure-os-enforces-fsf-guidelines-on-debian" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="PureOS is a security-focused, privacy-respecting GNU/Linux distribution developed by Purism that achieves the rare distinction of being fully endorsed by the Free Software Foundation (FSF). Although it uses Debian as its upstream base, PureOS actively mod" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-pureos-enforces-fsf-guidelines-on-debian">How PureOS
+Enforces FSF Guidelines on Debian</h1>
+<p>PureOS is a security-focused, privacy-respecting GNU/Linux
+distribution developed by Purism that achieves the rare distinction of
+being fully endorsed by the Free Software Foundation (FSF). Although it
+uses Debian as its upstream base, PureOS actively modifies and curates
+the operating system to comply with the FSF’s strict Free System
+Distribution Guidelines (FSDG). This article explains the technical and
+structural methods PureOS uses to purge proprietary software, audit the
+Debian ecosystem, and maintain an uncompromising commitment to user
+freedom.</p>
+<h3 id="purging-proprietary-repositories">Purging Proprietary
+Repositories</h3>
+<p>Debian categorizes packages into different archive sections:
+<code>main</code> (free software), <code>contrib</code> (free software
+that depends on non-free software), and <code>non-free</code>
+(proprietary software and firmware). PureOS diverges fundamentally by
+completely eliminating Debian's <code>contrib</code> and
+<code>non-free</code> repositories from its software sources. Users
+cannot inadvertently enable proprietary archives through default system
+management tools, ensuring that every package natively available in the
+PureOS ecosystem complies with software freedom criteria.</p>
+<h3 id="deploying-a-de-blobbed-linux-kernel">Deploying a De-Blobbed
+Linux Kernel</h3>
+<p>Upstream Debian packages the standard Linux kernel, which includes
+proprietary binary firmware blobs necessary to initialize certain
+commercial hardware components. To qualify for FSF endorsement, an
+operating system must not distribute or recommend unfree firmware.
+PureOS addresses this by shipping a cleaned, de-blobbed kernel
+equivalent to Linux-libre. This kernel strips out all obfuscated,
+closed-source microcode and firmware images, preventing the operating
+system from executing unverified code directly on the processor or
+peripheral chipsets.</p>
+<h3 id="auditing-and-patching-debian-packages">Auditing and Patching
+Debian Packages</h3>
+<p>Even within Debian's strictly free <code>main</code> repository, some
+software packages contain subtle violations of FSDG rules. For example,
+certain utilities may include documentation that promotes proprietary
+services, features that automatically download non-free plugins, or
+hardcoded hooks into unfree web platforms.</p>
+<p>PureOS maintains its own downstream packaging infrastructure to audit
+packages inherited from Debian. When a package in Debian
+<code>main</code> recommends, suggests, or facilitates the installation
+of non-free third-party code, PureOS maintainers patch the source to
+remove those hooks. If a package cannot be decoupled from proprietary
+elements, it is removed entirely from the PureOS repositories.</p>
+<h3 id="modifying-applications-for-freedom-and-privacy">Modifying
+Applications for Freedom and Privacy</h3>
+<p>PureOS alters key user-facing applications to prevent accidental
+exposure to proprietary formats or software:</p>
+<ul>
+<li><strong>Web Browsers:</strong> Upstream web browsers frequently
+prompt users to enable proprietary Digital Rights Management (DRM)
+components, such as Widevine, to stream protected media. PureOS provides
+browser configurations that disable or strip out automatic prompts and
+installers for non-free DRM modules.</li>
+<li><strong>Add-on Directories:</strong> Default application stores and
+browser extension portals are filtered to ensure they do not point users
+toward proprietary extensions, plugins, or commercial add-ons.</li>
+</ul>
+<h3 id="alignment-with-hardware-freedom">Alignment with Hardware
+Freedom</h3>
+<p>Operating systems adhering to FSDG often face hardware compatibility
+issues because modern Wi-Fi cards, GPUs, and power management
+controllers regularly demand closed-source binary blobs. PureOS avoids
+compromising its software standards by pairing its development closely
+with hardware explicitly selected to run on open-source drivers and free
+firmware, such as Purism's Librem line. Instead of creating software
+exceptions for stubborn hardware, PureOS requires the hardware to adapt
+to the software freedom standard.</p>
+<h3 id="continuous-fsdg-compliance-auditing">Continuous FSDG Compliance
+Auditing</h3>
+<p>Maintaining FSF endorsement is not a one-time achievement; it
+requires ongoing vigilance. Because PureOS tracks Debian's testing
+branch to provide modern software updates, every new upstream package
+synchronization introduces the risk of newly introduced proprietary
+dependencies. PureOS utilizes automated testing combined with human
+audits to verify that upstream updates continue to meet the FSF's strict
+guidelines before they are released into the stable PureOS channels.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-pure-os-enforces-fsf-guidelines-on-debian';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

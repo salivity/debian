@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Supports NVIDIA Proprietary Drivers - debian</title>
+    <meta name="description" content="Debian provides support for proprietary NVIDIA graphics drivers through its dedicated non-free repository infrastructure and automated package management framework. While the operating system prioritizes Free and Open Source Software (FOSS) by default, it">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-supports-nvidia-proprietary-drivers">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Supports NVIDIA Proprietary Drivers - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-supports-nvidia-proprietary-drivers" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian provides support for proprietary NVIDIA graphics drivers through its dedicated non-free repository infrastructure and automated package management framework. While the operating system prioritizes Free and Open Source Software (FOSS) by default, it" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-supports-nvidia-proprietary-drivers">How Debian
+Supports NVIDIA Proprietary Drivers</h1>
+<p>Debian provides support for proprietary NVIDIA graphics drivers
+through its dedicated non-free repository infrastructure and automated
+package management framework. While the operating system prioritizes
+Free and Open Source Software (FOSS) by default, it officially packages
+and distributes NVIDIA's binary-only drivers to deliver full hardware
+acceleration, high-performance compute capabilities via CUDA, and modern
+display server compatibility. This guide outlines how Debian integrates
+these drivers through repository segmentation, hardware detection,
+automated kernel module builds, and Secure Boot management.</p>
+<h3 id="repository-segmentation-non-free-and-contrib">Repository
+Segmentation: Non-Free and Contrib</h3>
+<p>Debian maintains a strict separation between open-source and
+proprietary software by dividing its package archives into components:
+<code>main</code>, <code>contrib</code>, <code>non-free</code>, and
+<code>non-free-firmware</code>.</p>
+<p>Because NVIDIA's proprietary driver is closed-source, it cannot be
+included in <code>main</code>. Debian hosts the driver packages in the
+<code>non-free</code> archive, while packaging tools and dependencies
+that are open-source but depend on proprietary code reside in
+<code>contrib</code>. Users must explicitly opt in by enabling these
+components in their <code>/etc/apt/sources.list</code> or
+<code>/etc/apt/sources.list.d/debian.sources</code> configuration before
+the proprietary drivers can be installed via the Advanced Package Tool
+(APT).</p>
+<h3 id="hardware-detection-via-nvidia-detect">Hardware Detection via
+<code>nvidia-detect</code></h3>
+<p>To eliminate guesswork regarding hardware compatibility, Debian
+provides a utility package named <code>nvidia-detect</code>. When
+executed, this tool queries the system's PCI bus via <code>lspci</code>,
+identifies the model and chipset generation of the installed NVIDIA GPU,
+cross-references it with Debian's package database, and outputs the
+exact package branch required for the system. This helps users
+differentiate between the modern <code>nvidia-driver</code> package and
+legacy branches (such as <code>nvidia-legacy-390xx-driver</code> or
+<code>nvidia-legacy-340xx-driver</code>) required by older architecture
+cards.</p>
+<h3 id="dynamic-kernel-module-support-dkms">Dynamic Kernel Module
+Support (DKMS)</h3>
+<p>NVIDIA's proprietary driver consists of two main parts: user-space
+libraries (like OpenGL, Vulkan, and CUDA interfaces) and kernel-space
+modules (<code>nvidia.ko</code>, <code>nvidia-modeset.ko</code>,
+<code>nvidia-uvm.ko</code>, and <code>nvidia-drm.ko</code>).</p>
+<p>Debian utilizes Dynamic Kernel Module Support (DKMS) to bridge the
+kernel module and Debian's Linux kernel:</p>
+<ol type="1">
+<li>When installing the <code>nvidia-driver</code> metapackage, APT
+pulls in <code>nvidia-kernel-dkms</code> alongside the Linux kernel
+headers matching the active kernel version.</li>
+<li>The DKMS framework automatically compiles the proprietary kernel
+modules locally on the user's machine against the installed kernel
+headers.</li>
+<li>When Debian updates the Linux kernel during regular security and
+maintenance updates, DKMS triggers post-install hooks to automatically
+recompile the NVIDIA kernel module for the new kernel version,
+preventing broken graphical sessions upon reboot.</li>
+</ol>
+<h3 id="secure-boot-and-module-signing">Secure Boot and Module
+Signing</h3>
+<p>Debian supports UEFI Secure Boot with proprietary drivers through
+integration with the Machine Owner Key (MOK) facility:</p>
+<ul>
+<li>Because Secure Boot prevents the Linux kernel from loading unsigned
+third-party modules, Debian's installation scripts prompt the user to
+generate or utilize an existing cryptographic key pair via
+<code>mokutil</code>.</li>
+<li>DKMS uses this local key to sign the compiled <code>nvidia.ko</code>
+binary directly on the machine.</li>
+<li>Upon the subsequent reboot, the system launches the
+<code>MokManager</code> EFI utility, prompting the user to enroll the
+local key by entering a temporary password created during the driver
+installation. Once enrolled, the kernel loads the proprietary driver
+securely without requiring the complete disabling of UEFI Secure
+Boot.</li>
+</ul>
+<h3 id="display-server-integration-xorg-and-wayland">Display Server
+Integration (Xorg and Wayland)</h3>
+<p>Debian configures proprietary NVIDIA drivers to integrate directly
+with both standard display ecosystems:</p>
+<ul>
+<li><strong>Xorg:</strong> The package deploys configuration snippets
+into <code>/usr/share/X11/xorg.conf.d/</code> that instruct the X server
+to prefer the proprietary NVIDIA driver module over the open-source
+<code>nouveau</code> driver. The installation automatically blacklists
+<code>nouveau</code> inside <code>/etc/modprobe.d/</code> to prevent
+driver conflicts.</li>
+<li><strong>Wayland:</strong> Modern releases of Debian configure Kernel
+Mode Setting (KMS) parameters and deploy Generic Buffer Management (GBM)
+support, allowing modern desktop environments like GNOME and KDE Plasma
+running on Wayland to operate directly with the proprietary NVIDIA
+driver stack.</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-debian-supports-nvidia-proprietary-drivers';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

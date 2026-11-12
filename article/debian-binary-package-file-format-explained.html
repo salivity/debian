@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Binary Package File Format Explained - debian</title>
+    <meta name="description" content="This article provides an overview of the binary package file format utilized by the Debian operating system, known as the .deb format. It covers the structure of .deb files, their internal archive components, and the core command-line tools used to manage">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-binary-package-file-format-explained">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Binary Package File Format Explained - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-binary-package-file-format-explained" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides an overview of the binary package file format utilized by the Debian operating system, known as the .deb format. It covers the structure of .deb files, their internal archive components, and the core command-line tools used to manage" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-binary-package-file-format-explained">Debian Binary
+Package File Format Explained</h1>
+<p>This article provides an overview of the binary package file format
+utilized by the Debian operating system, known as the <code>.deb</code>
+format. It covers the structure of <code>.deb</code> files, their
+internal archive components, and the core command-line tools used to
+manage, inspect, and install these packages on Debian and its derivative
+distributions.</p>
+<p>The Debian operating system uses the <code>.deb</code> format for
+distributing and installing binary software packages. A
+<code>.deb</code> file is essentially a standard Unix <code>ar</code>
+archive that encapsulates the application binaries, configuration files,
+metadata, and installation scripts necessary to integrate software into
+the system.</p>
+<p>Internally, every Debian binary package consists of three main files
+packaged inside the <code>ar</code> container:</p>
+<ol type="1">
+<li><strong>debian-binary</strong>: A plain text file that specifies the
+version of the Debian package format being used, which is typically
+version <code>2.0</code>.</li>
+<li><strong>control.tar.gz</strong> (or compressed with <code>.xz</code>
+or <code>.zst</code>): An archive containing package metadata. This
+includes the package name, version, dependencies, architecture,
+maintainer details, and optional maintainer scripts (such as
+<code>preinst</code>, <code>postinst</code>, <code>prerm</code>, and
+<code>postrm</code>) that run before or after installation and
+removal.</li>
+<li><strong>data.tar.gz</strong> (or compressed with <code>.xz</code> or
+<code>.zst</code>): An archive containing the actual program files,
+libraries, documentation, and configuration files that will be extracted
+onto the target filesystem during installation.</li>
+</ol>
+<p>Debian packages are handled at different abstraction levels depending
+on the task:</p>
+<ul>
+<li><strong>dpkg</strong>: The primary low-level tool responsible for
+unpacking, installing, and removing individual <code>.deb</code> files
+directly from the local file system. It does not resolve remote
+dependencies automatically.</li>
+<li><strong>APT (Advanced Package Tool)</strong>: The high-level package
+management system that works on top of <code>dpkg</code>. APT interacts
+with remote repositories, automatically resolves and downloads necessary
+dependencies, and invokes <code>dpkg</code> to perform the actual
+installation of <code>.deb</code> packages.</li>
+</ul>
+<p>Because Debian's packaging standard is both stable and robust, the
+<code>.deb</code> format is also used by numerous Debian-derived Linux
+distributions, including Ubuntu, Linux Mint, and Raspberry Pi OS.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-binary-package-file-format-explained';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

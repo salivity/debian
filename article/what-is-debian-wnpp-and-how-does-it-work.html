@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Is Debian WNPP and How Does It Work? - debian</title>
+    <meta name="description" content="Within the Debian operating system community, Work-Needing and Prospective Packages (WNPP) serves as a centralized coordination system for tracking the maintenance status of software packages. It informs developers and users about software that requires n">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/what-is-debian-wnpp-and-how-does-it-work">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Is Debian WNPP and How Does It Work? - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/what-is-debian-wnpp-and-how-does-it-work" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Within the Debian operating system community, Work-Needing and Prospective Packages (WNPP) serves as a centralized coordination system for tracking the maintenance status of software packages. It informs developers and users about software that requires n" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="what-is-debian-wnpp-and-how-does-it-work">What Is Debian WNPP
+and How Does It Work?</h1>
+<p>Within the Debian operating system community, Work-Needing and
+Prospective Packages (WNPP) serves as a centralized coordination system
+for tracking the maintenance status of software packages. It informs
+developers and users about software that requires new maintainers,
+packages that may be retired, and new programs being introduced to the
+Debian archive. Operated through the Debian Bug Tracking System (BTS),
+WNPP provides transparency, prevents redundant work, and channels
+community contributions to where they are needed most.</p>
+<h3 id="the-mechanism-of-wnpp">The Mechanism of WNPP</h3>
+<p>WNPP operates as a "pseudo-package" within Debian’s Bug Tracking
+System. Instead of reporting technical bugs against software code,
+contributors submit reports categorized by specific tags to signal an
+administrative need or intent. This makes tracking the lifecycle of
+software packages public and queryable through standard BTS tools.</p>
+<h3 id="categories-for-existing-packages">Categories for Existing
+Packages</h3>
+<p>When a package is already in the Debian archive but needs attention,
+maintainers and contributors use specific tags to classify its
+status:</p>
+<ul>
+<li><strong>Request for Help (RFH):</strong> The current maintainer
+wishes to keep maintaining the package but needs assistance due to
+workload or lack of specialized knowledge.</li>
+<li><strong>Request for Adoption (RFA):</strong> The maintainer plans to
+step down and is looking for a new maintainer to take over the package,
+but will continue to care for it until someone steps in.</li>
+<li><strong>Orphaned (O):</strong> The package has been abandoned by its
+maintainer. It resides in the archive without active supervision and is
+at risk of removal if problems arise and no one steps forward to take
+responsibility.</li>
+<li><strong>Intent to Adopt (ITA):</strong> A contributor announces
+their intention to take over the maintenance of an orphaned or RFA
+package, signaling to others that the transition is underway.</li>
+</ul>
+<h3 id="categories-for-prospective-packages">Categories for Prospective
+Packages</h3>
+<p>WNPP also facilitates the introduction of new software into Debian,
+coordinating the process to avoid duplication of effort:</p>
+<ul>
+<li><strong>Request for Package (RFP):</strong> A user or developer asks
+the community to package a specific piece of software that is not yet
+available in Debian.</li>
+<li><strong>Intent to Package (ITP):</strong> A packager informs the
+community that they are actively preparing to build and upload a new
+software package into the archive, preventing other developers from
+unknowingly working on the same software simultaneously.</li>
+</ul>
+<h3 id="the-purpose-in-the-debian-ecosystem">The Purpose in the Debian
+Ecosystem</h3>
+<p>The primary purpose of WNPP is to maintain archive hygiene and foster
+open collaboration. Because Debian is maintained entirely by distributed
+volunteers, tracking package health without a centralized index would
+lead to unmaintained software silently degrading over time.</p>
+<p>WNPP ensures that when a package falls into disrepair, it is visibly
+flagged for community action or slated for removal if no maintainer
+steps forward. Simultaneously, it acts as an entry point for aspiring
+Debian Maintainers and Developers, offering an organized list of
+existing software that needs help and prospective packages waiting to be
+built.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/what-is-debian-wnpp-and-how-does-it-work';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

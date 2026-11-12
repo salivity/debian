@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Compile a Custom Linux Kernel on Debian - debian</title>
+    <meta name="description" content="This article outlines the standard, modern procedure for compiling a custom Linux kernel on a Debian-based operating system using native packaging utilities. By building standard .deb packages directly from the kernel source tree, you can ensure clean int">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-to-compile-a-custom-linux-kernel-on-debian">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Compile a Custom Linux Kernel on Debian - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-to-compile-a-custom-linux-kernel-on-debian" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article outlines the standard, modern procedure for compiling a custom Linux kernel on a Debian-based operating system using native packaging utilities. By building standard .deb packages directly from the kernel source tree, you can ensure clean int" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-compile-a-custom-linux-kernel-on-debian">How to Compile a
+Custom Linux Kernel on Debian</h1>
+<p>This article outlines the standard, modern procedure for compiling a
+custom Linux kernel on a Debian-based operating system using native
+packaging utilities. By building standard <code>.deb</code> packages
+directly from the kernel source tree, you can ensure clean integration,
+straightforward dependency management, and easy installation or removal
+via Debian's standard package management tools.</p>
+<h3 id="1-install-required-build-dependencies">1. Install Required Build
+Dependencies</h3>
+<p>Before compiling, install the necessary development tools, compilers,
+and libraries required to build the kernel and generate Debian
+packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install build-essential libncurses-dev bison flex libssl-dev libelf-dev bc rsync kmod cpio</span></code></pre></div>
+<h3 id="2-obtain-and-extract-the-kernel-source">2. Obtain and Extract
+the Kernel Source</h3>
+<p>You can use the official Debian-packaged kernel source or download a
+mainline release directly from kernel.org. To use standard vanilla
+sources:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /usr/src</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.6.tar.xz</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tar <span class="at">-xf</span> linux-6.6.tar.xz</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> linux-6.6</span></code></pre></div>
+<h3 id="3-configure-the-kernel">3. Configure the Kernel</h3>
+<p>The safest way to configure a custom kernel is to base it on your
+currently running Debian configuration:</p>
+<ol type="1">
+<li><p>Copy the current configuration file:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /boot/config-<span class="va">$(</span><span class="fu">uname</span> <span class="at">-r</span><span class="va">)</span> .config</span></code></pre></div></li>
+<li><p>Update the configuration to match the new source tree:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> olddefconfig</span></code></pre></div></li>
+<li><p>(Optional) Customize components via the interactive menu:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> menuconfig</span></code></pre></div></li>
+<li><p>Disable standard Debian build keys that cause compilation errors
+when building outside the official Debian build infrastructure:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/config</span> <span class="at">--set-str</span> SYSTEM_TRUSTED_KEYS <span class="st">&quot;&quot;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/config</span> <span class="at">--set-str</span> SYSTEM_REVOCATION_KEYS <span class="st">&quot;&quot;</span></span></code></pre></div></li>
+</ol>
+<h3 id="4-compile-the-kernel-packages">4. Compile the Kernel
+Packages</h3>
+<p>Modern kernel source trees contain built-in targets to generate
+Debian packages natively. Run the build command utilizing all available
+CPU threads:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> <span class="at">-j</span><span class="va">$(</span><span class="fu">nproc</span><span class="va">)</span> bindeb-pkg</span></code></pre></div>
+<p><em>Note: The <code>bindeb-pkg</code> target builds only the binary
+packages (<code>linux-image</code>, <code>linux-headers</code>, and
+<code>linux-libc-dev</code>), significantly reducing build time compared
+to <code>deb-pkg</code>, which also generates source packages.</em></p>
+<h3 id="5-install-the-generated-deb-packages">5. Install the Generated
+<code>.deb</code> Packages</h3>
+<p>Once compilation finishes, the resulting <code>.deb</code> packages
+will be placed in the parent directory (<code>..</code>). Install the
+kernel image and headers using <code>dpkg</code>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg <span class="at">-i</span> linux-image-<span class="pp">*</span>.deb linux-headers-<span class="pp">*</span>.deb</span></code></pre></div>
+<p>Installing the <code>linux-image</code> package automatically
+generates the initramfs using <code>initramfs-tools</code> and updates
+the GRUB bootloader to include the new kernel entry.</p>
+<h3 id="6-reboot-and-verify">6. Reboot and Verify</h3>
+<p>Restart your system to boot into the newly compiled custom
+kernel:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code></pre></div>
+<p>After the system boots, verify that the new kernel is running:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">uname</span> <span class="at">-r</span></span></code></pre></div></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-to-compile-a-custom-linux-kernel-on-debian';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

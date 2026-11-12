@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Fully Automatic Installation with FAI - debian</title>
+    <meta name="description" content="Fully Automatic Installation (FAI) is an automated system deployment tool engineered to install, configure, and manage Debian systems unattended. By combining standard network booting mechanisms, declarative configuration files, and a modular class-based">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-fully-automatic-installation-with-fai">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Fully Automatic Installation with FAI - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-fully-automatic-installation-with-fai" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Fully Automatic Installation (FAI) is an automated system deployment tool engineered to install, configure, and manage Debian systems unattended. By combining standard network booting mechanisms, declarative configuration files, and a modular class-based" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-fully-automatic-installation-with-fai">Debian Fully
+Automatic Installation with FAI</h1>
+<p>Fully Automatic Installation (FAI) is an automated system deployment
+tool engineered to install, configure, and manage Debian systems
+unattended. By combining standard network booting mechanisms,
+declarative configuration files, and a modular class-based system, FAI
+provisions bare-metal servers, virtual machines, and cloud instances
+without human intervention. This article examines the core architecture,
+installation workflow, and mechanisms that allow FAI to deliver
+consistent and scalable Debian deployments.</p>
+<h3 id="network-booting-and-the-install-environment">Network Booting and
+the Install Environment</h3>
+<p>FAI initiates installations over the local network using standard
+infrastructure services:</p>
+<ol type="1">
+<li><strong>DHCP:</strong> The target machine boots using PXE (Preboot
+Execution Environment) and queries the local DHCP server for an IP
+address and the network boot file location.</li>
+<li><strong>TFTP:</strong> The client downloads the Linux kernel and an
+initial RAM filesystem (initrd) from a TFTP server.</li>
+<li><strong>NFS Root (nfsroot):</strong> Once the kernel boots, it
+mounts a minimal Debian environment (the <code>nfsroot</code>) exported
+by the FAI install server. This read-only environment contains all
+necessary utilities, such as partitioning tools, hardware detection
+modules, and the FAI runtime engine.</li>
+</ol>
+<h3 id="the-class-based-configuration-system">The Class-Based
+Configuration System</h3>
+<p>The defining feature of FAI is its class-based approach to
+configuration. Instead of requiring a distinct profile for every unique
+machine, FAI assigns dynamic classes to each host to dictate its role,
+storage layout, software selection, and network configuration.</p>
+<ul>
+<li><strong>Class Definition:</strong> Classes are defined centrally on
+the FAI server within the configuration space
+(<code>/srv/fai/config</code>). Classes can be assigned statically based
+on hostnames or MAC addresses, or dynamically via discovery scripts
+(e.g., assigning a <code>64BIT</code> class via <code>uname -m</code>,
+or a <code>VIRTUAL</code> class if hypervisor flags are detected).</li>
+<li><strong>Inheritance and Ordering:</strong> Multiple classes combine
+to build a complete profile. For instance, a system might inherit
+classes such as <code>DEFAULT</code>, <code>DEBIAN</code>,
+<code>WEBSERVER</code>, and <code>HOST_WEB01</code>. Settings in more
+specific classes override generic defaults.</li>
+</ul>
+<h3 id="the-installation-execution-phases">The Installation Execution
+Phases</h3>
+<p>Once the client boots into the installation environment, FAI executes
+a sequence of standardized operational tasks:</p>
+<h4 id="1-hardware-detection-and-storage-setup">1. Hardware Detection
+and Storage Setup</h4>
+<p>FAI utilizes the <code>setup-storage</code> tool to automatically
+prepare block devices. The tool parses declarative disk configuration
+files mapped to the system's active classes. It automatically
+handles:</p>
+<ul>
+<li>Partition tables (MBR and GPT)</li>
+<li>Software RAID arrays (mdadm)</li>
+<li>Logical Volume Management (LVM)</li>
+<li>Disk encryption (LUKS)</li>
+<li>Filesystem creation (ext4, XFS, Btrfs)</li>
+</ul>
+<h4 id="2-base-system-bootstrapping">2. Base System Bootstrapping</h4>
+<p>FAI builds the core Debian operating system on the newly formatted
+target partitions using <code>debootstrap</code>. This creates a clean,
+minimal root directory structure matching the designated Debian release
+(such as Debian Bookworm or Bullseye) directly from an official or local
+APT mirror.</p>
+<h4 id="3-software-package-installation">3. Software Package
+Installation</h4>
+<p>Software installation is controlled through package configuration
+lists found in the <code>package_config</code> directory. FAI evaluates
+the host's classes and determines which packages to install or remove
+via <code>apt-get</code>. Administrators can specify package groups,
+specific versions, kernels, and backports, allowing both minimal base
+systems and fully loaded application servers to be generated from the
+same setup.</p>
+<h4 id="4-system-configuration-and-customization">4. System
+Configuration and Customization</h4>
+<p>After packages are installed, FAI executes custom configuration
+tasks. FAI provides native tools to automate:</p>
+<ul>
+<li><strong>Debconf Preseeding:</strong> Applying non-interactive
+debconf answers to configure packages silently during installation.</li>
+<li><strong>File Copying (<code>fcopy</code>):</strong> Deploying
+class-specific configuration files (such as
+<code>/etc/network/interfaces</code> or
+<code>/etc/ssh/sshd_config</code>) to the target filesystem with
+preserved ownership and permissions.</li>
+<li><strong>Hook and Script Execution:</strong> Running shell, Perl, or
+Python scripts to execute specialized logic, register the host with
+configuration management tools (like Ansible, Puppet, or Salt), or
+create local users.</li>
+</ul>
+<h4 id="5-bootloader-installation-and-finalization">5. Bootloader
+Installation and Finalization</h4>
+<p>In the final step, FAI installs and configures the bootloader
+(typically GRUB) into the target storage drive's master boot record or
+EFI system partition. Once the bootloader is written, the temporary
+filesystems are unmounted, and the system reboots directly into the
+newly installed, fully operational Debian operating system.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-fully-automatic-installation-with-fai';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

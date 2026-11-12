@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian ISO Non-Free Firmware Detection Explained - debian</title>
+    <meta name="description" content="Starting with Debian 12 (Bookworm), the official Debian installation media natively includes non-free firmware binaries to automate hardware enablement during setup. This article explains how the Debian installer detects hardware components requiring prop">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-iso-non-free-firmware-detection-explained">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian ISO Non-Free Firmware Detection Explained - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-iso-non-free-firmware-detection-explained" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Starting with Debian 12 (Bookworm), the official Debian installation media natively includes non-free firmware binaries to automate hardware enablement during setup. This article explains how the Debian installer detects hardware components requiring prop" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-iso-non-free-firmware-detection-explained">Debian ISO
+Non-Free Firmware Detection Explained</h1>
+<p>Starting with Debian 12 (Bookworm), the official Debian installation
+media natively includes non-free firmware binaries to automate hardware
+enablement during setup. This article explains how the Debian installer
+detects hardware components requiring proprietary blobs, automatically
+loads the required files to ensure functionality during installation,
+and persists these packages to the installed target system.</p>
+<h3 id="the-inclusion-policy-shift">The Inclusion Policy Shift</h3>
+<p>Historically, the Debian project maintained a strict separation
+between completely free installation images and unofficial images that
+bundled proprietary firmware. Following a 2022 General Resolution, the
+project altered its policy. Official installation ISO images now bundle
+non-free firmware packages directly by default. These files reside in a
+dedicated archive component called <code>non-free-firmware</code>,
+keeping them distinct from general non-free software while making them
+readily accessible to the installer.</p>
+<h3 id="the-detection-mechanism-hw-detect">The Detection Mechanism
+(<code>hw-detect</code>)</h3>
+<p>The Debian Installer (<code>d-i</code>) handles hardware discovery
+primarily through the <code>hw-detect</code> package, which contains a
+dedicated subsystem named <code>check-missing-firmware</code>.</p>
+<p>The detection process follows these operational steps:</p>
+<ol type="1">
+<li><strong>Kernel Driver Initialization:</strong> As the installer
+boots, the Linux kernel initializes drivers for detected PCI, USB, and
+other bus devices.</li>
+<li><strong>Missing Firmware Triggers:</strong> When a driver encounters
+hardware that requires external microcode or firmware to function (such
+as Wi-Fi adapters, Ethernet controllers, or GPUs), the kernel issues an
+asynchronous request for the specific binary blob.</li>
+<li><strong>Log Scanning:</strong> The
+<code>check-missing-firmware</code> script monitors the kernel ring
+buffer (<code>dmesg</code>) and <code>/sys</code> filesystem for
+notifications indicating that a driver requested a firmware file that
+was not immediately found in <code>/lib/firmware</code>.</li>
+</ol>
+<h3 id="sourcing-and-loading-the-firmware">Sourcing and Loading the
+Firmware</h3>
+<p>Once a missing firmware file is identified, the installer locates the
+appropriate payload:</p>
+<ul>
+<li><strong>Internal Media Search:</strong> The installer automatically
+searches the package pool contained on the booted ISO image. Most common
+firmware packages (such as <code>firmware-linux-free</code>,
+<code>firmware-linux-nonfree</code>, <code>firmware-misc-nonfree</code>,
+and vendor-specific packages for Intel, Realtek, Broadcom, and AMD) are
+pre-indexed on the image.</li>
+<li><strong>Removable Media Fallback:</strong> If the required firmware
+is not on the primary media, the installer prompts the user and scans
+external FAT, ext2/3/4, or ISO9660 partitions on plugged-in USB
+storage.</li>
+<li><strong>Dynamic Unpacking:</strong> Once the appropriate
+<code>.deb</code> package or raw firmware archive is located, the
+installer extracts the requested binaries directly into the installer
+runtime environment's <code>/lib/firmware</code> directory. It then
+reloads the associated kernel module or re-triggers the device subsystem
+to initialize the hardware immediately.</li>
+</ul>
+<h3 id="target-system-configuration-and-persistence">Target System
+Configuration and Persistence</h3>
+<p>Detecting and using firmware in the live installation environment is
+only the first step; the installer must also make the hardware
+functional upon reboot:</p>
+<ol type="1">
+<li><strong>Package Installation:</strong> When base system packages are
+installed onto the target drive, <code>apt-install</code> is invoked to
+permanently install the specific <code>.deb</code> packages containing
+the firmware utilized during the session.</li>
+<li><strong>APT Source Configuration:</strong> The installer
+automatically adds the <code>non-free-firmware</code> component to
+<code>/etc/apt/sources.list</code> alongside <code>main</code>. This
+ensures that security updates and newer versions of the installed
+firmware packages are tracked during standard system upgrades.</li>
+<li><strong>Initramfs Generation:</strong> Before the installation
+concludes, the <code>update-initramfs</code> hook executes within the
+target environment, ensuring any critical firmware required early in the
+boot sequence (such as CPU microcode or storage controller firmware) is
+packed into the boot image.</li>
+</ol>
+<h3 id="user-choice-and-opt-out-controls">User Choice and Opt-Out
+Controls</h3>
+<p>Although non-free firmware detection is enabled by default to prevent
+failed network connections and broken display outputs, Debian retains
+options to disable it. Users can disable non-free firmware loading by
+entering expert install mode or by appending boot parameters such as
+<code>firmware=never</code> at the installer boot prompt. When disabled,
+the installer bypasses the automated <code>check-missing-firmware</code>
+routines and installs only strictly free software.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-iso-non-free-firmware-detection-explained';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

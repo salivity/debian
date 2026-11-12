@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Non-Free Firmware General Resolution Outcome - debian</title>
+    <meta name="description" content="In October 2022, the Debian Project concluded a historic General Resolution vote regarding the inclusion of non-free firmware in official installation media. The Debian developer community decisively chose to amend the Debian Social Contract and officiall">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-non-free-firmware-general-resolution-outcome">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Non-Free Firmware General Resolution Outcome - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-non-free-firmware-general-resolution-outcome" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In October 2022, the Debian Project concluded a historic General Resolution vote regarding the inclusion of non-free firmware in official installation media. The Debian developer community decisively chose to amend the Debian Social Contract and officiall" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-non-free-firmware-general-resolution-outcome">Debian
+Non-Free Firmware General Resolution Outcome</h1>
+<p>In October 2022, the Debian Project concluded a historic General
+Resolution vote regarding the inclusion of non-free firmware in official
+installation media. The Debian developer community decisively chose to
+amend the Debian Social Contract and officially bundle proprietary
+firmware packages with official installer and live images. This major
+policy shift resolved long-standing usability issues on modern hardware,
+officially taking effect with the release of Debian 12 ("Bookworm").</p>
+<h3 id="the-background-of-the-issue">The Background of the Issue</h3>
+<p>For decades, Debian prioritized software freedom by strictly
+separating purely free software from proprietary components. While this
+adhered closely to the Debian Free Software Guidelines (DFSG), modern
+computer hardware—especially Wi-Fi adapters, graphics processors, and
+network cards—increasingly required closed-source binary blobs
+(firmware) just to operate.</p>
+<p>Users faced severe installation hurdles because official Debian media
+lacked these proprietary drivers. To get hardware working, users had to
+search for unofficial, community-generated installer images that bundled
+non-free firmware. This caused widespread confusion, poor user
+experience, and fragmented maintenance efforts across the project.</p>
+<h3 id="the-vote-and-the-winning-option">The Vote and the Winning
+Option</h3>
+<p>To resolve the impasse, Debian developers held a General Resolution
+vote in late 2022 featuring six distinct proposals ranging from
+maintaining the strict status quo to fully endorsing non-free
+firmware.</p>
+<p>The community selected <strong>Proposal E (Option 5)</strong>, which
+passed with a substantial majority. This option enacted a balanced
+compromise between software freedom, transparency, and modern hardware
+support.</p>
+<h3 id="key-outcomes-of-the-resolution">Key Outcomes of the
+Resolution</h3>
+<p>The resolution mandated several critical changes to Debian's
+distribution policy:</p>
+<ol type="1">
+<li><p><strong>Amendment to the Debian Social Contract:</strong> Point 5
+of the Debian Social Contract was officially amended. It now includes
+explicit permission for hardware enablement:<br />
+<em>"The Debian official media may include firmware that is otherwise
+not part of the Debian system to allow use of Debian with hardware that
+requires such firmware."</em></p></li>
+<li><p><strong>Creation of the <code>non-free-firmware</code> Archive
+Section:</strong> Debian created a dedicated archive component called
+<code>non-free-firmware</code>, cleanly separating hardware firmware
+binaries from other proprietary userland applications found in the
+broader <code>non-free</code> repository.</p></li>
+<li><p><strong>Inclusion on Official Media by Default:</strong> Official
+Debian installation and live images now bundle necessary non-free
+firmware packages by default. When the installer detects hardware
+requiring proprietary firmware, it loads the necessary binary
+automatically to ensure smooth hardware initialization.</p></li>
+<li><p><strong>User Transparency and Disabling Options:</strong> The
+installer actively notifies users whenever non-free firmware is loaded
+and logs that information on the target system. Users retain the ability
+to disable non-free firmware via boot parameters if they prefer a
+strictly free environment.</p></li>
+<li><p><strong>Retention of Pure-Free Media:</strong> Debian committed
+to exploring and maintaining download options containing only free
+software for users who require a fully DFSG-compliant installation from
+the start.</p></li>
+</ol>
+<h3 id="the-practical-impact">The Practical Impact</h3>
+<p>The resolution removed one of the largest adoption barriers for the
+Debian operating system. Starting with Debian 12 ("Bookworm"), new
+installations automatically configure network hardware and peripheral
+components without requiring unofficial workarounds, modernizing
+Debian's setup process while maintaining explicit transparency about
+non-free code running on user systems.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-non-free-firmware-general-resolution-outcome';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

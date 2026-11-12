@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Reportbug Collects System Metadata - debian</title>
+    <meta name="description" content="When reporting a bug in the Debian operating system, the reportbug utility automates the collection of critical diagnostic information to help package maintainers reproduce and resolve issues. This article explains the underlying mechanisms reportbug uses">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-reportbug-collects-system-metadata">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Reportbug Collects System Metadata - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-reportbug-collects-system-metadata" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="When reporting a bug in the Debian operating system, the reportbug utility automates the collection of critical diagnostic information to help package maintainers reproduce and resolve issues. This article explains the underlying mechanisms reportbug uses" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-reportbug-collects-system-metadata">How Debian
+Reportbug Collects System Metadata</h1>
+<p>When reporting a bug in the Debian operating system, the
+<code>reportbug</code> utility automates the collection of critical
+diagnostic information to help package maintainers reproduce and resolve
+issues. This article explains the underlying mechanisms
+<code>reportbug</code> uses to gather package versions, system
+architectures, hardware details, and environment configurations, and how
+it formats this metadata into a structured report.</p>
+<h3 id="querying-the-package-management-database">Querying the Package
+Management Database</h3>
+<p>The primary source for package version metadata is Debian's low-level
+package manager, <code>dpkg</code>. When you specify a package to report
+against, <code>reportbug</code> queries the local <code>dpkg</code>
+status database (<code>/var/lib/dpkg/status</code>) using tools like
+<code>dpkg-query</code>.</p>
+<p>Through this interface, <code>reportbug</code> extracts:</p>
+<ul>
+<li><strong>Package Status and Version:</strong> The exact upstream and
+Debian release version installed.</li>
+<li><strong>Architecture:</strong> The binary architecture for which the
+package was compiled (such as <code>amd64</code> or
+<code>arm64</code>).</li>
+<li><strong>Dependencies and Recommendations:</strong> The current
+installation status and version numbers of all dependencies,
+recommendations, and suggested packages defined in the package control
+fields.</li>
+<li><strong>Modified Configuration Files (Conffiles):</strong> It checks
+the checksums of the package’s default configuration files against what
+is currently on the disk, flagging any customized files for review.</li>
+</ul>
+<p><code>reportbug</code> also interacts with APT to determine pinning
+priorities, repository sources, and whether the installed package
+originated from stable, testing, unstable, or an external
+repository.</p>
+<h3 id="package-specific-bug-scripts">Package-Specific Bug Scripts</h3>
+<p>Debian packages can provide custom hooks that instruct
+<code>reportbug</code> to collect specialized hardware or configuration
+data relevant only to that software. These files reside in the
+<code>/usr/share/bug/&lt;package-name&gt;/</code> directory.</p>
+<p>If an executable named <code>script</code> exists in that directory,
+<code>reportbug</code> runs it automatically in a subshell and appends
+its standard output to the bug report. For example:</p>
+<ul>
+<li><strong>Kernel and driver packages</strong> provide scripts that
+invoke tools like <code>lspci</code>, <code>lsusb</code>,
+<code>dmesg</code>, and parse <code>/proc/cpuinfo</code> to extract
+relevant hardware controller data.</li>
+<li><strong>Display server packages</strong> (like Xorg or Wayland
+compositors) run scripts that collect graphics card identifiers, active
+display drivers, and monitor configurations.</li>
+<li><strong>System daemons</strong> run scripts that filter and append
+sanitized service logs or non-sensitive configuration parameters.</li>
+</ul>
+<h3 id="gathering-kernel-and-system-environment-data">Gathering Kernel
+and System Environment Data</h3>
+<p>For general system metadata, <code>reportbug</code> queries standard
+Unix utilities and the Linux virtual filesystems (<code>/proc</code> and
+<code>/sys</code>):</p>
+<ul>
+<li><strong>Kernel Version:</strong> Retrieved via the
+<code>uname</code> system call or utility (e.g., <code>uname -a</code>),
+recording the kernel release, compilation date, and SMP status.</li>
+<li><strong>System Architecture:</strong> Obtained via
+<code>dpkg --print-architecture</code> and
+<code>dpkg --print-foreign-architectures</code> to show whether
+multiarch (such as 32-bit compatibility on 64-bit systems) is
+active.</li>
+<li><strong>Locale and Shell:</strong> The tool reads current
+environment variables (such as <code>LANG</code>, <code>LC_ALL</code>,
+and <code>SHELL</code>) to document localization settings that could
+affect software behavior.</li>
+</ul>
+<h3 id="user-review-and-redaction">User Review and Redaction</h3>
+<p>Once the scripts and database queries complete,
+<code>reportbug</code> aggregates the metadata into standardized Debian
+Bug Tracking System (BTS) pseudo-headers and plain-text sections.</p>
+<p>Before transmission, <code>reportbug</code> spawns a text editor
+displaying the complete compiled draft. This gives the user full control
+to inspect, redact, or supplement the collected hardware details, file
+paths, and version strings before the report is sent to the
+maintainer.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-debian-reportbug-collects-system-metadata';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

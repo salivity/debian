@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian debdiff Tool: Comparing Debian Packages - debian</title>
+    <meta name="description" content="The debdiff command-line utility is a specialized comparison tool used primarily within the Debian operating system and its derivatives to inspect differences between two versions of a package. Part of the standard devscripts package suite, debdiff allows">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-debdiff-tool-comparing-debian-packages">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian debdiff Tool: Comparing Debian Packages - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-debdiff-tool-comparing-debian-packages" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The debdiff command-line utility is a specialized comparison tool used primarily within the Debian operating system and its derivatives to inspect differences between two versions of a package. Part of the standard devscripts package suite, debdiff allows" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-debdiff-tool-comparing-debian-packages">Debian debdiff
+Tool: Comparing Debian Packages</h1>
+<p>The <code>debdiff</code> command-line utility is a specialized
+comparison tool used primarily within the Debian operating system and
+its derivatives to inspect differences between two versions of a
+package. Part of the standard <code>devscripts</code> package suite,
+<code>debdiff</code> allows system administrators, package maintainers,
+and security auditors to compare either two Debian source packages
+(<code>.dsc</code> files) or two Debian binary packages
+(<code>.deb</code> files). By surfacing code modifications, dependency
+alterations, and file list variations, it ensures that package updates
+are deliberate, correct, and secure prior to deployment.</p>
+<h3 id="comparing-debian-source-packages">Comparing Debian Source
+Packages</h3>
+<p>When used with source packages, <code>debdiff</code> extracts the two
+specified <code>.dsc</code> files along with their corresponding source
+archives and generates a unified diff between them. This comparison
+targets two primary areas:</p>
+<ul>
+<li><strong>Packaging Metadata (<code>debian/</code>
+directory):</strong> It tracks changes to essential packaging metadata,
+including modifications to <code>debian/changelog</code>, build
+configurations in <code>debian/rules</code>, maintainer scripts, and
+dependency definitions in <code>debian/control</code>.</li>
+<li><strong>Upstream Code and Patches:</strong> It reveals any patches
+applied, removed, or modified via the Debian patch system (such as
+Quilt), highlighting exact code changes made between the original
+upstream source and the Debian-specific release.</li>
+</ul>
+<p>This level of inspection is essential for package sponsors and
+release teams who must review and verify the modifications introduced in
+a new source upload before accepting it into the distribution
+archive.</p>
+<h3 id="comparing-debian-binary-packages">Comparing Debian Binary
+Packages</h3>
+<p>When executed against compiled <code>.deb</code> binary packages,
+<code>debdiff</code> focuses on the compiled artifacts and installation
+instructions rather than source code. Its primary functions include:</p>
+<ul>
+<li><strong>File List Comparison:</strong> It compares the exact list of
+files inside both packages, explicitly reporting any files that have
+been added, removed, or moved between versions. This catches
+regressions, such as omitted configuration files or misplaced
+binaries.</li>
+<li><strong>Control Information:</strong> It analyzes changes within the
+binary control files, flagging differences in dependencies
+(<code>Depends</code>, <code>Recommends</code>, <code>Suggests</code>),
+package descriptions, architecture specifications, and installed
+sizes.</li>
+<li><strong>Content Differences:</strong> If the <code>--diff</code>
+option is enabled, it unpacks the payload of both packages to display
+line-by-line differences of text files contained within them, such as
+default configuration templates.</li>
+</ul>
+<h3 id="primary-use-cases">Primary Use Cases</h3>
+<p>The overarching purpose of <code>debdiff</code> is automated quality
+assurance. Key use cases include:</p>
+<ul>
+<li><strong>Pre-upload Review:</strong> Package maintainers generate a
+<code>debdiff</code> against the current archive version to ensure that
+only intended files and changes are committed.</li>
+<li><strong>Security Auditing:</strong> Security teams use
+<code>debdiff</code> to evaluate security patches backported to stable
+releases, ensuring the patch fixes the vulnerability without introducing
+unintended side effects.</li>
+<li><strong>Build Verification:</strong> Continuous integration
+pipelines use the tool to detect unexpected file omissions, unintended
+library soname changes, or altered permissions between automated
+builds.</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-debdiff-tool-comparing-debian-packages';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

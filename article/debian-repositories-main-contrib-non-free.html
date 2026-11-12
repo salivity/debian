@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Repositories: Main, Contrib, Non-Free - debian</title>
+    <meta name="description" content="The Debian operating system categorizes its software packages into distinct archive areas—primarily main, contrib, and non-free—to balance strict adherence to open-source principles with real-world usability. These classifications are strictly defined by">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-repositories-main-contrib-non-free">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Repositories: Main, Contrib, Non-Free - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-repositories-main-contrib-non-free" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian operating system categorizes its software packages into distinct archive areas—primarily main, contrib, and non-free—to balance strict adherence to open-source principles with real-world usability. These classifications are strictly defined by" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-repositories-main-contrib-non-free">Debian Repositories:
+Main, Contrib, Non-Free</h1>
+<p>The Debian operating system categorizes its software packages into
+distinct archive areas—primarily <code>main</code>,
+<code>contrib</code>, and <code>non-free</code>—to balance strict
+adherence to open-source principles with real-world usability. These
+classifications are strictly defined by compliance with the Debian Free
+Software Guidelines (DFSG) and the package's dependencies. This
+structure ensures users have full transparency regarding the licensing,
+freedom, and support status of any software installed on their
+systems.</p>
+<h3 id="the-foundation-debian-free-software-guidelines-dfsg">The
+Foundation: Debian Free Software Guidelines (DFSG)</h3>
+<p>Debian's repository structure is anchored by the Debian Free Software
+Guidelines, a set of criteria defining what qualifies as "free software"
+under the Debian Social Contract. The DFSG mandates requirements such as
+free redistribution, inclusion of source code, permission for
+modifications and derived works, and non-discrimination against persons,
+groups, or fields of endeavor. How a piece of software aligns with the
+DFSG determines which archive area it belongs to.</p>
+<h3 id="the-main-archive">The <code>main</code> Archive</h3>
+<p>The <code>main</code> component represents the official Debian
+distribution. Every package within <code>main</code> meets two essential
+conditions:</p>
+<ol type="1">
+<li><strong>DFSG Compliance:</strong> The software itself is fully open
+source and adheres completely to the DFSG.</li>
+<li><strong>Independent Operation:</strong> The software must not
+require any packages outside of <code>main</code> to build or
+execute.</li>
+</ol>
+<p>Debian only provides full official support and security updates to
+software housed in the <code>main</code> component. If a system is
+configured solely using <code>main</code>, the user is guaranteed to be
+running a 100% free and open-source operating system.</p>
+<h3 id="the-contrib-archive">The <code>contrib</code> Archive</h3>
+<p>The <code>contrib</code> component contains packages that are
+themselves compliant with the DFSG, but fail the test of independence.
+Software in this section cannot function on its own within a pure
+free-software environment. A package is placed in <code>contrib</code>
+if:</p>
+<ul>
+<li>It requires non-free software to compile or build.</li>
+<li>It depends on software in the <code>non-free</code> archive at
+runtime.</li>
+<li>It installs or downloads third-party proprietary components (for
+example, proprietary game data or proprietary browser plugins).</li>
+</ul>
+<p>Although the packaging and code in <code>contrib</code> are free,
+Debian does not consider <code>contrib</code> part of the official
+distribution because it forces the user to rely on non-free
+software.</p>
+<h3 id="the-non-free-archive">The <code>non-free</code> Archive</h3>
+<p>The <code>non-free</code> component includes software that does not
+meet the DFSG criteria. These packages may have licenses that restrict
+commercial use, prohibit modification, withhold source code, or place
+limits on distribution. Common examples include proprietary drivers,
+software with restrictive patent clauses, and applications distributed
+exclusively in binary format.</p>
+<p>Packages in <code>non-free</code> are hosted on Debian infrastructure
+purely as a convenience to users who require specific closed-source
+applications. Debian does not officially support this software, cannot
+always provide security fixes (due to the lack of source code), and does
+not consider <code>non-free</code> part of the official Debian
+release.</p>
+<h3 id="the-non-free-firmware-archive">The
+<code>non-free-firmware</code> Archive</h3>
+<p>Starting with Debian 12 (Bookworm), Debian introduced a dedicated
+<code>non-free-firmware</code> component. Previously bundled within the
+general <code>non-free</code> archive, hardware firmware packages—such
+as proprietary drivers for network cards and graphics chips—were
+separated to allow users to enable necessary hardware support during
+installation without opening their system to all other categories of
+proprietary software.</p>
+<h3 id="configuring-archive-areas-in-debian">Configuring Archive Areas
+in Debian</h3>
+<p>Repository sections are managed via the APT package manager
+configuration file located at <code>/etc/apt/sources.list</code> (or
+within <code>.sources</code> files in
+<code>/etc/apt/sources.list.d/</code>). Users specify which areas they
+wish to enable after the distribution codename:</p>
+<pre class="text"><code>deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware</code></pre>
+<p>By adding or removing these keywords, system administrators can
+strictly enforce how much non-free software is accessible on their
+machines.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-repositories-main-contrib-non-free';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

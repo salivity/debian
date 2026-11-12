@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why Debian Switched to systemd in Debian 8 Jessie - debian</title>
+    <meta name="description" content="In Debian 8 &quot;Jessie,&quot; released in 2015, the Debian Project officially replaced its long-standing System V init (SysVinit) with systemd as the default init system. This transition was the culmination of an exhaustive technical debate within the Debian Tech">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/why-debian-switched-to-systemd-in-debian-8-jessie">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Why Debian Switched to systemd in Debian 8 Jessie - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/why-debian-switched-to-systemd-in-debian-8-jessie" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In Debian 8 &quot;Jessie,&quot; released in 2015, the Debian Project officially replaced its long-standing System V init (SysVinit) with systemd as the default init system. This transition was the culmination of an exhaustive technical debate within the Debian Tech" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="why-debian-switched-to-systemd-in-debian-8-jessie">Why Debian
+Switched to systemd in Debian 8 Jessie</h1>
+<p>In Debian 8 "Jessie," released in 2015, the Debian Project officially
+replaced its long-standing System V init (SysVinit) with systemd as the
+default init system. This transition was the culmination of an
+exhaustive technical debate within the Debian Technical Committee,
+driven by the need to modernize the operating system's boot
+architecture, improve service management, support modern desktop
+environments, and align with the broader Linux ecosystem.</p>
+<h3 id="limitations-of-sysvinit">Limitations of SysVinit</h3>
+<p>For decades, Debian relied on SysVinit, a system where service
+initialization depended heavily on sequential shell scripts located in
+<code>/etc/init.d/</code>. By the early 2010s, this approach had reached
+its architectural limits:</p>
+<ul>
+<li><strong>Fragile Shell Scripts:</strong> SysVinit scripts were
+complex, prone to human error, and difficult to maintain uniformly
+across thousands of packages.</li>
+<li><strong>Sequential Execution:</strong> Services had to start one
+after another, leading to slow boot times on modern multi-core
+processors.</li>
+<li><strong>Poor Process Tracking:</strong> SysVinit relied primarily on
+PID files to track services. If a daemon spawned multiple child
+processes or crashed unexpectedly, orphan processes could escape
+management, leaving services in inconsistent states.</li>
+</ul>
+<h3 id="advanced-process-management-with-cgroups">Advanced Process
+Management with cgroups</h3>
+<p>One of the primary technical justifications for systemd was its
+implementation of Linux Control Groups (cgroups). Instead of tracking
+processes using PID files, systemd places every service into its own
+dedicated cgroup. This architecture guarantees that every child process
+spawned by a daemon remains tracked. As a result, administrators can
+reliably terminate, restart, or limit resources for a service and all of
+its subprocesses without leaving stray processes running in the
+background.</p>
+<h3
+id="aggressive-parallelization-and-event-driven-architecture">Aggressive
+Parallelization and Event-Driven Architecture</h3>
+<p>systemd modernized the boot pipeline by introducing an event-driven
+design based on socket and D-Bus activation. By creating listening
+sockets for services before the services themselves launch, systemd
+allows dependent processes to start concurrently without race
+conditions. If a service needs to communicate with another daemon that
+has not finished loading, the kernel simply buffers the request until
+the target service is ready. This parallelization significantly reduced
+system startup times across both server and desktop installations.</p>
+<h3 id="integration-with-modern-upstream-software">Integration with
+Modern Upstream Software</h3>
+<p>The evolution of core desktop environments, particularly GNOME,
+heavily influenced Debian's transition. By GNOME 3.8, essential desktop
+functionality—such as session tracking, power management, and user
+switching—depended on <code>systemd-logind</code>. Maintaining Debian
+with SysVinit required extensive workarounds, compatibility shims, and
+maintaining obsolete packages like ConsoleKit. Transitioning to systemd
+allowed Debian package maintainers to focus on upstream software as
+designed, reducing the technical debt required to keep modern software
+working on an aging init system.</p>
+<h3 id="ecosystem-standardization-and-the-committee-decision">Ecosystem
+Standardization and the Committee Decision</h3>
+<p>Prior to the transition, the Debian Technical Committee evaluated
+several alternatives, including Canonical's Upstart and Gentoo's OpenRC.
+In February 2014, the committee voted in favor of systemd. Major Linux
+distributions—including Fedora, Red Hat Enterprise Linux, Arch Linux,
+and eventually Ubuntu—were already consolidating around systemd.
+Aligning with this emerging standard ensured that Debian would benefit
+from active upstream development, simplified cross-distribution
+packaging, and shared tooling, ultimately ensuring the operating
+system's long-term sustainability.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/why-debian-switched-to-systemd-in-debian-8-jessie';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Flags for Position-Independent Executables - debian</title>
+    <meta name="description" content="This article outlines the compile-time and linker flags enforced across the Debian archive to implement Position-Independent Executables (PIE). By ensuring binaries are loaded at random memory locations via Address Space Layout Randomization (ASLR), these">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-flags-for-position-independent-executables">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Flags for Position-Independent Executables - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-flags-for-position-independent-executables" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article outlines the compile-time and linker flags enforced across the Debian archive to implement Position-Independent Executables (PIE). By ensuring binaries are loaded at random memory locations via Address Space Layout Randomization (ASLR), these" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-flags-for-position-independent-executables">Debian Flags
+for Position-Independent Executables</h1>
+<p>This article outlines the compile-time and linker flags enforced
+across the Debian archive to implement Position-Independent Executables
+(PIE). By ensuring binaries are loaded at random memory locations via
+Address Space Layout Randomization (ASLR), these flags mitigate attacks
+such as Return-Oriented Programming (ROP). The sections below cover the
+specific compiler options, the role of Debian's build system, and the
+underlying toolchain defaults.</p>
+<h3 id="the-core-pie-compilation-and-linker-flags">The Core PIE
+Compilation and Linker Flags</h3>
+<p>To produce a position-independent binary, the build process requires
+two distinct flags:</p>
+<ul>
+<li><strong><code>-fPIE</code> (or <code>-fpie</code>)</strong>: Passed
+to the compiler (<code>CFLAGS</code>, <code>CXXFLAGS</code>). It
+instructs the compiler to generate position-independent machine code for
+an executable, similar to <code>-fPIC</code> used for shared libraries,
+but optimized to eliminate indirection overhead when accessing symbols
+known to be local to the executable.</li>
+<li><strong><code>-pie</code> (or <code>-Wl,-pie</code>)</strong>:
+Passed to the linker (<code>LDFLAGS</code>). It instructs the linker to
+produce a dynamically linked position-independent executable capable of
+being loaded at an arbitrary virtual memory address.</li>
+</ul>
+<h3 id="the-role-of-dpkg-buildflags">The Role of
+<code>dpkg-buildflags</code></h3>
+<p>Debian orchestrates archive-wide hardening features via the
+<code>dpkg-dev</code> package through the <code>dpkg-buildflags</code>
+command. Within this framework, PIE is handled by the <code>pie</code>
+feature in the <code>hardening</code> area.</p>
+<p>When building a Debian package, standard packaging scripts evaluate
+<code>dpkg-buildflags --get CFLAGS</code> and
+<code>dpkg-buildflags --get LDFLAGS</code>. For systems or targets where
+PIE must be explicitly passed, <code>dpkg-buildflags</code> injects
+<code>-fPIE</code> into <code>CFLAGS</code>, <code>CXXFLAGS</code>,
+<code>OBJCFLAGS</code>, and <code>FFLAGS</code>, while appending
+<code>-pie</code> to <code>LDFLAGS</code>.</p>
+<p>If a package cannot compile with position independence (for instance,
+static bootloaders or low-level utilities), package maintainers
+explicitly opt out in <code>debian/rules</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">export</span><span class="dt"> DEB_BUILD_MAINT_OPTIONS </span><span class="ch">=</span><span class="st"> hardening=-pie</span></span></code></pre></div>
+<p>Disabling the feature causes <code>dpkg-buildflags</code> to emit
+<code>-fno-PIE</code> and <code>-no-pie</code> to counteract any default
+toolchain configurations.</p>
+<h3 id="gcc-default-configuration---enable-default-pie">GCC Default
+Configuration (<code>--enable-default-pie</code>)</h3>
+<p>Starting with Debian 9 (Stretch), Debian switched to enabling PIE by
+default directly within the GNU Compiler Collection (GCC) on most 64-bit
+and supported 32-bit architectures (including <code>amd64</code>,
+<code>arm64</code>, <code>armhf</code>, <code>i386</code>,
+<code>ppc64el</code>, and <code>s390x</code>).</p>
+<p>During GCC's build configuration, Debian configures the compiler
+with:</p>
+<pre class="text"><code>--enable-default-pie</code></pre>
+<p>Because this setting is built into GCC's spec files:</p>
+<ol type="1">
+<li><code>gcc</code> automatically assumes <code>-fPIE</code> during the
+compilation step.</li>
+<li><code>gcc</code> automatically passes <code>-pie</code> to the
+linker during the final link step.</li>
+</ol>
+<p>Consequently, modern Debian packages do not always need explicit
+<code>-fPIE</code> or <code>-pie</code> flags displayed in their build
+logs, as the underlying native toolchain automatically enforces PIE
+unless explicitly instructed otherwise with <code>-fno-PIE</code> and
+<code>-no-pie</code>.</p>
+<h3 id="related-hardening-flags">Related Hardening Flags</h3>
+<p>PIE relies on accompanying linker flags to provide comprehensive
+memory protection:</p>
+<ul>
+<li><strong><code>-Wl,-z,relro</code></strong>: Read-Only Relocations
+(RELRO). Marks sections of the ELF binary as read-only after the dynamic
+linker resolves relocations.</li>
+<li><strong><code>-Wl,-z,now</code></strong>: Immediate Binding
+(BINDNOW). Resolves all dynamic symbols at application launch time
+rather than lazily on demand. This allows the Global Offset Table (GOT)
+to be marked entirely read-only, preventing attackers from overwriting
+GOT pointers.</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-flags-for-position-independent-executables';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
