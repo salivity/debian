@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Debian Source Packages Using dget - debian</title>
+    <meta name="description" content="This article explains how the dget utility retrieves remote source packages directly from Debian operating system repositories. You will learn about the core mechanics of dget, how it processes package description files to download complete multi-part sou">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/download-debian-source-packages-using-dget">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Download Debian Source Packages Using dget - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/download-debian-source-packages-using-dget" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explains how the dget utility retrieves remote source packages directly from Debian operating system repositories. You will learn about the core mechanics of dget, how it processes package description files to download complete multi-part sou" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="download-debian-source-packages-using-dget">Download Debian
+Source Packages Using dget</h1>
+<p>This article explains how the <code>dget</code> utility retrieves
+remote source packages directly from Debian operating system
+repositories. You will learn about the core mechanics of
+<code>dget</code>, how it processes package description files to
+download complete multi-part source trees, and the practical commands
+used to fetch and optionally unpack Debian source code in a single
+workflow.</p>
+<h3 id="what-is-dget">What is dget?</h3>
+<p><code>dget</code> is a command-line utility provided by the
+<code>devscripts</code> package in Debian and Debian-based operating
+systems. Its primary function is to download Debian binary and source
+packages over the network. Unlike basic tools such as <code>curl</code>
+or <code>wget</code>, which only retrieve individual target files,
+<code>dget</code> is purpose-built to understand Debian packaging
+metadata.</p>
+<h3 id="how-dget-retrieves-remote-source-packages">How dget Retrieves
+Remote Source Packages</h3>
+<p>A Debian source package is not a single archive; it consists of
+multiple complementary files:</p>
+<ul>
+<li>A Debian Source Control (<code>.dsc</code>) file containing metadata
+and checksums.</li>
+<li>An upstream source tarball (<code>.orig.tar.gz</code>,
+<code>.orig.tar.xz</code>, or similar).</li>
+<li>A Debian packaging diff or tarball (<code>.debian.tar.xz</code> or
+<code>.diff.gz</code>).</li>
+</ul>
+<p>When retrieving remote source packages, <code>dget</code> performs
+several automated steps to fetch the complete source tree:</p>
+<ol type="1">
+<li><strong>Retrieves the <code>.dsc</code> File:</strong> When supplied
+with a URL pointing to a remote <code>.dsc</code> file,
+<code>dget</code> downloads this descriptor first.</li>
+<li><strong>Parses Package Components:</strong> It reads the
+<code>Files</code> or <code>Checksums-*</code> sections inside the
+<code>.dsc</code> file to identify all linked archives required to build
+or inspect the source.</li>
+<li><strong>Downloads Associated Files:</strong> It automatically
+resolves the URLs for the upstream tarball and the Debian-specific
+archive relative to the location of the <code>.dsc</code> file,
+downloading them to the current directory.</li>
+<li><strong>Validates Integrity:</strong> <code>dget</code> verifies the
+cryptographic checksums (MD5, SHA-1, SHA-256) of the downloaded archives
+against the values declared in the <code>.dsc</code> file.</li>
+</ol>
+<h3 id="key-retrieval-modes-and-options">Key Retrieval Modes and
+Options</h3>
+<p><code>dget</code> provides specific flags that enhance its
+source-fetching functionality:</p>
+<ul>
+<li><strong>Automatic Extraction (<code>-x</code>):</strong> Running
+<code>dget -x &lt;URL-to-.dsc&gt;</code> downloads all package
+components and immediately executes <code>dpkg-source -x</code> to
+extract the package into a ready-to-use source directory.</li>
+<li><strong>Extraction Without Download (<code>-d</code>):</strong> The
+<code>-d</code> flag instructs <code>dget</code> to only download the
+source components without extracting them.</li>
+<li><strong>APT Integration (<code>-u</code> or
+<code>--all</code>):</strong> When provided with a package name instead
+of a direct URL, <code>dget</code> can query configured APT repositories
+to locate, fetch, and verify the source package directly using
+repository indices.</li>
+</ul>
+<h3 id="example-usage">Example Usage</h3>
+<p>To download and automatically unpack a source package using a direct
+repository URL:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">dget</span> <span class="at">-x</span> http://deb.debian.org/debian/pool/main/h/hello/hello_2.10-3.dsc</span></code></pre></div>
+<p>To fetch a source package directly from configured repositories via
+APT:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">dget</span> <span class="at">-u</span> hello</span></code></pre></div>
+<p>Through this automation, <code>dget</code> eliminates the need to
+manually track, download, verify, and unpack the individual files that
+constitute a Debian source package.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/download-debian-source-packages-using-dget';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

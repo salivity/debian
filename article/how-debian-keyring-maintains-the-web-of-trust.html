@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Keyring Maintains the Web of Trust - debian</title>
+    <meta name="description" content="The Debian Keyring maintains software integrity and developer identity across the Debian operating system by enforcing a strict, decentralized Web of Trust (WoT) powered by OpenPGP cryptography. Every package uploaded to Debian must be cryptographically s">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-keyring-maintains-the-web-of-trust">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Keyring Maintains the Web of Trust - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-keyring-maintains-the-web-of-trust" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian Keyring maintains software integrity and developer identity across the Debian operating system by enforcing a strict, decentralized Web of Trust (WoT) powered by OpenPGP cryptography. Every package uploaded to Debian must be cryptographically s" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-keyring-maintains-the-web-of-trust">How Debian
+Keyring Maintains the Web of Trust</h1>
+<p>The Debian Keyring maintains software integrity and developer
+identity across the Debian operating system by enforcing a strict,
+decentralized Web of Trust (WoT) powered by OpenPGP cryptography. Every
+package uploaded to Debian must be cryptographically signed by an
+authenticated developer whose public key exists in the official keyring.
+By combining in-person identity verification, peer cross-signing, and
+automated signature validation during package ingestion, Debian
+guarantees that only trusted contributors can alter software within its
+official repositories.</p>
+<h2 id="the-structure-of-debian-keyrings">The Structure of Debian
+Keyrings</h2>
+<p>Debian manages access to its archive through distinct GnuPG (GPG)
+keyrings maintained by the Debian Keyring Team. The primary keyrings
+are:</p>
+<ul>
+<li><strong>debian-keyring:</strong> Contains the keys of official
+Debian Developers (DDs). These developers have full archive access and
+voting rights.</li>
+<li><strong>debian-maintainers:</strong> Contains the keys of Debian
+Maintainers (DMs), who are permitted to upload specific packages after
+being granted permissions by a Debian Developer.</li>
+<li><strong>debian-nonupload:</strong> Contains the keys of
+non-uploading contributors who still require identity verification for
+Debian voting and project infrastructure access.</li>
+</ul>
+<p>These keyrings are packaged and distributed regularly, serving as the
+definitive list of authorized contributors for both infrastructure and
+automated archive checks.</p>
+<h2 id="the-debian-web-of-trust-and-key-signing">The Debian Web of Trust
+and Key Signing</h2>
+<p>Debian does not rely on a central certificate authority (CA) to
+validate identities. Instead, it relies on the decentralized Web of
+Trust built on mutual cryptographic verification.</p>
+<p>To join Debian as an official developer, a candidate must go through
+the Debian New Member (NM) process. A central requirement is
+establishing cryptographic trust through existing project members:</p>
+<ol type="1">
+<li><strong>Identity Verification:</strong> The prospective contributor
+must present their cryptographic key fingerprint and government-issued
+photo identification to one or more existing Debian Developers in an
+in-person meeting. This frequently happens at events like DebConf, local
+conferences, or regional key-signing parties.</li>
+<li><strong>Key Signing:</strong> Once the existing developer verifies
+the person's identity, they cryptographically sign the applicant's
+public key using their own trusted Debian GPG key.</li>
+<li><strong>Submission to the Keyring:</strong> The signed key is
+submitted to the Debian Keyring Team. These signatures act as formal
+attestations: established members attest to the authenticity of the new
+member's key.</li>
+</ol>
+<p>This chain of trust ensures that no anonymous or unvetted key enters
+the upload-authorized keyring.</p>
+<h2
+id="cryptographic-enforcement-in-the-package-upload-workflow">Cryptographic
+Enforcement in the Package Upload Workflow</h2>
+<p>Trust verification moves from an abstract concept into automated
+enforcement every time a package is uploaded to the Debian archive:</p>
+<ol type="1">
+<li><strong>Signing the Package:</strong> When a developer builds a
+package, their local build tool signs the <code>.changes</code> or
+<code>.dsc</code> metadata file using their private GPG key. This file
+lists the package files and their cryptographic hashes (SHA-256).</li>
+<li><strong>Ingestion by the Debian Archive Kit (dak):</strong> The
+developer uploads the signed package to the upload queue. The Debian
+Archive Kit (<code>dak</code>) intercepts the upload and verifies the
+digital signature against the active <code>debian-keyring.gpg</code> or
+<code>debian-maintainers.gpg</code>.</li>
+<li><strong>Validation and Rejection:</strong>
+<ul>
+<li>If the key is not in the keyring, the upload is rejected
+instantly.</li>
+<li>If the key belongs to a Debian Maintainer who lacks permission for
+that specific package, the upload is rejected.</li>
+<li>If the signature has expired, been revoked, or fails mathematical
+validation, the upload is rejected.</li>
+</ul></li>
+<li><strong>Archive Inclusion:</strong> Only upon successful
+cryptographic validation is the package moved into the
+<code>unstable</code> branch, where it can later migrate to
+<code>testing</code> and <code>stable</code>.</li>
+</ol>
+<h2 id="key-lifecycle-and-continuous-keyring-maintenance">Key Lifecycle
+and Continuous Keyring Maintenance</h2>
+<p>The Web of Trust is maintained as a living security system. The
+Debian Keyring Team actively manages the key database to mitigate
+compromise and obsolescence:</p>
+<ul>
+<li><strong>Key Expirations and Transitions:</strong> Debian requires
+developers to use modern, secure key lengths (e.g., RSA 4096-bit or
+Ed25519) and enforce key expiration dates. Developers must periodically
+extend their key's expiration using an existing trust path or transition
+to a new key via signed transition announcements.</li>
+<li><strong>Revocation Handling:</strong> If a developer's private key
+is lost or compromised, a revocation certificate is published, and the
+Debian Keyring Team immediately removes the compromised key from the
+archive upload rings.</li>
+<li><strong>Retirement and Inactivity:</strong> Keys belonging to
+inactive or retired developers are systematically moved to the
+<code>debian-emeritus</code> keyring, revoking their package-upload
+privileges while preserving historical signature records.</li>
+</ul>
+<p>Through rigorous physical identity checks, peer key signatures, and
+automated upload gatekeeping, the Debian Keyring maintains an unbroken
+chain of trust between individual human developers and the software
+consumed by millions of users.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-debian-keyring-maintains-the-web-of-trust';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

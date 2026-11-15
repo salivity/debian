@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian 14 Forky Development Roadmap Explained - debian</title>
+    <meta name="description" content="Debian 14, codenamed &quot;Forky,&quot; represents the next major milestone in the Debian GNU/Linux distribution roadmap following Debian 13 &quot;Trixie.&quot; This article outlines the position of Debian 14 within the standard Debian development pipeline, detailing its nam">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-14-forky-development-roadmap-explained">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian 14 Forky Development Roadmap Explained - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-14-forky-development-roadmap-explained" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian 14, codenamed &quot;Forky,&quot; represents the next major milestone in the Debian GNU/Linux distribution roadmap following Debian 13 &quot;Trixie.&quot; This article outlines the position of Debian 14 within the standard Debian development pipeline, detailing its nam" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-14-forky-development-roadmap-explained">Debian 14 Forky
+Development Roadmap Explained</h1>
+<p>Debian 14, codenamed "Forky," represents the next major milestone in
+the Debian GNU/Linux distribution roadmap following Debian 13 "Trixie."
+This article outlines the position of Debian 14 within the standard
+Debian development pipeline, detailing its naming origin, expected
+release timeline, the transition from unstable to testing repositories,
+and the structured freeze process that leads to its eventual stable
+release.</p>
+<h3 id="naming-and-debians-release-lineage">Naming and Debian's Release
+Lineage</h3>
+<p>Debian traditionally names its releases after characters from Pixar’s
+<em>Toy Story</em> franchise. Announced in late 2022 alongside Debian 13
+"Trixie," Debian 14 is officially dubbed "Forky," a character introduced
+in <em>Toy Story 4</em>. In Debian’s release sequence, Forky directly
+succeeds Debian 13, maintaining the distribution's predictable,
+multi-year progression cycle.</p>
+<h3 id="the-development-timeline">The Development Timeline</h3>
+<p>Debian operates on a roughly two-year release cycle:</p>
+<ul>
+<li><strong>Debian 12 ("Bookworm"):</strong> Released as Stable in June
+2023.</li>
+<li><strong>Debian 13 ("Trixie"):</strong> Slated for release as Stable
+around mid-2025.</li>
+<li><strong>Debian 14 ("Forky"):</strong> Expected to arrive as the
+Stable release in mid-2027.</li>
+</ul>
+<p>While work on underlying software components occurs continuously in
+Debian's <code>unstable</code> branch (known permanently as "Sid"),
+Forky will only take center stage after Debian 13 is officially promoted
+to Stable.</p>
+<h3 id="how-forky-moves-through-the-debian-branches">How Forky Moves
+Through the Debian Branches</h3>
+<p>The preparation for Debian 14 follows a precise stage-by-stage
+workflow:</p>
+<ol type="1">
+<li><strong>The <code>unstable</code> (Sid) Influx:</strong> Independent
+upstream software updates and new packages continuously land in Debian
+<code>unstable</code>.</li>
+<li><strong>Transition to <code>testing</code>:</strong> Once Debian 13
+"Trixie" transitions from <code>testing</code> to <code>stable</code>,
+the <code>testing</code> alias will automatically point to Debian 14
+"Forky." Packages that satisfy automated quality checks, dependency
+chains, and maturity thresholds in <code>unstable</code> will migrate
+into the Forky repository.</li>
+<li><strong>Architecture and Infrastructure Support:</strong> During
+this phase, Debian's Release Team and architecture porters evaluate
+which hardware platforms (such as amd64, arm64, and newer architectures
+like riscv64) will officially be supported for Forky.</li>
+</ol>
+<h3 id="the-freeze-and-stabilization-process">The Freeze and
+Stabilization Process</h3>
+<p>Prior to the 2027 release, Debian 14 will enter a sequence of freezes
+coordinated by the Debian Release Team to guarantee stability:</p>
+<ul>
+<li><strong>Transition Freeze:</strong> Restricts major library
+transitions to prevent broken package dependencies.</li>
+<li><strong>Soft Freeze:</strong> Limits new packages or significant
+feature updates from entering Forky, focusing development on bug
+fixing.</li>
+<li><strong>Hard Freeze:</strong> Restricts changes strictly to critical
+bug fixes, security remediation, and translation updates.</li>
+<li><strong>Full Freeze:</strong> Prohibits package updates without
+explicit approval from the Release Team until the final image is
+certified for release.</li>
+</ul>
+<h3 id="maintenance-and-long-term-support">Maintenance and Long-Term
+Support</h3>
+<p>Once released, Debian 14 "Forky" will serve as the default "Stable"
+distribution for roughly two years. Following the release of Debian 15,
+Forky will transition into the "Oldstable" designation and enter the
+Debian Long Term Support (LTS) pipeline, securing maintenance and
+security patches for at least five years from its initial launch
+date.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-14-forky-development-roadmap-explained';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

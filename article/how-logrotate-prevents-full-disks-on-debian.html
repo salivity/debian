@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Logrotate Prevents Full Disks on Debian - debian</title>
+    <meta name="description" content="On Debian systems, active services continuously generate log data that can eventually consume all available disk space, leading to system instability or crashes. The logrotate utility solves this problem by automating the lifecycle of log files through sc">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-logrotate-prevents-full-disks-on-debian">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Logrotate Prevents Full Disks on Debian - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-logrotate-prevents-full-disks-on-debian" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="On Debian systems, active services continuously generate log data that can eventually consume all available disk space, leading to system instability or crashes. The logrotate utility solves this problem by automating the lifecycle of log files through sc" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-logrotate-prevents-full-disks-on-debian">How Logrotate
+Prevents Full Disks on Debian</h1>
+<p>On Debian systems, active services continuously generate log data
+that can eventually consume all available disk space, leading to system
+instability or crashes. The <code>logrotate</code> utility solves this
+problem by automating the lifecycle of log files through scheduled
+rotation, compression, truncation, and deletion. This article explains
+the exact mechanisms <code>logrotate</code> uses to manage file growth,
+its default configuration structure on Debian, and how to tune its
+settings to safeguard storage capacity.</p>
+<h2 id="the-problem-with-unmanaged-logs">The Problem with Unmanaged
+Logs</h2>
+<p>System daemons, web servers, and user applications write constant
+status and error events to <code>/var/log</code>. Without intervention,
+files such as <code>syslog</code>, <code>kern.log</code>, or web access
+logs grow indefinitely. When storage fills up:</p>
+<ul>
+<li>Services fail to write new data and may crash.</li>
+<li>Critical operations, such as package updates or database writes, are
+blocked.</li>
+<li>System responsiveness degrades significantly.</li>
+</ul>
+<h2 id="how-logrotate-manages-disk-usage">How Logrotate Manages Disk
+Usage</h2>
+<p><code>logrotate</code> is installed by default on Debian and operates
+non-interactively to enforce log management policies through several key
+actions:</p>
+<h3 id="1-file-rotation">1. File Rotation</h3>
+<p>Instead of letting a single log file expand endlessly,
+<code>logrotate</code> closes the active log and renames it. For
+example, <code>/var/log/syslog</code> becomes
+<code>/var/log/syslog.1</code>. A new, empty
+<code>/var/log/syslog</code> is created so the service can continue
+logging without interruption.</p>
+<h3 id="2-compression">2. Compression</h3>
+<p>Historical logs are rarely accessed but must be retained for
+auditing. <code>logrotate</code> compresses older archives using tools
+like <code>gzip</code> (controlled by the <code>compress</code>
+directive). This reduces the disk footprint of text logs by up to 90%.
+When configured with <code>delaycompress</code>, it defers compression
+of the most recent backup until the next cycle to avoid conflicts with
+daemons still writing to the old file descriptor.</p>
+<h3 id="3-removal-of-old-logs">3. Removal of Old Logs</h3>
+<p>Debian administrators define retention limits using the
+<code>rotate</code> directive (e.g., <code>rotate 7</code> keeps seven
+rotated logs). When a new rotation occurs and the limit is exceeded, the
+oldest log file (such as <code>syslog.7.gz</code>) is permanently
+unlinked, freeing storage space automatically.</p>
+<h3 id="4-size-and-time-triggers">4. Size and Time Triggers</h3>
+<p>Rotations can be triggered either on a fixed time interval
+(<code>daily</code>, <code>weekly</code>, <code>monthly</code>) or based
+on size thresholds:</p>
+<ul>
+<li><strong>Time-based:</strong> Rotates logs periodically regardless of
+size, providing predictable intervals.</li>
+<li><strong>Size-based:</strong> Directives like <code>size 100M</code>
+or <code>maxsize 500M</code> force a rotation once a file reaches a
+defined limit, preventing sudden log surges from overwhelming the disk
+before the next scheduled cycle.</li>
+</ul>
+<h2 id="how-it-runs-on-debian">How It Runs on Debian</h2>
+<p><code>logrotate</code> does not run as a continuous daemon. Instead,
+modern Debian installations execute it daily via a systemd timer
+(<code>logrotate.timer</code>) or a daily cron job located at
+<code>/etc/cron.daily/logrotate</code>. When triggered, it reads
+configuration rules and acts on files that meet the criteria.</p>
+<p>The configuration on Debian is split into two components:</p>
+<ul>
+<li><strong>/etc/logrotate.conf:</strong> Contains global defaults (such
+as weekly rotation, compression behavior, and global file
+permissions).</li>
+<li><strong>/etc/logrotate.d/:</strong> Contains application-specific
+configuration snippets for installed packages (e.g., Nginx, Apache, APT,
+or <code>rsyslog</code>).</li>
+</ul>
+<h2 id="key-directives-for-disk-protection">Key Directives for Disk
+Protection</h2>
+<p>To aggressively protect disk space, key directives can be applied
+inside <code>/etc/logrotate.d/</code> configurations:</p>
+<ul>
+<li><code>compress</code>: Enables compression for rotated logs.</li>
+<li><code>rotate &lt;number&gt;</code>: Sets the maximum number of
+retained archives.</li>
+<li><code>maxsize &lt;size&gt;</code>: Rotates the file if it exceeds
+this size, even if the regular time interval has not passed.</li>
+<li><code>minsize &lt;size&gt;</code>: Prevents premature rotation of
+small files until they reach a minimum size.</li>
+<li><code>missingok</code>: Prevents errors if a log file does not
+exist, keeping execution smooth.</li>
+<li><code>notifempty</code>: Skips rotation if the log file contains no
+data.</li>
+</ul>
+<p>By automating the compression of historical records and deleting the
+oldest entries beyond a fixed retention window, <code>logrotate</code>
+creates a predictable ceiling on disk usage for log storage across the
+Debian operating system.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-logrotate-prevents-full-disks-on-debian';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

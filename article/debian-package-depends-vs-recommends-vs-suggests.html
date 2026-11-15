@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Package Depends vs Recommends vs Suggests - debian</title>
+    <meta name="description" content="In the Debian package management ecosystem, control files use relationship fields to declare how a package interacts with other software. This article explains the technical differences between the Depends, Recommends, and Suggests fields, detailing how e">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-package-depends-vs-recommends-vs-suggests">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Package Depends vs Recommends vs Suggests - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-package-depends-vs-recommends-vs-suggests" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In the Debian package management ecosystem, control files use relationship fields to declare how a package interacts with other software. This article explains the technical differences between the Depends, Recommends, and Suggests fields, detailing how e" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-package-depends-vs-recommends-vs-suggests">Debian Package
+Depends vs Recommends vs Suggests</h1>
+<p>In the Debian package management ecosystem, control files use
+relationship fields to declare how a package interacts with other
+software. This article explains the technical differences between the
+<code>Depends</code>, <code>Recommends</code>, and <code>Suggests</code>
+fields, detailing how each level of dependency dictates package
+functionality and how package managers like APT handle them during
+installation.</p>
+<h2 id="depends">Depends</h2>
+<p>The <code>Depends</code> field specifies absolute dependencies. A
+package cannot function, be configured, or be installed properly without
+the packages listed in this field.</p>
+<ul>
+<li><strong>Criticality:</strong> Mandatory.</li>
+<li><strong>Default APT Behavior:</strong> APT will automatically
+download and install all packages listed under <code>Depends</code>. If
+any dependency cannot be satisfied, the installation will abort or
+fail.</li>
+<li><strong>Use Case:</strong> Core shared libraries, essential runtime
+environments, or system utilities required for the program to
+execute.</li>
+</ul>
+<p>If a package's <code>Depends</code> requirement is missing, package
+configuration scripts (such as <code>postinst</code>) will fail, leaving
+the package in an unconfigured, broken state.</p>
+<h2 id="recommends">Recommends</h2>
+<p>The <code>Recommends</code> field declares a strong, but not
+absolute, dependency. According to Debian policy, a package listed in
+<code>Recommends</code> should be found in all but unusual
+installations. The primary package can execute without recommended
+packages, but users may experience missing features or reduced
+functionality.</p>
+<ul>
+<li><strong>Criticality:</strong> Strong recommendation.</li>
+<li><strong>Default APT Behavior:</strong> Modern APT installations
+install recommended packages by default
+(<code>APT::Install-Recommends "true"</code>). However, users can bypass
+them using the <code>--no-install-recommends</code> flag.</li>
+<li><strong>Use Case:</strong> Optional graphical front-ends, commonly
+used plugins, or helper utilities that the vast majority of users expect
+to have available.</li>
+</ul>
+<h2 id="suggests">Suggests</h2>
+<p>The <code>Suggests</code> field declares a weak relationship.
+Packages listed here are entirely optional and typically enhance the
+primary package's usefulness or offer complementary features.</p>
+<ul>
+<li><strong>Criticality:</strong> Optional enhancement.</li>
+<li><strong>Default APT Behavior:</strong> APT will not install
+suggested packages automatically. Instead, APT merely prints a list of
+suggested packages in the terminal during the installation transaction
+for the user's awareness.</li>
+<li><strong>Use Case:</strong> Documentation, alternative backend
+engines, advanced plugins, or complementary administration tools.</li>
+</ul>
+<h2 id="summary-of-differences">Summary of Differences</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Feature</th>
+<th style="text-align: left;">Depends</th>
+<th style="text-align: left;">Recommends</th>
+<th style="text-align: left;">Suggests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Strictness</strong></td>
+<td style="text-align: left;">Absolute requirement</td>
+<td style="text-align: left;">Standard requirement</td>
+<td style="text-align: left;">Optional enhancement</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Default APT Action</strong></td>
+<td style="text-align: left;">Automatically installed</td>
+<td style="text-align: left;">Automatically installed</td>
+<td style="text-align: left;">Not installed (notification only)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Can Be Bypassed?</strong></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Yes (via
+<code>--no-install-recommends</code>)</td>
+<td style="text-align: left;">N/A</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Impact if Missing</strong></td>
+<td style="text-align: left;">Software fails to run or configure</td>
+<td style="text-align: left;">Software runs with limited features</td>
+<td style="text-align: left;">Software runs normally without
+add-ons</td>
+</tr>
+</tbody>
+</table></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-package-depends-vs-recommends-vs-suggests';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

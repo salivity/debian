@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Is the Role of the DFSG in the Debian Ecosystem? - debian</title>
+    <meta name="description" content="The Debian Free Software Guidelines (DFSG) serve as the operational definition of software freedom for the Debian Project, determining whether a piece of software can be included in the official operating system distribution. Originally drafted by Bruce P">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/what-is-the-role-of-the-dfsg-in-the-debian-ecosystem">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Is the Role of the DFSG in the Debian Ecosystem? - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/what-is-the-role-of-the-dfsg-in-the-debian-ecosystem" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian Free Software Guidelines (DFSG) serve as the operational definition of software freedom for the Debian Project, determining whether a piece of software can be included in the official operating system distribution. Originally drafted by Bruce P" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="what-is-the-role-of-the-dfsg-in-the-debian-ecosystem">What Is
+the Role of the DFSG in the Debian Ecosystem?</h1>
+<p>The Debian Free Software Guidelines (DFSG) serve as the operational
+definition of software freedom for the Debian Project, determining
+whether a piece of software can be included in the official operating
+system distribution. Originally drafted by Bruce Perens and ratified
+alongside the Debian Social Contract in 1997, the document establishes
+clear criteria regarding source code availability, distribution rights,
+modification permissions, and non-discrimination. By enforcing these
+rules across all Debian repositories, the DFSG guarantees that the core
+Debian operating system remains strictly free and open source, while
+also providing the foundational text that directly inspired the Open
+Source Definition used throughout the modern software industry.</p>
+<h2 id="defining-the-boundaries-of-free-software">Defining the
+Boundaries of Free Software</h2>
+<p>At its core, the DFSG acts as a legal and ethical litmus test for
+software licenses. The guidelines outline specific conditions that a
+license must satisfy to be deemed free by the Debian community:</p>
+<ul>
+<li><strong>Free Redistribution:</strong> The license cannot restrict
+any party from selling or giving away the software as a component of an
+aggregate software distribution.</li>
+<li><strong>Source Code Access:</strong> The program must include source
+code and allow distribution in both source code and compiled forms.</li>
+<li><strong>Modifications and Derived Works:</strong> The license must
+allow modifications and derivative works, permitting them to be
+distributed under the same terms as the original software.</li>
+<li><strong>Integrity of the Author's Source Code:</strong> Modification
+through patch files is permitted if a license requires keeping original
+source code intact, balancing developer attribution with freedom to
+fork.</li>
+<li><strong>No Discrimination:</strong> Licenses cannot discriminate
+against any person, group of persons, or specific fields of endeavor
+(such as commercial or military use).</li>
+<li><strong>Distribution of Rights:</strong> The rights attached to the
+program must apply to all to whom the program is redistributed without
+the need to execute an additional license.</li>
+<li><strong>License Independence:</strong> The rights attached to the
+program must not depend on the program's being part of a Debian system,
+and the license must not contaminate other software distributed
+alongside it.</li>
+</ul>
+<h2 id="structuring-the-debian-archive">Structuring the Debian
+Archive</h2>
+<p>The DFSG dictates the structural architecture of Debian's software
+repositories. Debian organizes its package archives into distinct
+sections based on licensing compliance:</p>
+<ul>
+<li><strong>Main:</strong> The official Debian distribution consists
+solely of packages that comply with the DFSG. Every package in
+<code>main</code> can be freely used, modified, and redistributed by
+anyone.</li>
+<li><strong>Contrib:</strong> This section contains software that
+complies with the DFSG itself but depends on packages outside
+<code>main</code> to compile or run.</li>
+<li><strong>Non-Free:</strong> Packages that fail one or more DFSG
+criteria (such as software with commercial usage bans or closed-source
+code) reside here. While hosted on Debian infrastructure for user
+convenience, <code>non-free</code> is not considered part of the
+official Debian system.</li>
+<li><strong>Non-Free Firmware:</strong> Established to handle
+proprietary hardware firmware separately from other non-free software,
+balancing system usability on modern hardware with adherence to DFSG
+principles.</li>
+</ul>
+<h2 id="governance-and-community-consensus">Governance and Community
+Consensus</h2>
+<p>The DFSG is not merely a static checklist; it is an active instrument
+of Debian governance. Because software licenses often contain nuanced
+clauses, the interpretation of the DFSG frequently requires community
+evaluation.</p>
+<p>The <code>debian-legal</code> mailing list analyzes ambiguous
+licenses and edge cases, evaluating whether particular terms infringe
+upon the guidelines. When contentious issues arise—such as the status of
+documentation under the GNU Free Documentation License (GFDL) or binary
+firmware blobs in the Linux kernel—the Debian Project resolves them
+through General Resolutions (GR), allowing project members to vote on
+how strictly the DFSG applies.</p>
+<h2 id="broader-influence-across-the-open-source-world">Broader
+Influence Across the Open Source World</h2>
+<p>The influence of the DFSG extends well beyond the Debian project
+itself. When the Open Source Initiative (OSI) was founded in 1998 to
+promote open development models to the commercial sector, it adopted the
+DFSG almost verbatim to create the Open Source Definition (OSD). As a
+result, the criteria that determine whether a package enters Debian's
+<code>main</code> archive remain the benchmark for defining open source
+software globally. Furthermore, major distributions derived from Debian,
+such as Ubuntu and Linux Mint, rely directly or indirectly on the
+repository curation and license audits established by the DFSG.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/what-is-the-role-of-the-dfsg-in-the-debian-ecosystem';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

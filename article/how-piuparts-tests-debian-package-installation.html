@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Piuparts Tests Debian Package Installation - debian</title>
+    <meta name="description" content="This article examines how piuparts (package installation, upgrading, and purging action testing tool) automates the quality assurance process for Debian packages. It covers the mechanics of how the tool creates isolated environments, executes clean instal">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-piuparts-tests-debian-package-installation">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Piuparts Tests Debian Package Installation - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-piuparts-tests-debian-package-installation" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article examines how piuparts (package installation, upgrading, and purging action testing tool) automates the quality assurance process for Debian packages. It covers the mechanics of how the tool creates isolated environments, executes clean instal" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-piuparts-tests-debian-package-installation">How Piuparts
+Tests Debian Package Installation</h1>
+<p>This article examines how <code>piuparts</code> (package
+installation, upgrading, and purging action testing tool) automates the
+quality assurance process for Debian packages. It covers the mechanics
+of how the tool creates isolated environments, executes clean
+installations, tests upgrade paths from previous releases, verifies
+complete package removal and purging, and checks for lingering
+filesystem artifacts.</p>
+<h2 id="isolated-environment-creation">Isolated Environment
+Creation</h2>
+<p>To ensure tests are deterministic and do not alter the host system,
+<code>piuparts</code> runs its tests inside an isolated environment,
+typically a minimal <code>chroot</code>, container, or virtual
+machine.</p>
+<p>Before starting any package operation, <code>piuparts</code>
+initializes this environment with a bare minimum base system (usually
+created using <code>debootstrap</code>). It records a complete snapshot
+of the filesystem, logging all existing files, directories, symbolic
+links, and their respective permissions and ownership metadata. This
+initial snapshot serves as the baseline against which the system state
+is later compared.</p>
+<h2 id="clean-installation-testing">Clean Installation Testing</h2>
+<p>The clean installation test evaluates whether a package can install
+reliably on an unmodified system:</p>
+<ol type="1">
+<li><strong>Dependency Resolution:</strong> <code>piuparts</code>
+invokes <code>apt-get</code> to fetch and install all required runtime
+dependencies from configured Debian repositories.</li>
+<li><strong>Package Unpacking and Configuration:</strong> The package
+under test is unpacked, and its maintainer scripts (<code>preinst</code>
+and <code>postinst</code>) are executed.</li>
+<li><strong>Execution Verification:</strong> <code>piuparts</code>
+monitors the exit codes of these scripts. If any maintainer script fails
+or returns a non-zero exit status, the test immediately flags an
+installation failure.</li>
+<li><strong>Log Inspection:</strong> The process captures logs to detect
+warnings, deprecated command usage, or unexpected script output.</li>
+</ol>
+<h2 id="upgrade-testing">Upgrade Testing</h2>
+<p>Debian requires smooth transitions between package releases and
+stable distribution upgrades. <code>piuparts</code> verifies this by
+simulating package upgrades:</p>
+<ol type="1">
+<li><strong>Baseline Version Installation:</strong>
+<code>piuparts</code> first installs the older, currently released
+version of the package from the Debian archive.</li>
+<li><strong>Transition Execution:</strong> It then instructs the package
+manager to install the new candidate <code>.deb</code> package over the
+existing version.</li>
+<li><strong>Lifecycle Script Verification:</strong> This tests whether
+the transition scripts—specifically the old package's <code>prerm</code>
+and <code>postrm</code> and the new package's <code>preinst</code> and
+<code>postinst</code>—execute in the correct sequence without data loss,
+broken configuration files, or dependency deadlocks.</li>
+</ol>
+<h2 id="package-removal-and-purging">Package Removal and Purging</h2>
+<p>Debian Policy dictates that removing a package should delete its
+program files while preserving configuration files, whereas purging must
+eradicate all files associated with the package. <code>piuparts</code>
+tests both stages:</p>
+<ol type="1">
+<li><strong>Removal (<code>apt-get remove</code>):</strong> The tool
+uninstalls the package, ensuring that binaries, libraries, and auxiliary
+files are removed, while configuration files (conffiles) are left
+intact.</li>
+<li><strong>Purging (<code>apt-get purge</code>):</strong> The tool
+instructs the package manager to purge the package, triggering the
+<code>postrm purge</code> script, which must remove all configuration
+files, state files, generated directories, and dynamically created
+system users.</li>
+</ol>
+<h2 id="post-purge-filesystem-comparison">Post-Purge Filesystem
+Comparison</h2>
+<p>The final phase is the integrity check. Once the purge operation
+completes, <code>piuparts</code> scans the entire filesystem again and
+compares the resulting state with the initial snapshot taken before the
+package was introduced.</p>
+<p>The test fails if it detects any of the following anomalies:</p>
+<ul>
+<li><strong>Leftover Files:</strong> Unowned files, empty directories,
+or log files that were created by the package or its maintainer scripts
+but were not deleted upon purging.</li>
+<li><strong>Modified System Files:</strong> Files belonging to other
+packages or the base system that were unexpectedly altered.</li>
+<li><strong>Broken Symlinks:</strong> Dangling symbolic links pointing
+to resources that were removed.</li>
+<li><strong>Permission Changes:</strong> Unintended modifications to
+system directory permissions or ownership.</li>
+</ul>
+<p>If the final filesystem state matches the initial baseline (allowing
+only for explicitly whitelisted system logs or state files),
+<code>piuparts</code> marks the package as compliant with Debian
+Policy.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-piuparts-tests-debian-package-installation';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Firewall Management With nftables and iptables - debian</title>
+    <meta name="description" content="Debian relies on the modern nftables framework as its default packet-filtering backend while maintaining backward compatibility with the legacy iptables toolset. This article explains how Debian integrates nftables by default, how the compatibility layer">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-firewall-management-with-nftables-and-iptables">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Firewall Management With nftables and iptables - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-firewall-management-with-nftables-and-iptables" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian relies on the modern nftables framework as its default packet-filtering backend while maintaining backward compatibility with the legacy iptables toolset. This article explains how Debian integrates nftables by default, how the compatibility layer" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-firewall-management-with-nftables-and-iptables">Debian
+Firewall Management With nftables and iptables</h1>
+<p>Debian relies on the modern <code>nftables</code> framework as its
+default packet-filtering backend while maintaining backward
+compatibility with the legacy <code>iptables</code> toolset. This
+article explains how Debian integrates <code>nftables</code> by default,
+how the compatibility layer bridges older syntax, how to verify or
+switch the active firewall system, and how native rules are structured
+and managed.</p>
+<h3 id="the-shift-to-nftables-as-the-default-backend">The Shift to
+nftables as the Default Backend</h3>
+<p>Starting with Debian 10 (Buster) and continuing through modern
+releases, Debian replaced the legacy <code>iptables</code> framework
+with <code>nftables</code> as the default Linux packet-filtering engine.
+The Linux kernel's <code>netfilter</code> subsystem powers both tools,
+but <code>nftables</code> consolidates IPv4, IPv6, ARP, and Ethernet
+filtering into a single unified framework with higher performance,
+atomic rule updates, and cleaner syntax.</p>
+<h3 id="the-compatibility-layer-iptables-nft">The Compatibility Layer:
+iptables-nft</h3>
+<p>To avoid breaking existing scripts, security tools, and administrator
+workflows, Debian does not simply remove the <code>iptables</code>
+commands. Instead, it provides a compatibility layer called
+<code>iptables-nft</code>.</p>
+<p>When an administrator runs commands like <code>iptables</code>,
+<code>ip6tables</code>, <code>ebtables</code>, or
+<code>arptables</code>, Debian directs these commands to translation
+binaries. These tools accept standard <code>iptables</code> syntax,
+translate the directives into <code>nftables</code> bytecode, and inject
+them directly into the <code>nftables</code> kernel subsystem. This
+allows legacy scripts and orchestration software to function without
+modification.</p>
+<h3 id="managing-firewall-alternatives">Managing Firewall
+Alternatives</h3>
+<p>Debian manages the relationship between legacy utilities and
+<code>nftables</code> through the <code>update-alternatives</code>
+system. By default, the symlinks point to the <code>*-nft</code>
+variants rather than the <code>*-legacy</code> variants.</p>
+<p>To inspect the current active backend for <code>iptables</code>,
+run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">update-alternatives</span> <span class="at">--display</span> iptables</span></code></pre></div>
+<p>If legacy behavior is strictly required for compatibility with
+specific legacy software, administrators can switch backends using:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> update-alternatives <span class="at">--config</span> iptables</span></code></pre></div>
+<p>The system will prompt you to select either <code>iptables-nft</code>
+(the default) or <code>iptables-legacy</code>. Debian maintains
+equivalent alternatives for <code>ip6tables</code>,
+<code>arptables</code>, and <code>ebtables</code>.</p>
+<h3 id="native-nftables-configuration">Native nftables
+Configuration</h3>
+<p>While the compatibility layer works automatically, Debian allows
+administrators to bypass legacy abstractions and configure
+<code>nftables</code> natively.</p>
+<p>The primary configuration file for native firewall rules is located
+at:</p>
+<pre class="text"><code>/etc/nftables.conf</code></pre>
+<p>A minimal native rule set typically defines an <code>inet</code>
+table (which handles both IPv4 and IPv6 simultaneously) and sets default
+policies for incoming, forward, and outgoing traffic:</p>
+<pre class="nftables"><code>flush ruleset
+
+table inet filter {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        # Accept loopback traffic
+        iif &quot;lo&quot; accept
+
+        # Accept established and related connections
+        ct state established,related accept
+
+        # Allow incoming SSH
+        tcp dport 22 accept
+    }
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+    }
+    chain output {
+        type filter hook output priority filter; policy accept;
+    }
+}</code></pre>
+<p>To enable and run native <code>nftables</code> at boot, execute:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> nftables</span></code></pre></div>
+<h3 id="high-level-firewall-frontends">High-Level Firewall
+Frontends</h3>
+<p>Debian also supports higher-level management frontends such as
+<code>ufw</code> (Uncomplicated Firewall) and <code>firewalld</code>.
+When installed on modern Debian installations, these utilities detect
+the underlying environment and interface directly with
+<code>nftables</code> or route their rules through the
+<code>iptables-nft</code> compatibility layer, ensuring standard
+firewall behavior across the system.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-firewall-management-with-nftables-and-iptables';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

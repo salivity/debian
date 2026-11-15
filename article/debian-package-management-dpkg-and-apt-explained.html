@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Package Management: dpkg and APT Explained - debian</title>
+    <meta name="description" content="This article examines the package management software originally created for the Debian operating system, focusing on the core system known as dpkg and its high-level counterpart, the Advanced Package Tool (APT). It covers the origin of these tools, how t">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-package-management-dpkg-and-apt-explained">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Package Management: dpkg and APT Explained - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-package-management-dpkg-and-apt-explained" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article examines the package management software originally created for the Debian operating system, focusing on the core system known as dpkg and its high-level counterpart, the Advanced Package Tool (APT). It covers the origin of these tools, how t" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-package-management-dpkg-and-apt-explained">Debian Package
+Management: dpkg and APT Explained</h1>
+<p>This article examines the package management software originally
+created for the Debian operating system, focusing on the core system
+known as <strong>dpkg</strong> and its high-level counterpart, the
+Advanced Package Tool (APT). It covers the origin of these tools, how
+they handle software installation and dependencies, and their enduring
+legacy across modern Linux distributions.</p>
+<p>The foundational package management system originally developed for
+and used by Debian is <strong>dpkg</strong> (Debian Package). Introduced
+in the mid-1990s during the early development of Debian, dpkg was
+designed to install, remove, build, and inspect binary packages packaged
+in the <code>.deb</code> format. It operates at a low level, interacting
+directly with the filesystem to extract files, verify checksums, and
+update internal databases that track installed software.</p>
+<p>While dpkg effectively manages individual software packages, it has a
+significant limitation: it cannot automatically download packages from
+remote repositories or automatically resolve missing dependencies. If a
+user attempts to install a <code>.deb</code> package that requires
+libraries not yet present on the system, dpkg halts the process and
+leaves the user to manually locate, download, and install those
+dependencies in the correct order.</p>
+<p>To resolve the dependency management challenge, the Debian project
+developed the <strong>Advanced Package Tool (APT)</strong>, introduced
+in Debian 2.1 in 1999. APT is not a replacement for dpkg, but rather a
+powerful, high-level front-end that works in tandem with it. APT reads
+software repository lists, automatically downloads necessary
+<code>.deb</code> files from the internet, calculates and resolves
+complex dependency trees, and then invokes dpkg in the background to
+execute the actual package extraction and configuration.</p>
+<p>Together, the <code>.deb</code> format, dpkg, and APT created one of
+the most reliable and influential package management ecosystems in
+computing. Today, this architecture remains the core software management
+system for Debian and powers numerous popular downstream distributions,
+including Ubuntu, Linux Mint, and Raspberry Pi OS.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-package-management-dpkg-and-apt-explained';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

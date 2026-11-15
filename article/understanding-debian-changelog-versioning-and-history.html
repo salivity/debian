@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding debian/changelog Versioning and History - debian</title>
+    <meta name="description" content="The debian/changelog file is the central source of truth for package versioning, release history, and metadata tracking within Debian and its derivative operating systems. This document outlines how the packaging ecosystem parses this file to extract vers">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/understanding-debian-changelog-versioning-and-history">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Understanding debian/changelog Versioning and History - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/understanding-debian-changelog-versioning-and-history" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The debian/changelog file is the central source of truth for package versioning, release history, and metadata tracking within Debian and its derivative operating systems. This document outlines how the packaging ecosystem parses this file to extract vers" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1
+id="understanding-debianchangelog-versioning-and-history">Understanding
+debian/changelog Versioning and History</h1>
+<p>The <code>debian/changelog</code> file is the central source of truth
+for package versioning, release history, and metadata tracking within
+Debian and its derivative operating systems. This document outlines how
+the packaging ecosystem parses this file to extract version numbers,
+automate build configurations, track bug closures, and maintain a
+verifiable, chronological history of modifications across the package
+lifecycle.</p>
+<h3 id="the-role-of-debianchangelog">The Role of debian/changelog</h3>
+<p>In Debian packaging, versioning is not defined inside a project's
+source code build files or standard configuration scripts. Instead,
+Debian build tools—such as <code>dpkg-buildpackage</code>,
+<code>debuild</code>, and <code>sbuild</code>—parse the very top entry
+of the <code>debian/changelog</code> file to determine the package name,
+current version, target distribution, and build urgency. Because package
+tools rely entirely on this file, maintaining correct syntax is
+mandatory; an error here halts the compilation and packaging pipeline
+immediately.</p>
+<h3 id="format-and-anatomy-of-an-entry">Format and Anatomy of an
+Entry</h3>
+<p>A <code>debian/changelog</code> file lists historical updates in
+reverse-chronological order, with the most recent version at the top.
+Each entry follows a rigid, standard structure:</p>
+<pre class="text"><code>package (version) distribution(s); urgency=urgency [key=value...]
+
+  * Detail of change 1.
+  * Detail of change 2 (Closes: #123456).
+
+ -- Maintainer Name &lt;maintainer@email.com&gt;  Date Specification</code></pre>
+<ul>
+<li><strong>Header Line:</strong> Contains the package name, the exact
+version enclosed in parentheses, the target distribution (such as
+<code>unstable</code>, <code>testing</code>, or
+<code>stable-security</code>), and the urgency level (e.g.,
+<code>urgency=medium</code>).</li>
+<li><strong>Change Details:</strong> Indented bullet points detailing
+the modifications made in that release. These lines explain why a change
+occurred, track patch additions, and integrate with the Debian Bug
+Tracking System (BTS) via syntax like <code>Closes: #XXXXXX</code>.</li>
+<li><strong>Trailer Line:</strong> Begins with two hyphens and a space
+(<code>--</code>), followed by the packager's name, email address, and
+an RFC 5322/2822-compliant timestamp.</li>
+</ul>
+<h3 id="how-versioning-is-established">How Versioning Is
+Established</h3>
+<p>The version string enclosed in the header line directly defines the
+version associated with the resulting binary (<code>.deb</code>) and
+source (<code>.dsc</code>) packages. Debian uses a specific versioning
+structure:</p>
+<p><code>[epoch:]upstream_version[-debian_revision]</code></p>
+<ol type="1">
+<li><strong>Epoch:</strong> An optional single number followed by a
+colon (e.g., <code>1:2.0-1</code>). It is used to override Debian's
+standard version-sorting logic if an upstream software project changes
+its version numbering scheme to something that evaluates as lower than
+the previous release.</li>
+<li><strong>Upstream Version:</strong> The actual version number
+assigned by the original software developers.</li>
+<li><strong>Debian Revision:</strong> Denotes packaging-specific changes
+made independently of upstream releases. If a maintainer fixes a
+packaging bug without an upstream code change, this number increments
+(e.g., from <code>1.0-1</code> to <code>1.0-2</code>). Native packages,
+developed solely for Debian, omit the Debian revision entirely.</li>
+</ol>
+<p>Debian's package manager, <code>dpkg</code>, compares versions
+character-by-character using specific sorting rules. By modifying the
+version string in <code>debian/changelog</code>, maintainers directly
+inform package managers whether an installed package should be upgraded,
+downgraded, or kept at its current state.</p>
+<h3 id="maintaining-historical-records-and-audit-trails">Maintaining
+Historical Records and Audit Trails</h3>
+<p>Beyond versioning, <code>debian/changelog</code> establishes a
+permanent, human- and machine-readable audit trail:</p>
+<ul>
+<li><strong>Bug Tracking Automation:</strong> When a package uploaded to
+Debian reaches the archive, automated archive tools scan the changelog
+for <code>Closes: #NNNNNN</code> tags and automatically mark those
+issues as resolved in the BTS.</li>
+<li><strong>Distribution Targeting:</strong> By specifying distributions
+such as <code>experimental</code> or <code>unstable</code>, the
+changelog controls where the built binaries are deposited in the Debian
+archive repositories.</li>
+<li><strong>Downstream Attribution:</strong> When downstream
+distributions like Ubuntu import Debian source packages, maintainers add
+new entries to the top of the changelog to document downstream-specific
+patches while preserving the entire historical chain of Debian
+contributions below.</li>
+<li><strong>Release Inspection:</strong> Once installed, users can
+inspect <code>/usr/share/doc/&lt;package&gt;/changelog.Debian.gz</code>
+to review every update, security patch, and configuration change made to
+the package over its lifespan.</li>
+</ul>
+<h3 id="automated-parsing-and-tooling">Automated Parsing and
+Tooling</h3>
+<p>Maintainers rarely edit <code>debian/changelog</code> completely by
+hand. Tooling such as <code>dch</code> (part of the
+<code>devscripts</code> suite) and <code>dpkg-parsechangelog</code>
+ensure conformity to formatting rules. The command
+<code>dpkg-parsechangelog</code> reads the file and exports its
+components as structured environment variables during the build process,
+translating raw changelog text into the definitive versioning metadata
+that powers the Debian distribution.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/understanding-debian-changelog-versioning-and-history';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

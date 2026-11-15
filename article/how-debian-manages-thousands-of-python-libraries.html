@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Manages Thousands of Python Libraries - debian</title>
+    <meta name="description" content="Maintaining thousands of Python packages across the Debian archive requires a combination of strict packaging policies, specialized automation tools, collaborative Git workflows, and comprehensive quality assurance testing. The Debian Python Team (DPT) re">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-manages-thousands-of-python-libraries">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Manages Thousands of Python Libraries - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-manages-thousands-of-python-libraries" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Maintaining thousands of Python packages across the Debian archive requires a combination of strict packaging policies, specialized automation tools, collaborative Git workflows, and comprehensive quality assurance testing. The Debian Python Team (DPT) re" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-manages-thousands-of-python-libraries">How Debian
+Manages Thousands of Python Libraries</h1>
+<p>Maintaining thousands of Python packages across the Debian archive
+requires a combination of strict packaging policies, specialized
+automation tools, collaborative Git workflows, and comprehensive quality
+assurance testing. The Debian Python Team (DPT) relies on shared
+infrastructure, standardized build systems like <code>pybuild</code>,
+and continuous integration to package upstream Python libraries, resolve
+complex dependency trees, and execute seamless migrations when new
+Python interpreter versions enter the distribution.</p>
+<h3 id="collaborative-repositories-on-salsa">Collaborative Repositories
+on Salsa</h3>
+<p>The Debian Python Team coordinates its work on Salsa, Debian’s
+collaborative GitLab instance. Rather than individual maintainers
+working in isolation, packages are maintained under a shared team
+umbrella using the <code>git-buildpackage</code> workflow. Team members
+follow unified repository layouts where upstream code, packaging
+instructions in the <code>debian/</code> directory, and patch queues
+managed by <code>quilt</code> reside together. This shared access allows
+any team member to fix bugs, adopt unmaintained packages, or perform
+necessary updates without waiting for an individual package owner.</p>
+<h3 id="standardized-builds-with-dh-python-and-pybuild">Standardized
+Builds with <code>dh-python</code> and <code>pybuild</code></h3>
+<p>Managing thousands of packages with differing upstream build systems
+(such as <code>setuptools</code>, <code>flit</code>,
+<code>poetry</code>, <code>meson</code>, or <code>hatchling</code>) is
+made possible by <code>pybuild</code>, a build system abstraction tool
+within the <code>dh-python</code> suite. Integrated directly into
+Debian's <code>debhelper</code> framework, <code>pybuild</code>
+automatically detects the upstream build system, compiles code for all
+currently supported Python versions, and executes upstream test suites.
+By abstracting the mechanics of building, testing, and installing Python
+packages, a standard <code>debian/rules</code> configuration file often
+requires only a few lines of code.</p>
+<h3 id="unbundling-and-dfsg-compliance">Unbundling and DFSG
+Compliance</h3>
+<p>The Debian Free Software Guidelines (DFSG) require all software to be
+free and buildable from source using tools already in Debian. Upstream
+Python libraries frequently vendor third-party dependencies inside their
+wheels or source trees. The Debian Python Team systematically unbundles
+these libraries, patches the upstream code to use system-wide
+Debian-packaged equivalents, and packages missing dependencies
+separately. This guarantees that security vulnerabilities in common
+libraries can be patched once in the central Debian package rather than
+across dozens of bundled copies.</p>
+<h3 id="rigorous-testing-and-ci">Rigorous Testing and CI</h3>
+<p>Quality assurance runs at multiple stages of the package
+lifecycle:</p>
+<ul>
+<li><strong>Build-Time Testing:</strong> <code>pybuild</code> runs test
+suites (such as <code>pytest</code> or <code>unittest</code>) against
+every supported Python version during the package build process. If
+tests fail, the build fails.</li>
+<li><strong>Post-Installation Testing
+(<code>autopkgtest</code>):</strong> Packages include integration tests
+that run in isolated environments against the installed
+<code>.deb</code> packages rather than the source tree, verifying that
+dependencies and runtime environments function correctly.</li>
+<li><strong>Reverse-Dependency Testing:</strong> Debian's continuous
+integration system automatically tests packages against their reverse
+dependencies. When an upstream library introduces an API change, CI
+alerts the team to broken downstream packages across the archive before
+the update reaches the testing suite.</li>
+</ul>
+<h3 id="managing-system-wide-python-transitions">Managing System-Wide
+Python Transitions</h3>
+<p>Debian typically supports one default Python version and occasionally
+one secondary version during transitions to a new major upstream
+release. When migrating to a new Python version (for example, from
+Python 3.11 to 3.12), the team relies on automated transition
+trackers:</p>
+<ol type="1">
+<li>The new Python interpreter is added to the archive as a supported
+version alongside the current default.</li>
+<li>Arch-dependent packages (those compiling C/C++ or Rust extensions
+via CPython APIs) are rebuilt for both versions.</li>
+<li>The team monitors mass rebuild logs, coordinates bug fixes for
+incompatible libraries, and files bugs against packages that fail to
+build.</li>
+<li>Once the archive is stable against the new interpreter, the default
+pointer is switched, the old version is dropped, and unnecessary builds
+are removed.</li>
+</ol>
+<h3 id="enforcement-of-the-debian-python-policy">Enforcement of the
+Debian Python Policy</h3>
+<p>All packages within the team's scope must conform to the Debian
+Python Policy. This document defines standard binary package naming
+conventions (such as prefixing modules with <code>python3-</code>),
+enforces installation paths according to standard filesystem hierarchies
+(<code>/usr/lib/python3/dist-packages</code>), governs how compiled
+bytecode (<code>.pyc</code> files) is generated via post-installation
+triggers, and regulates how command-line executables exposed via entry
+points are made available to users.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-debian-manages-thousands-of-python-libraries';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

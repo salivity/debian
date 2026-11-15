@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimizing Debian for Low-Spec x86 and ARM Systems - debian</title>
+    <meta name="description" content="This guide covers essential system configurations to optimize the Debian operating system for resource-constrained, embedded x86 and ARM environments. By pruning background services, minimizing memory consumption, optimizing storage input/output (I/O) to">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/optimizing-debian-for-low-spec-x-86-and-arm-systems">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Optimizing Debian for Low-Spec x86 and ARM Systems - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/optimizing-debian-for-low-spec-x-86-and-arm-systems" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide covers essential system configurations to optimize the Debian operating system for resource-constrained, embedded x86 and ARM environments. By pruning background services, minimizing memory consumption, optimizing storage input/output (I/O) to" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="optimizing-debian-for-low-spec-x86-and-arm-systems">Optimizing
+Debian for Low-Spec x86 and ARM Systems</h1>
+<p>This guide covers essential system configurations to optimize the
+Debian operating system for resource-constrained, embedded x86 and ARM
+environments. By pruning background services, minimizing memory
+consumption, optimizing storage input/output (I/O) to prevent flash
+media degradation, and tuning kernel parameters, you can build a
+responsive, lightweight, and reliable system tailored for low-spec
+hardware.</p>
+<h2 id="minimal-base-installation">Minimal Base Installation</h2>
+<p>Optimizing Debian begins at installation:</p>
+<ul>
+<li><strong>Install Only the Base System:</strong> Use the minimal
+Debian Netinst ISO or generate a custom rootfs using
+<code>debootstrap --variant=minbase</code>. Deselect the "Debian desktop
+environment" and standard system utilities during the
+<code>tasksel</code> phase.</li>
+<li><strong>Prevent Recommended Packages:</strong> By default, APT
+installs optional dependencies that consume storage and memory.
+Configure APT to ignore recommended and suggested packages by creating
+<code>/etc/apt/apt.conf.d/99no-recommends</code>:</li>
+</ul>
+<pre class="apt"><code>APT::Install-Recommends &quot;0&quot;;
+APT::Install-Suggests &quot;0&quot;;</code></pre>
+<h2 id="storage-and-filesystem-tweaks">Storage and Filesystem
+Tweaks</h2>
+<p>Embedded x86 and ARM boards commonly run on SD cards, eMMC, or slow
+flash storage with limited write endurance.</p>
+<ul>
+<li><strong>Mount Options in <code>/etc/fstab</code>:</strong> Reduce
+unnecessary write cycles by appending <code>noatime</code> and
+<code>commit=60</code> to your root and data partitions. The
+<code>noatime</code> option disables metadata updates when files are
+read:</li>
+</ul>
+<pre class="text"><code>UUID=xxxx-xxxx  /  ext4  defaults,noatime,commit=60  0  1</code></pre>
+<ul>
+<li><strong>Mount Temporary Directories in RAM:</strong> Place temporary
+directories in <code>tmpfs</code> to avoid hitting physical
+storage:</li>
+</ul>
+<pre class="text"><code>tmpfs  /tmp      tmpfs  defaults,nosuid,nodev,noatime,size=64M  0  0
+tmpfs  /var/log  tmpfs  defaults,nosuid,nodev,noatime,size=32M  0  0</code></pre>
+<h2 id="memory-optimization-and-zram">Memory Optimization and ZRAM</h2>
+<p>On systems with 512 MB to 2 GB of RAM, running out of memory (OOM) is
+a frequent point of failure.</p>
+<ul>
+<li><strong>Enable ZRAM Swap:</strong> Instead of wearing out flash
+media with disk-based swap partitions, use compressed RAM swap via
+<code>zram-tools</code>:</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install zram-tools</span></code></pre></div>
+<p>In <code>/etc/default/zramswap</code>, configure the compression
+algorithm and allocation:</p>
+<pre class="text"><code>ALGO=lz4
+PERCENT=50</code></pre>
+<ul>
+<li><strong>Tune Virtual Memory Behavior:</strong> Edit
+<code>/etc/sysctl.d/99-lowspec.conf</code> to adjust swap behavior and
+release memory more aggressively:</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Favor ZRAM usage over filesystem cache drop</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">vm.swappiness</span><span class="ot">=</span><span class="dv">100</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggressively reclaim directory and inode caches</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dt">vm.vfs_cache_pressure</span><span class="ot">=</span><span class="dv">150</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Prevent aggressive overcommitting of memory</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="dt">vm.overcommit_memory</span><span class="ot">=</span><span class="dv">2</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="dt">vm.overcommit_ratio</span><span class="ot">=</span><span class="dv">80</span></span></code></pre></div>
+<p>Apply settings immediately with:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sysctl <span class="at">--system</span></span></code></pre></div>
+<h2 id="pruning-systemd-and-background-daemons">Pruning Systemd and
+Background Daemons</h2>
+<p>Debian ships with several daemons that are unnecessary in headless or
+embedded appliances.</p>
+<ul>
+<li><strong>Audit Active Services:</strong></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> list-units <span class="at">--type</span><span class="op">=</span>service <span class="at">--state</span><span class="op">=</span>running</span></code></pre></div>
+<ul>
+<li><strong>Disable Unneeded Services:</strong> Remove or disable
+services that do not apply to your hardware use-case:</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable <span class="at">--now</span> exim4          <span class="co"># MTA/mail daemon</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable <span class="at">--now</span> avahi-daemon   <span class="co"># mDNS discovery</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable <span class="at">--now</span> bluetooth.service</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable <span class="at">--now</span> ModemManager.service</span></code></pre></div>
+<ul>
+<li><strong>Restrict Journald Logging:</strong> Unconstrained logs
+exhaust memory and write cycles. Edit
+<code>/etc/systemd/journald.conf</code>:</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Journal]</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Storage</span><span class="ot">=</span><span class="st">volatile</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="dt">RuntimeMaxUse</span><span class="ot">=</span><span class="st">16M</span></span></code></pre></div>
+<h2 id="kernel-and-console-optimization">Kernel and Console
+Optimization</h2>
+<ul>
+<li><strong>Reduce Boot Delay:</strong> If using GRUB (common on x86),
+set <code>GRUB_TIMEOUT=0</code> in <code>/etc/default/grub</code> and
+run <code>sudo update-grub</code>. On ARM systems running U-Boot, modify
+<code>bootdelay=0</code> within your boot script or environment.</li>
+<li><strong>Suppress Console Output:</strong> Add
+<code>quiet loglevel=3</code> to your kernel command line parameters to
+reduce CPU interrupts caused by writing dmesg messages to serial or TTY
+consoles.</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/optimizing-debian-for-low-spec-x-86-and-arm-systems';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Debian Manages Release-Critical Bugs - debian</title>
+    <meta name="description" content="Debian relies on a strict definition of Release-Critical (RC) bugs and an automated, community-driven enforcement pipeline to maintain its reputation for system stability. By categorizing bugs according to severity and tracking them through the Debian Bug">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-debian-manages-release-critical-bugs">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Debian Manages Release-Critical Bugs - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-debian-manages-release-critical-bugs" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian relies on a strict definition of Release-Critical (RC) bugs and an automated, community-driven enforcement pipeline to maintain its reputation for system stability. By categorizing bugs according to severity and tracking them through the Debian Bug" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-debian-manages-release-critical-bugs">How Debian Manages
+Release-Critical Bugs</h1>
+<p>Debian relies on a strict definition of Release-Critical (RC) bugs
+and an automated, community-driven enforcement pipeline to maintain its
+reputation for system stability. By categorizing bugs according to
+severity and tracking them through the Debian Bug Tracking System (BTS),
+the project ensures that flawed software cannot migrate into testing or
+ship with a stable release. This article explores how Debian defines
+these critical flaws, how automated tools like migration scripts and
+autoremovals isolate them, and how the Release Team enforces remediation
+through freeze cycles, Bug Squashing Parties, and package removals.</p>
+<h3 id="defining-release-critical-bugs">Defining Release-Critical
+Bugs</h3>
+<p>In the Debian project, a bug is designated as Release-Critical if its
+severity prevents the package from being included in the next Debian
+stable release. Debian's Bug Tracking System (BTS) classifies bugs into
+several severity tiers, but only three qualify as RC by default:</p>
+<ul>
+<li><strong>Critical:</strong> Bugs that break unrelated software or the
+entire system, cause severe data loss, or introduce a major security
+vulnerability affecting the host.</li>
+<li><strong>Grave:</strong> Bugs that render the specific package
+unusable or mostly unusable, cause data loss for users of the package,
+or create a security hole in the package itself.</li>
+<li><strong>Serious:</strong> Bugs that represent a severe violation of
+the Debian Policy Manual or are deemed critical by the package
+maintainer or the Debian Release Team.</li>
+</ul>
+<p>Additionally, the Release Team can manually apply special tags (such
+as <code>bullseye-can-defer</code> or distribution-specific release
+tags) to include or exclude specific bugs from blocking a release.</p>
+<h3 id="tracking-and-visibility">Tracking and Visibility</h3>
+<p>Every reported bug is indexed in the BTS, where it is version-tracked
+against specific Debian distributions: <code>unstable</code> (Sid),
+<code>testing</code>, and <code>stable</code>.</p>
+<p>Because a bug might exist in <code>unstable</code> but not in
+<code>testing</code>, Debian tracks bug states per package version
+rather than per distribution. The Debian Release-Critical Bug graph and
+dedicated dashboard continuously monitor the overall count of unresolved
+RC bugs affecting the <code>testing</code> branch, providing maintainers
+with real-time tracking of issues blocking the next stable
+milestone.</p>
+<h3 id="automated-remediation-britney-and-package-autoremoval">Automated
+Remediation: Britney and Package Autoremoval</h3>
+<p>Debian automates much of its quality control through its package
+migration tool, nicknamed <strong>Britney</strong>.</p>
+<ol type="1">
+<li><strong>Migration Gating:</strong> When a developer uploads a
+package to <code>unstable</code>, Britney evaluates whether it is
+eligible to migrate to <code>testing</code>. If an RC bug is open
+against the version in <code>unstable</code>, Britney prevents the
+package from entering <code>testing</code>.</li>
+<li><strong>Automated Removals:</strong> If an RC bug affects a package
+already present in <code>testing</code>, a countdown timer begins
+(typically 14 to 20 days). If the bug remains unfixed and no package in
+<code>testing</code> depends on it (no reverse-dependency blockers),
+Britney automatically removes the package from <code>testing</code>.
+This prevents individual maintainer inactivity from holding back the
+release cycle.</li>
+</ol>
+<h3 id="the-debian-freeze-process">The Debian Freeze Process</h3>
+<p>As the development cycle nears completion, the Debian Release Team
+implements progressive "freeze" stages to stabilize the
+<code>testing</code> branch:</p>
+<ul>
+<li><strong>Transition Freeze:</strong> Maintainers are barred from
+initiating large library transitions that could destabilize groups of
+interconnected packages.</li>
+<li><strong>Soft Freeze:</strong> New source packages cannot enter
+<code>testing</code>. Britney's autoremovals continue, and packages can
+only update to fix bugs.</li>
+<li><strong>Hard Freeze:</strong> Maintainers must obtain explicit
+approval from the Release Team for any package update entering
+<code>testing</code>. Only fixes for RC bugs and documentation updates
+are accepted.</li>
+<li><strong>Full Freeze:</strong> No package migrations occur without
+manual intervention by the Release Team.</li>
+</ul>
+<h3 id="manual-enforcement-and-maintainer-intervention">Manual
+Enforcement and Maintainer Intervention</h3>
+<p>When automation is not enough, Debian relies on maintainer policies
+and collective remediation:</p>
+<ul>
+<li><strong>Non-Maintainer Uploads (NMUs):</strong> If an RC bug is
+neglected by a package's primary maintainer, Debian policy allows other
+developers to fix the bug and upload a patched package via an NMU, often
+bypassing typical waiting delays during freeze periods.</li>
+<li><strong>Bug Squashing Parties (BSPs):</strong> Distributed,
+community-wide coding sessions are organized globally to triage, patch,
+and verify RC bugs in the final months of a release cycle.</li>
+<li><strong>Package Drops:</strong> If a package cannot be fixed before
+the target release date and is not an essential system component, the
+Release Team will manually drop it and its dependent packages from the
+release candidates.</li>
+</ul>
+<p>A new Debian version is only released when the count of
+release-critical bugs affecting the <code>testing</code> distribution
+reaches zero, or when any remaining edge cases are explicitly waived by
+the Release Team.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-debian-manages-release-critical-bugs';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

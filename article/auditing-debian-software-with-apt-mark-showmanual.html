@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditing Debian Software with apt-mark showmanual - debian</title>
+    <meta name="description" content="This article examines how the apt-mark showmanual command serves as a critical auditing tool for administrators on the Debian operating system. It covers the distinction between manual and automatic package installations, explains how to filter system noi">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/auditing-debian-software-with-apt-mark-showmanual">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Auditing Debian Software with apt-mark showmanual - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/auditing-debian-software-with-apt-mark-showmanual" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article examines how the apt-mark showmanual command serves as a critical auditing tool for administrators on the Debian operating system. It covers the distinction between manual and automatic package installations, explains how to filter system noi" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="auditing-debian-software-with-apt-mark-showmanual">Auditing
+Debian Software with apt-mark showmanual</h1>
+<p>This article examines how the <code>apt-mark showmanual</code>
+command serves as a critical auditing tool for administrators on the
+Debian operating system. It covers the distinction between manual and
+automatic package installations, explains how to filter system noise to
+identify operator-installed software, and outlines practical methods for
+maintaining system security, tracking configuration drift, and preparing
+for server migrations.</p>
+<h2 id="the-distinction-between-manual-and-automatic-packages">The
+Distinction Between Manual and Automatic Packages</h2>
+<p>The Advanced Package Tool (APT) maintains a database tracking the
+installation state of every package on a Debian system. When a package
+is added, APT classifies it using one of two internal flags:</p>
+<ul>
+<li><strong>Automatic (<code>auto</code>):</strong> Packages pulled in
+automatically to satisfy dependency requirements of other software.</li>
+<li><strong>Manual (<code>manual</code>):</strong> Packages that were
+explicitly requested by a system administrator or an automated
+provisioning script via commands like
+<code>apt install &lt;package&gt;</code>.</li>
+</ul>
+<p>The <code>apt-mark showmanual</code> command reads this database and
+prints a newline-delimited list of all packages marked as manually
+installed.</p>
+<h2 id="why-standard-listing-commands-fall-short-for-auditing">Why
+Standard Listing Commands Fall Short for Auditing</h2>
+<p>Traditional Debian inspection tools like <code>dpkg -l</code> or
+<code>dpkg-query</code> output every package present on the system. On a
+standard Debian server, this typically results in a list of over a
+thousand packages, the vast majority of which are shared libraries,
+system utilities, and transient dependencies.</p>
+<p>Auditing with <code>dpkg -l</code> makes it difficult to distinguish
+between essential OS components and software introduced by
+administrators. By filtering out automatically resolved dependencies,
+<code>apt-mark showmanual</code> reduces this output to a targeted list
+of packages that were deliberately chosen, significantly reducing the
+surface area an auditor must review.</p>
+<h2 id="key-auditing-applications">Key Auditing Applications</h2>
+<h3 id="1-identifying-unauthorized-or-forgotten-software">1. Identifying
+Unauthorized or Forgotten Software</h3>
+<p>Over time, servers experience configuration drift as administrators
+install debug tools, editors, or alternative services during
+maintenance. Running <code>apt-mark showmanual</code> exposes these
+additions, allowing teams to verify that every user-installed package
+conforms to security baselines and organizational policies.</p>
+<h3 id="2-streamlining-system-replication-and-migrations">2.
+Streamlining System Replication and Migrations</h3>
+<p>When migrating workloads to a new server or defining
+Infrastructure-as-Code (IaC) templates, administrators should only
+specify top-level requirements rather than hardcoding entire dependency
+trees. Capturing the output of <code>apt-mark showmanual</code> provides
+the exact package list needed to rebuild the environment on a clean
+installation:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-mark</span> showmanual <span class="op">&gt;</span> manual-packages.txt</span></code></pre></div>
+<p>On the target system, this list can be used to install the required
+applications while allowing the new OS to resolve the appropriate,
+updated dependencies automatically.</p>
+<h3 id="3-cleaning-up-orphaned-packages">3. Cleaning Up Orphaned
+Packages</h3>
+<p>If an administrator manually installs a package that is later no
+longer needed, changing its flag back to automatic allows APT's garbage
+collection to clean up both the package and its orphaned
+dependencies:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-mark auto <span class="op">&lt;</span>package-name<span class="op">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt autoremove</span></code></pre></div>
+<p>Auditing the manual list helps identify packages that are no longer
+in active use, enabling effective disk space reclamation and reducing
+the overall attack surface.</p>
+<h2 id="advanced-usage-in-security-audits">Advanced Usage in Security
+Audits</h2>
+<p>While <code>apt-mark showmanual</code> isolates operator-requested
+packages, the initial Debian installation process also marks baseline
+system packages as manual. To isolate <em>only</em> the packages
+installed after the base OS was deployed, administrators can compare the
+current manual list against a baseline reference system using
+<code>comm</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">comm</span> <span class="at">-23</span> <span class="op">&lt;(</span><span class="ex">apt-mark</span> showmanual <span class="kw">|</span> <span class="fu">sort</span><span class="op">)</span> <span class="op">&lt;(</span><span class="fu">cat</span> baseline-manual.txt <span class="kw">|</span> <span class="fu">sort</span><span class="op">)</span></span></code></pre></div>
+<p>This output yields the precise set of software introduced over the
+server's lifecycle, providing an actionable inventory for compliance
+checks, vulnerability management, and security reviews.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/auditing-debian-software-with-apt-mark-showmanual';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

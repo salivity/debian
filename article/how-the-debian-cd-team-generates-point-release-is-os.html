@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How the Debian CD Team Generates Point Release ISOs - debian</title>
+    <meta name="description" content="During a Debian point release, the Debian CD Team builds, verifies, and distributes refreshed installation and live ISO images to ensure new installations do not require massive immediate upgrades. This article details the end-to-end technical workflow be">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/how-the-debian-cd-team-generates-point-release-is-os">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How the Debian CD Team Generates Point Release ISOs - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/how-the-debian-cd-team-generates-point-release-is-os" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="During a Debian point release, the Debian CD Team builds, verifies, and distributes refreshed installation and live ISO images to ensure new installations do not require massive immediate upgrades. This article details the end-to-end technical workflow be" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-the-debian-cd-team-generates-point-release-isos">How the
+Debian CD Team Generates Point Release ISOs</h1>
+<p>During a Debian point release, the Debian CD Team builds, verifies,
+and distributes refreshed installation and live ISO images to ensure new
+installations do not require massive immediate upgrades. This article
+details the end-to-end technical workflow behind this process, covering
+archive synchronization, installer kernel updates, automated image
+generation via dedicated tooling, distributed community testing, and
+final cryptographic signing for public release.</p>
+<h3 id="archive-preparation-and-synchronization">Archive Preparation and
+Synchronization</h3>
+<p>The ISO generation process begins only after the Debian Release Team
+and FTP Masters finalize the point release. Maintenance updates and
+security fixes accumulated in the <code>proposed-updates</code> archive
+suite are formally accepted into the <code>stable</code> repository.
+Once the main archive metadata updates and package pools are consistent,
+the CD Team can begin pulling packages to ensure the new media contains
+the latest package versions.</p>
+<h3 id="updating-the-debian-installer">Updating the Debian
+Installer</h3>
+<p>Before building ISOs, the <code>debian-installer</code> (d-i) package
+stack must be updated to match the point release. This step incorporates
+the latest point release Linux kernel ABI and any critical bug fixes to
+installation modules (udebs). The updated installer packages are built,
+uploaded, and accepted into the archive, making them available to the
+ISO creation tools.</p>
+<h3 id="building-images-with-debian-cd-and-live-build">Building Images
+with debian-cd and live-build</h3>
+<p>The actual compilation of installation media takes place on dedicated
+infrastructure using automated tools:</p>
+<ul>
+<li><strong>Standard Installation Media:</strong> The core tool,
+<code>debian-cd</code>, reads package lists, task definitions, and
+dependency trees to construct image layouts. It handles netinst images,
+full DVD/BD sets, and multi-architecture combinations across all
+officially supported CPU architectures (such as <code>amd64</code>,
+<code>arm64</code>, and <code>s390x</code>). It resolves priorities so
+that standard desktop environments and essential utilities occupy the
+first installation image.</li>
+<li><strong>Live Images:</strong> Live desktop environments (GNOME, KDE
+Plasma, XFCE, etc.) are built separately using <code>live-build</code>.
+These images contain complete, bootable runtime systems alongside an
+integrated installer (such as Calamares or standard d-i).</li>
+</ul>
+<h3 id="testing-and-quality-assurance">Testing and Quality
+Assurance</h3>
+<p>Once the build scripts complete generating test images, the CD Team
+coordinates with the broader Debian community on the
+<code>#debian-cd</code> IRC channel and dedicated tracking pages to run
+quality assurance checks:</p>
+<ol type="1">
+<li><strong>Boot Testing:</strong> Testers verify that images
+successfully boot on both modern UEFI and legacy BIOS systems across
+various hardware configurations.</li>
+<li><strong>Installation Verification:</strong> Community volunteers
+conduct test installations using netinst, full media without internet
+access, and live desktop installers.</li>
+<li><strong>Architecture Checks:</strong> Non-x86 architectures are
+checked by respective port maintainers to ensure platform-specific
+bootloaders (like GRUB, U-Boot, or SILO) function as expected.</li>
+</ol>
+<h3 id="checksum-generation-signing-and-distribution">Checksum
+Generation, Signing, and Distribution</h3>
+<p>After testing passes, checksum files (<code>SHA256SUMS</code> and
+<code>SHA512SUMS</code>) are generated for all final ISO files. These
+checksums are cryptographically signed using the official Debian CD
+signing key, ensuring end-user verification and integrity.</p>
+<p>Finally, the completed images, checksums, and signature files are
+pushed from the central build systems to primary mirrors, the Debian
+Content Delivery Network (CDN), and Jigdo repositories, making the
+refreshed media publicly available worldwide.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/how-the-debian-cd-team-generates-point-release-is-os';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

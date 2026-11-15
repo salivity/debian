@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Is Debian Backports and How to Use It - debian</title>
+    <meta name="description" content="Debian Backports is an official repository that provides newer versions of select software packages for the Debian Stable release. While Debian Stable is renowned for its rock-solid reliability, its software versions remain frozen throughout its lifecycle">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/what-is-debian-backports-and-how-to-use-it">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Is Debian Backports and How to Use It - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/what-is-debian-backports-and-how-to-use-it" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debian Backports is an official repository that provides newer versions of select software packages for the Debian Stable release. While Debian Stable is renowned for its rock-solid reliability, its software versions remain frozen throughout its lifecycle" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="what-is-debian-backports-and-how-to-use-it">What Is Debian
+Backports and How to Use It</h1>
+<p>Debian Backports is an official repository that provides newer
+versions of select software packages for the Debian Stable release.
+While Debian Stable is renowned for its rock-solid reliability, its
+software versions remain frozen throughout its lifecycle. The Backports
+repository bridges the gap between stability and modern features by
+taking packages from the Debian Testing or Unstable branches,
+recompiling them against the libraries of Debian Stable, and making them
+available for selective installation without breaking the base
+system.</p>
+<h2 id="the-need-for-debian-backports">The Need for Debian
+Backports</h2>
+<p>Debian Stable prioritizes predictability and system integrity above
+all else. Once a Debian version is released, packages only receive
+critical security patches and bug fixes; they do not receive feature
+upgrades.</p>
+<p>However, users frequently encounter scenarios where newer software is
+necessary:</p>
+<ul>
+<li><strong>Newer Hardware:</strong> Newer motherboards, Wi-Fi adapters,
+and GPUs often require updated Linux kernel versions and firmware not
+present in the initial Stable release.</li>
+<li><strong>Modern Tooling:</strong> Developers and administrators often
+require up-to-date versions of development tools, container runtimes, or
+server software.</li>
+<li><strong>Desktop Applications:</strong> Everyday users may want newer
+feature releases of web browsers, media suites, or office
+applications.</li>
+</ul>
+<p>Debian Backports resolves this dilemma without forcing users to
+migrate their entire operating system to the less predictable Testing or
+Unstable branches.</p>
+<h2 id="how-debian-backports-works">How Debian Backports Works</h2>
+<p>Backport packages are taken primarily from the <code>testing</code>
+branch (and occasionally <code>unstable</code>) and adapted to run on
+the current <code>stable</code> release.</p>
+<p>Key technical aspects include:</p>
+<ul>
+<li><strong>Recompilation:</strong> The source code is recompiled using
+the shared libraries already present in Debian Stable. This ensures
+compatibility and prevents dependency conflicts.</li>
+<li><strong>Selective Pinning:</strong> By default, the Backports
+repository is configured with an APT pin priority of 100. This means
+packages in Backports will never automatically replace installed Stable
+packages during a standard <code>apt upgrade</code>. You must explicitly
+request a package from Backports to install it.</li>
+<li><strong>Independent Upgrades:</strong> Once you install a specific
+package from Backports, standard package management commands will keep
+that specific package updated with future Backports releases.</li>
+</ul>
+<h2 id="how-to-enable-and-use-debian-backports">How to Enable and Use
+Debian Backports</h2>
+<p>Enabling and using Backports is straightforward and handled via
+standard APT configuration.</p>
+<h3 id="1-add-the-repository">1. Add the Repository</h3>
+<p>To add Backports, create a new list file in
+<code>/etc/apt/sources.list.d/</code>. For example, on Debian 12
+(Bookworm):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sh <span class="at">-c</span> <span class="st">&#39;echo &quot;deb http://deb.debian.org/debian bookworm-backports main contrib non-free non-free-firmware&quot; &gt; /etc/apt/sources.list.d/backports.list&#39;</span></span></code></pre></div>
+<p>Update your package index afterward:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span></code></pre></div>
+<h3 id="2-install-a-package">2. Install a Package</h3>
+<p>Because the repository is deactivated by default through low pinning
+priority, you must specify the target release when installing a package
+using the <code>-t</code> flag:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-t</span> bookworm-backports linux-image-amd64</span></code></pre></div>
+<p>This command pulls the newer Linux kernel and any necessary
+backported dependencies, while leaving the rest of your system tied to
+the core Stable repository.</p>
+<h2 id="important-considerations">Important Considerations</h2>
+<p>While Debian Backports is an official project, there are differences
+in maintenance compared to the core release:</p>
+<ul>
+<li><strong>Security Support:</strong> Security updates for Backports
+are provided on a best-effort basis by package maintainers and the
+Backports team, rather than the primary Debian Security Team.</li>
+<li><strong>Selective Usage:</strong> Backports is intended for
+cherry-picking specific packages. Attempting to update the entire system
+using Backports defeats the purpose of running Debian Stable and can
+introduce instability.</li>
+</ul></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/what-is-debian-backports-and-how-to-use-it';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

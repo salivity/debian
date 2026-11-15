@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian Request for Adoption: Finding Volunteer Developers - debian</title>
+    <meta name="description" content="The Debian operating system maintains thousands of software packages through a decentralized network of volunteers, relying on formal procedures to keep software updated when a maintainer steps down. The Request for Adoption (RFA) process is the primary m">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-request-for-adoption-finding-volunteer-developers">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian Request for Adoption: Finding Volunteer Developers - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-request-for-adoption-finding-volunteer-developers" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Debian operating system maintains thousands of software packages through a decentralized network of volunteers, relying on formal procedures to keep software updated when a maintainer steps down. The Request for Adoption (RFA) process is the primary m" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-request-for-adoption-finding-volunteer-developers">Debian
+Request for Adoption: Finding Volunteer Developers</h1>
+<p>The Debian operating system maintains thousands of software packages
+through a decentralized network of volunteers, relying on formal
+procedures to keep software updated when a maintainer steps down. The
+Request for Adoption (RFA) process is the primary mechanism used by
+active maintainers to signal that a package needs a new caretaker.
+Through Debian’s Work-Needing and Prospective Packages (WNPP) tracking
+system, public mailing lists, and specialized developer command-line
+tools, RFAs broadcast maintenance vacancies to the global open-source
+community, facilitating a smooth transition of ownership without
+disrupting package availability.</p>
+<h3 id="initiating-the-request-via-wnpp">Initiating the Request via
+WNPP</h3>
+<p>When a Debian maintainer no longer has the time, interest, or
+resources to manage a piece of software, they do not simply abandon it.
+If the software is still useful and in a functional state, the
+maintainer files a formal bug report against the pseudo-package named
+<code>wnpp</code> (Work-Needing and Prospective Packages).</p>
+<p>The maintainer sets the bug subject line to
+<code>RFA: package-name -- short description</code> and sets the
+severity to "normal." Unlike an orphaned package where the maintainer
+has already walked away, an RFA indicates that the current maintainer
+intends to continue basic maintenance until an interested volunteer
+steps forward to claim responsibility.</p>
+<h3 id="broadcasting-vacancies-to-volunteers">Broadcasting Vacancies to
+Volunteers</h3>
+<p>Once an RFA bug is submitted, the Debian infrastructure automatically
+disseminates the notice through multiple developer-facing channels:</p>
+<ul>
+<li><strong>The WNPP Database:</strong> The bug is indexed on public
+Debian web pages that catalog all packages needing help, categorized by
+language, type, and age of the request.</li>
+<li><strong>Mailing Lists:</strong> Automated summaries and individual
+notifications are dispatched to the <code>debian-devel</code> mailing
+list, alerting thousands of active contributors.</li>
+<li><strong>Command-Line Discovery Tools:</strong> Debian provides
+diagnostic tools such as <code>wnpp-alert</code> and
+<code>how-can-i-help</code>. Developers regularly run these utilities on
+their local systems to scan installed software and identify locally used
+packages that currently have open RFAs. This allows contributors to
+easily find and adopt software they already use and understand.</li>
+</ul>
+<h3 id="the-adoption-workflow-ita">The Adoption Workflow (ITA)</h3>
+<p>When a prospective volunteer identifies an RFA they wish to take
+over, they initiate the "Intent to Adopt" (ITA) procedure:</p>
+<ol type="1">
+<li><strong>Retitling the Bug:</strong> The volunteer changes the bug
+status from <code>RFA</code> to
+<code>ITA: package-name -- short description</code> and reassigns the
+bug to their own email address. This prevents duplicate efforts by
+signaling to other developers that the package is being claimed.</li>
+<li><strong>Direct Communication:</strong> The new maintainer contacts
+the current maintainer to exchange domain-specific knowledge, discuss
+outstanding upstream issues, and coordinate access to version control
+repositories (such as Debian's Salsa GitLab instance).</li>
+<li><strong>Uploading the New Version:</strong> The volunteer prepares
+an updated package release, listing themselves in the
+<code>Maintainer</code> field of the <code>debian/control</code> file.
+The changelog entry explicitly closes the ITA bug report.</li>
+<li><strong>Sponsorship (if needed):</strong> If the volunteer is not
+yet an official Debian Developer with direct upload privileges, they
+work with an official Debian Sponsor through the Debian Mentors platform
+to inspect the package and upload it to the archives on their
+behalf.</li>
+</ol>
+<p>By standardizing how maintenance vacancies are announced, tracked,
+and transferred, the Debian RFA process ensures continuous software
+maintenance, preserves institutional knowledge, and creates an
+accessible onboarding path for new community contributors.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-request-for-adoption-finding-volunteer-developers';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debian-Goodies Explained: Functions and Utilities - debian</title>
+    <meta name="description" content="The debian-goodies package is a curated suite of lightweight, command-line utilities designed to supplement Debian’s native package management ecosystem. While standard tools like APT and dpkg handle core package operations, debian-goodies provides system">
+    <link rel="canonical" href="https://salivity.github.io/debian/article/debian-goodies-explained-functions-and-utilities">
+    <link rel="search" type="application/opensearchdescription+xml" title="debian" href="/debian/opensearch.xml">
+    <link rel="icon" href="/debian/favicon.ico">
+    <link rel="stylesheet" href="/debian/css/style.css">
+    <link media="print" rel="stylesheet" href="/debian/css/print.css">
+    <script src="/debian/js/fuse.min.js"></script>
+    <script src="/debian/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Debian-Goodies Explained: Functions and Utilities - debian" />
+    <meta property="og:url" content="https://salivity.github.io/debian/article/debian-goodies-explained-functions-and-utilities" />
+    <meta property="og:image" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/debian/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The debian-goodies package is a curated suite of lightweight, command-line utilities designed to supplement Debian’s native package management ecosystem. While standard tools like APT and dpkg handle core package operations, debian-goodies provides system" />
+    <link rel="manifest" href="/debian/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/debian/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>debian</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/debian/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="debian-goodies-explained-functions-and-utilities">Debian-Goodies
+Explained: Functions and Utilities</h1>
+<p>The <code>debian-goodies</code> package is a curated suite of
+lightweight, command-line utilities designed to supplement Debian’s
+native package management ecosystem. While standard tools like APT and
+<code>dpkg</code> handle core package operations,
+<code>debian-goodies</code> provides system administrators and users
+with specialized scripts to diagnose system states, inspect packages,
+and streamline everyday maintenance. This article outlines the primary
+function of <code>debian-goodies</code> and details the specific
+utilities it adds to the Debian operating system.</p>
+<h3 id="core-function-of-debian-goodies">Core Function of
+debian-goodies</h3>
+<p>In Debian, many small, single-purpose administrative scripts are too
+minor to justify individual package distribution. The
+<code>debian-goodies</code> package bundles these standalone tools into
+a single, cohesive installation. Its primary function is to extend
+package auditing, disk space management, and troubleshooting
+capabilities without adding heavy software dependencies. It bridges the
+gap between low-level <code>dpkg</code> queries and high-level system
+inspection.</p>
+<h3 id="key-utilities-in-debian-goodies">Key Utilities in
+debian-goodies</h3>
+<p>Once installed via standard repository managers
+(<code>sudo apt install debian-goodies</code>), the package provides
+several dedicated commands:</p>
+<ul>
+<li><strong>checkrestart</strong>: Scans the system for processes that
+are still using old, deleted versions of libraries or executables. This
+is especially useful after running security updates, as it identifies
+which background daemons need to be restarted without requiring a full
+system reboot.</li>
+<li><strong>dpigs</strong>: Displays the packages consuming the most
+disk space on the system. By default, it lists the top ten largest
+packages, making it an essential tool for clearing out unnecessary
+storage use. It supports flags to adjust the count or inspect source
+packages.</li>
+<li><strong>which-pkg-broke</strong>: Analyzes package dependencies to
+help identify which recently upgraded package may have broken another.
+It lists the dependencies of a target package along with their
+installation and modification times.</li>
+<li><strong>debman</strong>: Retrieves and displays manual pages from
+packages without requiring the packages themselves to be installed on
+the local system. It downloads the target package momentarily, extracts
+the man page, and presents it to the user.</li>
+<li><strong>debmany</strong>: Provides an interactive text-based
+interface to select and read all available documentation and man pages
+included within a specific installed or uninstalled Debian package.</li>
+<li><strong>dglob</strong>: Generates a list of package names that match
+a specified pattern, functioning as a fast alternative to running
+complex regular-expression pipelines through <code>dpkg -l</code>.</li>
+<li><strong>dhomepage</strong>: Queries package metadata and prints or
+opens the official upstream homepage URL of a specified package in a web
+browser.</li>
+<li><strong>check-enhancements</strong>: Searches for installed or
+available packages that provide enhancements for packages currently
+installed on the system, utilizing the "Enhances" control field.</li>
+</ul>
+<p>By integrating these utility scripts, <code>debian-goodies</code>
+simplifies routine system monitoring, enhances package visibility, and
+speeds up diagnostic tasks on any Debian-based distribution.</p></article>
+        <div id='disqus_thread'></div>
+        <script>
+
+            var disqus_config = function () {
+                this.page.url =         'https://salivity.github.io/debian/article/debian-goodies-explained-functions-and-utilities';  
+                //this.page.identifier =  PAGE_IDENTIFIER; 
+            };
+            
+            (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://salivity-github-io.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/debian/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/debian/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
